@@ -1,3 +1,1 @@
-Alanna:123
-Ana:321
-Hola:123
+Ana|1234|Ana|Salazar|costarricense|Ana@gmail.com
