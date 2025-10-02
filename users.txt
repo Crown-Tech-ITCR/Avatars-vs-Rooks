@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 ana:123
+=======
+Ana|1234|Ana|Salazar|costarricense|Ana@gmail.com
+>>>>>>> origin/main
