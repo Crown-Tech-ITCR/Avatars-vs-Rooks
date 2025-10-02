@@ -4,6 +4,7 @@ from tkinter import messagebox
 import os
 import time
 from face_gui import Face_Recognition
+from encriptación import Encriptacion
 
 class LoginAvatarsRooks:
     def __init__(self, root):
@@ -20,11 +21,13 @@ class LoginAvatarsRooks:
         self.text_color = "#2C2C2C"        # Texto gris oscuro
         self.users = {}
         self.cards = {}
+        self.encriptador = Encriptacion()
         self.load_users()
         self.load_cards()
         self.create_login_widgets()
         self.create_register_widgets()
         self.show_login_window()
+        
 
     def load_users(self):
         """Carga todos los datos de usuarios desde users.txt"""
@@ -35,23 +38,30 @@ class LoginAvatarsRooks:
                         if "|" in line:
                             parts = line.strip().split("|")
                             if len(parts) >= 6:
-                                username = parts[0]
+                                username = self.encriptador.desencriptar(parts[0])
                                 self.users[username] = {
-                                    'password': parts[1],
-                                    'nombre': parts[2],
-                                    'apellidos': parts[3],
-                                    'nacionalidad': parts[4],
-                                    'correo': parts[5]
+                                    'password': self.encriptador.desencriptar(parts[1]),
+                                    'nombre': self.encriptador.desencriptar(parts[2]),
+                                    'apellidos': self.encriptador.desencriptar(parts[3]),
+                                    'nacionalidad': self.encriptador.desencriptar(parts[4]),
+                                    'correo': self.encriptador.desencriptar(parts[5])
                                 }
             except Exception as e:
                 print(f"Error al cargar usuarios: {e}")
                 self.users = {}
+        print(self.users)
 
     def save_users(self):
         """Guarda todos los datos de usuarios en users.txt"""
         try:
             with open("users.txt", "w", encoding="utf-8") as f:
                 for username, data in self.users.items():
+                    username = self.encriptador.encriptar(username)
+                    data['password'] = self.encriptador.encriptar(data['password'])
+                    data['nombre'] = self.encriptador.encriptar(data['nombre'])
+                    data['apellidos'] = self.encriptador.encriptar(data['apellidos'])
+                    data['nacionalidad'] = self.encriptador.encriptar(data['nacionalidad'])
+                    data['correo'] = self.encriptador.encriptar(data['correo'])
                     f.write(f"{username}|{data['password']}|{data['nombre']}|{data['apellidos']}|{data['nacionalidad']}|{data['correo']}\n")
         except Exception as e:
             messagebox.showerror("Error", f"Error al guardar usuarios: {e}")
@@ -65,12 +75,12 @@ class LoginAvatarsRooks:
                         if "|" in line:
                             parts = line.strip().split("|")
                             if len(parts) >= 5:
-                                username = parts[0]
+                                username = self.encriptador.desencriptar(parts[0])
                                 self.cards[username] = {
-                                    'numero': parts[1],
-                                    'expiry': parts[2],
-                                    'cvv': parts[3],
-                                    'titular': parts[4]
+                                    'numero': self.encriptador.desencriptar(parts[1]),
+                                    'expiry': self.encriptador.desencriptar(parts[2]),
+                                    'cvv': self.encriptador.desencriptar(parts[3]),
+                                    'titular': self.encriptador.desencriptar(parts[4])
                                 }
             except Exception as e:
                 print(f"Error al cargar tarjetas: {e}")
@@ -81,6 +91,11 @@ class LoginAvatarsRooks:
         try:
             with open("cards.txt", "w", encoding="utf-8") as f:
                 for username, card_data in self.cards.items():
+                    username = self.encriptador.encriptar(username)
+                    card_data['numero'] = self.encriptador.encriptar(card_data['numero'])
+                    card_data['expiry'] = self.encriptador.encriptar(card_data['expiry'])
+                    card_data['cvv'] = self.encriptador.encriptar(card_data['cvv'])
+                    card_data['titular'] = self.encriptador.encriptar(card_data['titular'])
                     f.write(f"{username}|{card_data['numero']}|{card_data['expiry']}|{card_data['cvv']}|{card_data['titular']}\n")
         except Exception as e:
             messagebox.showerror("Error", f"Error al guardar tarjetas: {e}")

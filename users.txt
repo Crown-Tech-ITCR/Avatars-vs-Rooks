@@ -1,5 +1,2 @@
-<<<<<<< HEAD
-ana:123
-=======
 Ana|1234|Ana|Salazar|costarricense|Ana@gmail.com
->>>>>>> origin/main
+ISExOc|GQhGQh|JO@EJOz@|E@xcO8|ñxOS|EIqSÑ0ecÑmS/F5IÑ
