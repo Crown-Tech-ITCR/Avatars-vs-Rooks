@@ -8,13 +8,14 @@ import pygame
 import time as time
 
 class Face_Recognition:
-    def __init__(self, root):
+    def __init__(self, root, show_main_gui=True):
         self.USERS_DIR = "users_lbph"
         if not os.path.exists(self.USERS_DIR):
             os.makedirs(self.USERS_DIR)
         self.root = root
         self.login_thread_active = False
-        self.setup_gui()
+        if show_main_gui:
+            self.setup_gui()
 
     def setup_gui(self):
         """Configurar la interfaz gráfica con colores claros"""
