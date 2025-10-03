@@ -475,7 +475,8 @@ class LoginAvatarsRooks:
             activebackground="#357ABD",
             activeforeground="white",
             relief=tk.FLAT,
-            state=tk.DISABLED
+            state=tk.DISABLED,
+            command=self.open_face_gui  # <-- Agrega esta línea
         )
         self.facial_button.pack(fill=tk.X, pady=(0, 20))
         
@@ -737,14 +738,28 @@ class LoginAvatarsRooks:
         self.show_login_window()
  
     def face_recognition(self):
-        """Abre el sistema de reconocimiento facial"""
+        """Oculta login, muestra solo la cámara y regresa al login al terminar"""
+        self.login_frame.pack_forget()  # Oculta la ventana de login
         try:
-            self.root.destroy()
-            root = tk.Tk()
-            app = Face_Recognition(root)
-            root.mainloop()
+            temp_root = tk.Toplevel(self.root)
+            temp_root.grab_set()
+            temp_root.focus_set()
+            Face_Recognition(temp_root).login_with_face_gui()
+            temp_root.destroy()
         except Exception as e:
-            messagebox.showerror("Error", f"Error al abrir reconocimiento facial: {e}")
+            messagebox.showerror("Error", f"Error en el login facial: {e}")
+        self.login_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)  # Vuelve a mostrar login
+
+    def open_face_gui(self):
+        """Desactiva la ventana principal mientras se registra el rostro y la vuelve a activar al terminar"""
+        self.root.attributes('-disabled', True)  # Desactiva la ventana principal
+        try:
+            fr = Face_Recognition(self.root, show_main_gui=False)
+            fr.register_face_gui()
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al registrar rostro: {e}")
+        self.root.attributes('-disabled', False)  # Reactiva la ventana principal
+        self.register_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)  # Vuelve a mostrar registro
 
     def create_new_login(self):
         """Crea una nueva ventana de login después del logout"""
