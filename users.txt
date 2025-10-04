@@ -1,2 +1,9 @@
-Ana|1234|Ana|Salazar|costarricense|Ana@gmail.com
-ISExOc|GQhGQh|JO@EJOz@|E@xcO8|ñxOS|EIqSÑ0ecÑmS/F5IÑ
+{
+    "owefwme": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$nMJG2YilcKSyvavl2vM6eA$miN6JA0qlVSVMoOiiFpewzjyK0w0f19Tbw3SK8tno+8",
+        "nombre_enc": "5IfxKRUzTTs8RfpgPO71U9MiKIXsXFX19vIfu40DcA==",
+        "email_enc": "Xn6AuMCPE5TsM0+crk8fsK1yYj7Slh/lTFs/mop8emLcsWLuR1ayVZhCFQ==",
+        "nacionalidad_enc": "3+8A9ei6pOLiKz+e+7D8gKTXv03tTwuUifK+zuFIQ84BPJZEOKE=",
+        "apellidos_enc": "y/hNw4rkemMuTRopXKzzBbIk96NrUt62w29keda7gA=="
+    }
+}

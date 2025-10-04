@@ -4,7 +4,7 @@ from tkinter import messagebox
 import os
 import time
 from face_gui import Face_Recognition
-from encriptación import Encriptacion
+import encrip_aes
 
 class LoginAvatarsRooks:
     def __init__(self, root):
@@ -21,7 +21,7 @@ class LoginAvatarsRooks:
         self.text_color = "#2C2C2C"        # Texto gris oscuro
         self.users = {}
         self.cards = {}
-        self.encriptador = Encriptacion()
+        self.master_key = encrip_aes.load_or_create_key()
         self.load_users()
         self.load_cards()
         self.create_login_widgets()
@@ -30,76 +30,34 @@ class LoginAvatarsRooks:
         
 
     def load_users(self):
-        """Carga todos los datos de usuarios desde users.txt"""
-        if os.path.exists("users.txt"):
-            try:
-                with open("users.txt", "r", encoding="utf-8") as f:
-                    for line in f:
-                        if "|" in line:
-                            parts = line.strip().split("|")
-                            if len(parts) >= 6:
-                                username = self.encriptador.desencriptar(parts[0])
-                                self.users[username] = {
-                                    'password': self.encriptador.desencriptar(parts[1]),
-                                    'nombre': self.encriptador.desencriptar(parts[2]),
-                                    'apellidos': self.encriptador.desencriptar(parts[3]),
-                                    'nacionalidad': self.encriptador.desencriptar(parts[4]),
-                                    'correo': self.encriptador.desencriptar(parts[5])
-                                }
-            except Exception as e:
-                print(f"Error al cargar usuarios: {e}")
-                self.users = {}
-        print(self.users)
+        """Carga todos los datos de usuarios desde users.txt usando AES"""
+        try:
+            datos = encrip_aes.load_users_aes()
+            self.users = {}  # Limpiar el diccionario
+            
+            for username, user_data in datos.items():
+                # Cargar datos desencriptados
+                self.users[username] = {
+                    'password_hash': user_data['password_hash'],  # Hash de contraseña (no se desencripta)
+                    'nombre': encrip_aes.decrypt_data(user_data['nombre_enc'], self.master_key),
+                    'apellidos': encrip_aes.decrypt_data(user_data['apellidos_enc'], self.master_key),
+                    'nacionalidad': encrip_aes.decrypt_data(user_data['nacionalidad_enc'], self.master_key),
+                    'correo': encrip_aes.decrypt_data(user_data['email_enc'], self.master_key)
+                }
+        except Exception as e:
+            print(f"Error al cargar usuarios: {e}")
+            self.users = {}
 
     def save_users(self):
         """Guarda todos los datos de usuarios en users.txt"""
-        try:
-            with open("users.txt", "w", encoding="utf-8") as f:
-                for username, data in self.users.items():
-                    username = self.encriptador.encriptar(username)
-                    data['password'] = self.encriptador.encriptar(data['password'])
-                    data['nombre'] = self.encriptador.encriptar(data['nombre'])
-                    data['apellidos'] = self.encriptador.encriptar(data['apellidos'])
-                    data['nacionalidad'] = self.encriptador.encriptar(data['nacionalidad'])
-                    data['correo'] = self.encriptador.encriptar(data['correo'])
-                    f.write(f"{username}|{data['password']}|{data['nombre']}|{data['apellidos']}|{data['nacionalidad']}|{data['correo']}\n")
-        except Exception as e:
-            messagebox.showerror("Error", f"Error al guardar usuarios: {e}")
+        encrip_aes.save_users_aes(self.users)
 
     def load_cards(self):
-        """Carga datos de tarjetas desde cards.txt"""
-        if os.path.exists("cards.txt"):
-            try:
-                with open("cards.txt", "r", encoding="utf-8") as f:
-                    for line in f:
-                        if "|" in line:
-                            parts = line.strip().split("|")
-                            if len(parts) >= 5:
-                                username = self.encriptador.desencriptar(parts[0])
-                                self.cards[username] = {
-                                    'numero': self.encriptador.desencriptar(parts[1]),
-                                    'expiry': self.encriptador.desencriptar(parts[2]),
-                                    'cvv': self.encriptador.desencriptar(parts[3]),
-                                    'titular': self.encriptador.desencriptar(parts[4])
-                                }
-            except Exception as e:
-                print(f"Error al cargar tarjetas: {e}")
-                self.cards = {} 
+        return 
 
     def save_cards(self):
         """Guarda datos de tarjetas en cards.txt"""
-        try:
-            with open("cards.txt", "w", encoding="utf-8") as f:
-                for username, card_data in self.cards.items():
-                    username = self.encriptador.encriptar(username)
-                    card_data['numero'] = self.encriptador.encriptar(card_data['numero'])
-                    card_data['expiry'] = self.encriptador.encriptar(card_data['expiry'])
-                    card_data['cvv'] = self.encriptador.encriptar(card_data['cvv'])
-                    card_data['titular'] = self.encriptador.encriptar(card_data['titular'])
-                    f.write(f"{username}|{card_data['numero']}|{card_data['expiry']}|{card_data['cvv']}|{card_data['titular']}\n")
-        except Exception as e:
-            messagebox.showerror("Error", f"Error al guardar tarjetas: {e}")
-
+        return
 
     def center_window(self):
         """Centra la ventana en la pantalla"""
@@ -675,11 +633,26 @@ class LoginAvatarsRooks:
             messagebox.showerror("Error", "Por favor ingresa usuario y contraseña")
             return
         
-        if username in self.users and self.users[username]['password'] == password:
-            nombre = self.users[username]['nombre']
-            messagebox.showinfo("Bienvenido", f"¡Bienvenido {nombre}!")
+        # Cargar datos AES para verificar contraseña
+        users_aes = encrip_aes.load_users_aes()
+        
+        if username in users_aes:
+            try:
+                # Verificar contraseña usando Argon2
+                if encrip_aes.verify_password(users_aes[username]['password_hash'], password):
+                    # Obtener nombre desencriptado
+                    nombre = encrip_aes.decrypt_data(users_aes[username]['nombre_enc'], self.master_key)
+                    messagebox.showinfo("Bienvenido", f"¡Bienvenido {nombre}!")
+                    
+                    # Aquí puedes agregar la lógica para abrir el menú principal
+                    # self.open_main_menu(username)
+                else:
+                    messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al verificar credenciales: {e}")
         else:
             messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+
             
     def register_user(self):
         """Obtiene y guarda todos los datos del usuario al registrarse"""
@@ -704,38 +677,40 @@ class LoginAvatarsRooks:
             messagebox.showerror("Error", "Las contraseñas no coinciden")
             return
         
-        if username in self.users:
+        # Verificar si el usuario ya existe usando AES
+        users_aes = encrip_aes.load_users_aes()
+        if username in users_aes:
             messagebox.showerror("Error", "El usuario ya existe")
             return
         
-        # Guardar datos de usuario
-        self.users[username] = {
-            'password': password,
-            'nombre': nombre,
-            'apellidos': apellidos,
-            'nacionalidad': nacionalidad,
-            'correo': correo
-        }
-        self.save_users()
-        
-        # Guardar tarjeta si se habilitó
-        if self.guardar_tarjeta_var.get():
-            numero = self.num_tarjeta_entry.get()
-            expiry = self.expiry_entry.get()
-            cvv = self.cvv_entry.get()
-            titular = self.titular_entry.get()
+        try:
+            # Usar la función de registro de encrip_aes
+            encrip_aes.register_user(username, password, nombre, correo, nacionalidad, apellidos)
             
-            if numero and expiry and cvv and titular:
-                self.cards[username] = {
-                    'numero': numero,
-                    'expiry': expiry,
-                    'cvv': cvv,
-                    'titular': titular
-                }
-                self.save_cards()
-        
-        messagebox.showinfo("Éxito", "¡Registro exitoso!")
-        self.show_login_window()
+            # Recargar usuarios locales
+            self.load_users()
+            
+            # Guardar tarjeta si se habilitó (opcional)
+            if self.guardar_tarjeta_var.get():
+                numero = self.num_tarjeta_entry.get()
+                expiry = self.expiry_entry.get()
+                cvv = self.cvv_entry.get()
+                titular = self.titular_entry.get()
+                
+                if numero and expiry and cvv and titular:
+                    self.cards[username] = {
+                        'numero': numero,
+                        'expiry': expiry,
+                        'cvv': cvv,
+                        'titular': titular
+                    }
+                    self.save_cards()
+            
+            messagebox.showinfo("Éxito", "¡Registro exitoso!")
+            self.show_login_window()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al registrar usuario: {e}")
  
     def face_recognition(self):
         """Oculta login, muestra solo la cámara y regresa al login al terminar"""
