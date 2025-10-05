@@ -9,7 +9,7 @@ class ColorPicker(tk.Frame):
         self.width = width
         self.height = height
         self.bar_width = bar_width
-        self.selected_color = "#FFFFFF"
+        self.selected_color = "#FFFFFFFF"
         
         # IMPORTANTE: Definir valores HSV ANTES de crear imágenes
         self.value = 1.0

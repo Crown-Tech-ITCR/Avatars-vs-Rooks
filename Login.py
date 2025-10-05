@@ -671,7 +671,6 @@ class LoginAvatarsRooks:
             
     def register_user(self):
         """Obtiene y guarda todos los datos del usuario al registrarse"""
-        print('debug 1')
         nombre = self.nombre_entry.get()
         apellidos = self.apellidos_entry.get()
         nacionalidad = self.nacionalidad_entry.get()
@@ -706,9 +705,6 @@ class LoginAvatarsRooks:
             # Recargar usuarios locales
             self.load_users()
             
-            # DEBUG: Verificar si el checkbox está marcado
-            print(f"DEBUG: Checkbox tarjeta marcado: {self.guardar_tarjeta_var.get()}")
-
             # Guardar tarjeta si se habilitó (opcional)
             if self.guardar_tarjeta_var.get():
                 numero = self.num_tarjeta_entry.get().strip()
@@ -716,25 +712,16 @@ class LoginAvatarsRooks:
                 cvv = self.cvv_entry.get().strip()
                 titular = self.titular_entry.get().strip()
                 
-                # DEBUG: Mostrar valores de campos
-                print(f"DEBUG: Número: '{numero}', Expiry: '{expiry}', CVV: '{cvv}', Titular: '{titular}'")
-                
                 if numero and expiry and cvv and titular:
-                    print(f"DEBUG: Llamando a register_user_card con: {username}, {cvv}, {numero}, {expiry}, {titular}")
                     encrip_aes.register_user_card(username, cvv, numero, expiry, titular)
                     self.load_cards()
-                    print("DEBUG: Tarjeta registrada exitosamente")
                 else:
-                    print("DEBUG: Algún campo de tarjeta está vacío")
                     messagebox.showwarning("Advertencia", "Algunos campos de tarjeta están vacíos. Se guardó el usuario sin datos de tarjeta.")
-            else:
-                print("DEBUG: Checkbox de tarjeta no está marcado")
             
             messagebox.showinfo("Éxito", "¡Registro exitoso!")
             self.show_login_window()
             
         except Exception as e:
-            print('lol')
             messagebox.showerror("Error", f"Error al registrar usuario: {e}")
  
     def face_recognition(self):
