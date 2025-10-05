@@ -30,7 +30,7 @@ class LoginAvatarsRooks:
         
 
     def load_users(self):
-        """Carga todos los datos de usuarios desde users.txt usando AES"""
+        """Carga todos los datos de las tarjetas desde users.txt usando AES"""
         try:
             datos = encrip_aes.load_users_aes()
             self.users = {}  # Limpiar el diccionario
@@ -53,11 +53,26 @@ class LoginAvatarsRooks:
         encrip_aes.save_users_aes(self.users)
 
     def load_cards(self):
+        try:
+            cartas = encrip_aes.load_cards_aes()
+            self.cards = {}  # Limpiar el diccionario
+            
+            for username, card_data in cartas.items():
+                # Cargar datos desencriptados
+                self.cards[username] = {
+                    'numero': encrip_aes.decrypt_data(card_data['numero_enc'], self.master_key),
+                    'expiry': encrip_aes.decrypt_data(card_data['expiry_enc'], self.master_key),
+                    'cvv': card_data['cvv_hash'],
+                    'titular': encrip_aes.decrypt_data(card_data['titular_enc'], self.master_key)
+                }
+        except Exception as e:
+            print(f"Error al cargar usuarios: {e}")
+            self.cards = {}
         return 
 
     def save_cards(self):
         """Guarda datos de tarjetas en cards.txt"""
-        return
+        encrip_aes.save_cards_aes(self.cards)
 
     def center_window(self):
         """Centra la ventana en la pantalla"""
@@ -656,6 +671,7 @@ class LoginAvatarsRooks:
             
     def register_user(self):
         """Obtiene y guarda todos los datos del usuario al registrarse"""
+        print('debug 1')
         nombre = self.nombre_entry.get()
         apellidos = self.apellidos_entry.get()
         nacionalidad = self.nacionalidad_entry.get()
@@ -685,31 +701,40 @@ class LoginAvatarsRooks:
         
         try:
             # Usar la función de registro de encrip_aes
-            encrip_aes.register_user(username, password, nombre, correo, nacionalidad, apellidos)
+            encrip_aes.register_user_aes(username, password, nombre, correo, nacionalidad, apellidos)
             
             # Recargar usuarios locales
             self.load_users()
             
+            # DEBUG: Verificar si el checkbox está marcado
+            print(f"DEBUG: Checkbox tarjeta marcado: {self.guardar_tarjeta_var.get()}")
+
             # Guardar tarjeta si se habilitó (opcional)
             if self.guardar_tarjeta_var.get():
-                numero = self.num_tarjeta_entry.get()
-                expiry = self.expiry_entry.get()
-                cvv = self.cvv_entry.get()
-                titular = self.titular_entry.get()
+                numero = self.num_tarjeta_entry.get().strip()
+                expiry = self.expiry_entry.get().strip()
+                cvv = self.cvv_entry.get().strip()
+                titular = self.titular_entry.get().strip()
+                
+                # DEBUG: Mostrar valores de campos
+                print(f"DEBUG: Número: '{numero}', Expiry: '{expiry}', CVV: '{cvv}', Titular: '{titular}'")
                 
                 if numero and expiry and cvv and titular:
-                    self.cards[username] = {
-                        'numero': numero,
-                        'expiry': expiry,
-                        'cvv': cvv,
-                        'titular': titular
-                    }
-                    self.save_cards()
+                    print(f"DEBUG: Llamando a register_user_card con: {username}, {cvv}, {numero}, {expiry}, {titular}")
+                    encrip_aes.register_user_card(username, cvv, numero, expiry, titular)
+                    self.load_cards()
+                    print("DEBUG: Tarjeta registrada exitosamente")
+                else:
+                    print("DEBUG: Algún campo de tarjeta está vacío")
+                    messagebox.showwarning("Advertencia", "Algunos campos de tarjeta están vacíos. Se guardó el usuario sin datos de tarjeta.")
+            else:
+                print("DEBUG: Checkbox de tarjeta no está marcado")
             
             messagebox.showinfo("Éxito", "¡Registro exitoso!")
             self.show_login_window()
             
         except Exception as e:
+            print('lol')
             messagebox.showerror("Error", f"Error al registrar usuario: {e}")
  
     def face_recognition(self):

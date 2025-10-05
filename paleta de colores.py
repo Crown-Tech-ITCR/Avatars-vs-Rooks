@@ -1,74 +1,105 @@
 import tkinter as tk
-from tkinter import colorchooser, Canvas
-import math
+from tkinter import Canvas, Label
+from PIL import Image, ImageTk
+import colorsys
 
-def seleccionar_color_y_pintar():
-    """
-    Abre el selector de color y luego pinta la sección seleccionada en la rueda.
-    """
-    color_seleccionado = colorchooser.askcolor(title="Seleccionar color")
-    if color_seleccionado:  # Si el usuario seleccionó un color
-        # Obtener el color en formato hexadecimal (el primer elemento de la tupla)
-        color_hex = color_seleccionado[1]
+class ColorPicker(tk.Frame):
+    def __init__(self, master=None, width=256, height=256, bar_width=28):
+        super().__init__(master)
+        self.width = width
+        self.height = height
+        self.bar_width = bar_width
+        self.selected_color = "#FFFFFF"
         
-        # Aplicar el color a la sección de la rueda (necesita una lógica más avanzada para seleccionar la sección)
-        # Por ahora, pintaremos el fondo de la ventana para mostrar el color
-        root.config(bg=color_hex)
+        # IMPORTANTE: Definir valores HSV ANTES de crear imágenes
+        self.value = 1.0
+        self.hue = 0.0
+        self.saturation = 0.0
+        
+        # Ahora crear las imágenes (que necesitan self.value)
+        self.sv_image = self.create_sv_image()
+        self.value_bar_img = self.create_value_bar_img()
+        self.sv_photo = ImageTk.PhotoImage(self.sv_image)
+        self.bar_photo = ImageTk.PhotoImage(self.value_bar_img)
+        
+        # Crear canvas
+        self.sv_canvas = Canvas(self, width=self.width, height=self.height)
+        self.bar_canvas = Canvas(self, width=self.bar_width, height=self.height)
+        self.sv_canvas.create_image(0, 0, anchor="nw", image=self.sv_photo)
+        self.bar_canvas.create_image(0, 0, anchor="nw", image=self.bar_photo)
+        self.sv_canvas.grid(row=0, column=0, padx=(5,0), pady=5)
+        self.bar_canvas.grid(row=0, column=1, padx=(5,5), pady=5)
+        
+        # Bind events - incluyendo arrastrar mouse
+        self.sv_canvas.bind("<Button-1>", self.select_sv)
+        self.sv_canvas.bind("<B1-Motion>", self.select_sv)  # Arrastrar mouse
+        self.bar_canvas.bind("<Button-1>", self.select_value)
+        self.bar_canvas.bind("<B1-Motion>", self.select_value)  # Arrastrar mouse
+        
+        # Actualizar imagen inicial
+        self.update_sv_image()
+        
+        # Label para mostrar color
+        self.color_label = Label(self, text="Color: #FFFFFF", font=("Arial", 14))
+        self.color_label.grid(row=1, column=0, columnspan=2)
 
-def crear_rueda_colores():
-    """
-    Crea la ventana principal y un Canvas para dibujar la rueda de colores.
-    """
-    global root
+    def create_sv_image(self):
+        img = Image.new("RGB", (self.width, self.height))
+        for x in range(self.width):
+            h = x / self.width
+            for y in range(self.height):
+                s = y / self.height
+                r, g, b = colorsys.hsv_to_rgb(h, s, self.value)
+                img.putpixel((x, y), (int(r*255), int(g*255), int(b*255)))
+        return img
+
+    def create_value_bar_img(self):
+        img = Image.new("RGB", (self.bar_width, self.height))
+        for y in range(self.height):
+            v = 1 - y / self.height
+            gray = int(v * 255)
+            for x in range(self.bar_width):
+                img.putpixel((x, y), (gray, gray, gray))
+        return img
+
+    def select_sv(self, event):
+        # Asegurar que las coordenadas estén dentro de los límites
+        x = max(0, min(event.x, self.width - 1))
+        y = max(0, min(event.y, self.height - 1))
+        
+        self.hue = x / self.width
+        self.saturation = y / self.height
+        self.update_selected_color()
+
+    def select_value(self, event):
+        # Asegurar que las coordenadas estén dentro de los límites
+        y = max(0, min(event.y, self.height - 1))
+        
+        self.value = 1 - y / self.height
+        self.update_sv_image()
+        self.update_selected_color()
+
+    def update_sv_image(self):
+        img = Image.new("RGB", (self.width, self.height))
+        for x in range(self.width):
+            h = x / self.width
+            for y in range(self.height):
+                s = y / self.height
+                r, g, b = colorsys.hsv_to_rgb(h, s, self.value)
+                img.putpixel((x, y), (int(r*255), int(g*255), int(b*255)))
+        self.sv_photo = ImageTk.PhotoImage(img)
+        self.sv_canvas.create_image(0, 0, anchor="nw", image=self.sv_photo)
+        self.sv_canvas.image = self.sv_photo
+
+    def update_selected_color(self):
+        r, g, b = colorsys.hsv_to_rgb(self.hue, self.saturation, self.value)
+        color_hex = '#{:02x}{:02x}{:02x}'.format(int(r*255), int(g*255), int(b*255))
+        self.selected_color = color_hex
+        self.color_label.config(text=f"Color: {color_hex}", bg=color_hex)
+
+if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Rueda de Colores")
-
-    # Crear un Canvas para dibujar la rueda
-    canvas_width = 400
-    canvas_height = 400
-    canvas = Canvas(root, width=canvas_width, height=canvas_height, bg="white")
-    canvas.pack()
-
-    # Definir el centro y el radio de la rueda
-    center_x = canvas_width / 2
-    center_y = canvas_height / 2
-    radius = 150
-    
-    # Definir el número de secciones de la rueda
-    num_sections = 12
-    angle_step = 360 / num_sections  # Ángulo de cada sección
-
-    for i in range(num_sections):
-        # Calcular los ángulos de inicio y fin para cada arco
-        start_angle = i * angle_step
-        end_angle = (i + 1) * angle_step
-        
-        # Convertir ángulos a radianes y luego a coordenadas para el arco
-        # Tkinter usa un sistema de coordenadas donde 0 grados está en el eje X positivo (derecha)
-        # y los ángulos aumentan en sentido horario. Para esto, invertimos el ángulo de inicio.
-        start_rad = math.radians(start_angle)
-        end_rad = math.radians(end_angle)
-        
-        # Coordenadas del bounding box para el arco (x0, y0, x1, y1)
-        # La función de Tkinter puede usar ángulos de 0 a 360 en sentido horario
-        x0 = center_x - radius
-        y0 = center_y - radius
-        x1 = center_x + radius
-        y1 = center_y + radius
-        
-        # Dibujar el arco
-        # En un ejemplo real, se usaría un selector de color aquí para elegir el color para cada sección
-        canvas.create_arc(x0, y0, x1, y1,
-                          start=start_angle,
-                          extent=angle_step,
-                          fill="red",  # Color de ejemplo, debe cambiarse dinámicamente
-                          outline="black")
-
-    # Botón para seleccionar un color
-    button = tk.Button(root, text="Seleccionar Color", command=seleccionar_color_y_pintar)
-    button.pack()
-
+    root.title("Color Picker")
+    cp = ColorPicker(root)
+    cp.pack()
     root.mainloop()
-
-# Crear la rueda de colores
-crear_rueda_colores()

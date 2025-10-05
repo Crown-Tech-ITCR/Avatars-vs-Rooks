@@ -1,3 +1,8 @@
-Lanna27|545454|20/27|555|Alanna Mendoza
-hanna1|589644|22/28|222|Hanna Mena Salzar
-Ana|5656841255|10/23|555|Alanna Mendoza
+{
+    "oijoijr": {
+        "numero_enc": "rwFK2yNXgobCo+d/nca+Ab9XaEPrH/puKzZmlL0XB+TksISy6w==",
+        "expiry_enc": "ILXQchlfoAcQ7xWU6XqC7j40C+OmfrzajTygy7ZNFC1q",
+        "cvv_hash": "$argon2id$v=19$m=65536,t=3,p=4$atJtYstoAF3pI28A48lxUQ$SpIwNOiyEROQf376D17JPax+3T6RSLU+tBWOUayfO6c",
+        "titular_enc": "eixeazIB9dUzB9UNEzsB0A1JaDtspohZwYXrzuuyZHeWM6zogJw="
+    }
+}
