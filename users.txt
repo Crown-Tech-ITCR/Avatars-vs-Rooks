@@ -40,5 +40,12 @@
         "email_enc": "8vw0mQCON74Q3gFFIYF2857pA1gv1c//372Sc6auXEKQ0x3iLi9ZjqyHVA==",
         "nacionalidad_enc": "3mDQ4bjv9uWNltGXJKDw8dxjUNC0JorRGn4LZYtSRZ9C+Es0og==",
         "apellidos_enc": "wDBoRsf/LCmIE9hPxh74DhkTm3U9nHN4fzkCKV6KqViggbRUJiQ="
+    },
+    "Ana": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$Q/fFv+eXDJRa4TrVjxI8/g$LW+dicpJimX+9mRvaV/PsxMRKTLBXRTqbZrN8MwM21s",
+        "nombre_enc": "LN8gug+cPMklkdS+0hefYf89nw8Si0pvf2Kg1e+gkg==",
+        "email_enc": "V+sijZcDCVW/CMfZE/uUMB5/tu3nFj11OHISTHtvVgqA2h4m2AeM8Pq7",
+        "nacionalidad_enc": "LaVjZXBmTGul9Vg1NNlHrnI5B3xMORA7c2ZF5Dm13bOvYnE=",
+        "apellidos_enc": "48Ia5KTRnZniTfduxWzavfBq2xaxgvqDi1g2K597le4/"
     }
 }
