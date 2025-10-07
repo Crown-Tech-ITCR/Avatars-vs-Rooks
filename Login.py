@@ -5,6 +5,8 @@ from face_gui import Face_Recognition
 import encrip_aes
 from PersonalizaciónUI import MenuPersonalizacion
 import calendar
+from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk
 
 class LoginAvatarsRooks:
     def __init__(self, root):
@@ -41,6 +43,10 @@ class LoginAvatarsRooks:
         
         self.create_login_widgets()
         self.login_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Para guardar la foto
+        self.profile_photo_path = None
+        self.profile_photo_display = None
         
     def center_window(self):
         """Centra la ventana en la pantalla"""
@@ -540,6 +546,45 @@ class LoginAvatarsRooks:
         except:
             pass
 
+    #Seleccionar la foto
+    def selec_profile_photo(self):
+        file_path = filedialog.askopenfilename(
+            title= "Seleccionar foto de perfil",
+            filetypes=[
+            ("Archivos de imagen", "*.jpg *.jpeg *.png"),
+            ("JPG", "*.jpg *.jpeg"),
+            ("PNG", "*.png"),
+            ("Todos los archivos", "*.*")
+            ]
+        )
+        if file_path:
+            try: 
+                with Image.open(file_path) as img:
+
+                    if img.mode in ("RGBA", "LA", "P"):
+
+                        background = Image.new("RGB", img.size, (255, 255, 255))
+                        if img.mode == "P":
+                            img = img.convert("RGBA")
+                        background.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+                        img = background
+                    elif img.mode != "RGB":
+                        img = img.convert("RGB")
+                    img.thumbnail((150,150), Image.Resampling.LANCZOS)
+                    self.profile_photo_display = ImageTk.PhotoImage(img)
+                
+                self.photo_btn.config(
+                    image=self.profile_photo_display,
+                    text=""
+                )
+
+                self.photo_btn.image = self.profile_photo_display  # Mantener referencia
+            
+                messagebox.showinfo("Éxito", "Foto de perfil cargada correctamente")
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo cargar la imagen: {str(e)}")
+
+
     def create_register_widgets(self):
         """Crea los widgets para el registro con tema oscuro"""
         self.register_frame = tk.Frame(self.root, bg=self.bg_black)
@@ -656,7 +701,7 @@ class LoginAvatarsRooks:
             fg=self.white
         ).pack(anchor="w", pady=(0, 10))
         
-        photo_btn = tk.Button(
+        self.photo_btn = tk.Button(
             inner_frame,
             text="+\nAgregar foto",
             font=("Arial", 10),
@@ -666,9 +711,9 @@ class LoginAvatarsRooks:
             height=4,
             relief=tk.FLAT,
             cursor="hand2",
-            command=lambda: messagebox.showinfo("Foto", "Agregar foto de perfil")
+            command=self.selec_profile_photo
         )
-        photo_btn.pack(anchor="w", pady=(0, 15))
+        self.photo_btn.pack(anchor="w", pady=(0, 15))
 
         # Fecha de nacimiento
         tk.Label(
