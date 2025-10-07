@@ -40,5 +40,26 @@
         "email_enc": "8vw0mQCON74Q3gFFIYF2857pA1gv1c//372Sc6auXEKQ0x3iLi9ZjqyHVA==",
         "nacionalidad_enc": "3mDQ4bjv9uWNltGXJKDw8dxjUNC0JorRGn4LZYtSRZ9C+Es0og==",
         "apellidos_enc": "wDBoRsf/LCmIE9hPxh74DhkTm3U9nHN4fzkCKV6KqViggbRUJiQ="
+    },
+    "Ana": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$Q/fFv+eXDJRa4TrVjxI8/g$LW+dicpJimX+9mRvaV/PsxMRKTLBXRTqbZrN8MwM21s",
+        "nombre_enc": "LN8gug+cPMklkdS+0hefYf89nw8Si0pvf2Kg1e+gkg==",
+        "email_enc": "V+sijZcDCVW/CMfZE/uUMB5/tu3nFj11OHISTHtvVgqA2h4m2AeM8Pq7",
+        "nacionalidad_enc": "LaVjZXBmTGul9Vg1NNlHrnI5B3xMORA7c2ZF5Dm13bOvYnE=",
+        "apellidos_enc": "48Ia5KTRnZniTfduxWzavfBq2xaxgvqDi1g2K597le4/"
+    },
+    "fabri01": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$/PL1Pqlx8+kDh4JeA6cFfw$Oh3RVs2IYLKuOJpRdW/xNP+kTmGWbJk0NnK3/ieC+IA",
+        "nombre_enc": "HM95L16esWj4vkVZS3Mle4F93K5arFgSkGthasPACZjy",
+        "email_enc": "iETza/hlFRSqH8e1AlB0jyxZe0zZA4pADu5iBEO41pEfQUG3K1+N1f4NztXY3WaG3g==",
+        "nacionalidad_enc": "+CI7G+3eXONSBjL+mpcr0EYg/MHBACa/dg9JR7jFbpJjiooU+ixIeYw=",
+        "apellidos_enc": "RqmtWs/YCv40WOLROF1AtaE+X5KdHM2vh3TTTOW64Mc="
+    },
+    "fabo123": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$iux2bkeB7DkkeDCVC0j0rg$C368rLAmLohxmC81PLzeKVm1Ph9fYcpvH1bnueh8cng",
+        "nombre_enc": "IDwP1F6uOIRQKhXzKi6Xzsl+Yg6cMOkPO957e2QphDU=",
+        "email_enc": "5OfTZpEti6to/dJlmKihSI9nE7Nxqp28hzJFhsVlKz2WXR7Ep+qfyG4gvoU=",
+        "nacionalidad_enc": "nog9MtnM+2AUAXdTJI/clG/00SiiSIioKyXSZKyjY0LSlXxjacU=",
+        "apellidos_enc": "KbkdyvTIjIg/vAT8XRNEp28rtRVfqk2DrpwvCnU2vruPhw=="
     }
 }

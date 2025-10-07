@@ -21,7 +21,7 @@ MASTER_KEY_FILE = "master.key"
 def load_or_create_key() -> bytes:
     if os.path.exists(MASTER_KEY_FILE):
         return open(MASTER_KEY_FILE, "rb").read()
-    key = os.urandom(16)  # AES-128
+    key = AESGCM.generate_key(bit_length=256)  # AES-256
     with open(MASTER_KEY_FILE, "wb") as f:
         f.write(key)
     return key
