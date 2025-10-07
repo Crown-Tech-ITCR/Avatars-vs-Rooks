@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, Frame, Label, Toplevel, Button
 import os
 from face_gui import Face_Recognition
 import encrip_aes
@@ -123,7 +123,7 @@ class LoginAvatarsRooks:
         self.create_round_button(
             left_buttons_frame,
             "Ayuda",
-            lambda: messagebox.showinfo("Ayuda", "Sección de ayuda")
+            self.show_help
         ).pack(side=tk.LEFT, padx=5)
         
         self.create_round_button(
@@ -467,15 +467,157 @@ class LoginAvatarsRooks:
         messagebox.showinfo("Idioma", "Selector de idioma")
 
     def show_credits(self):
-        """Muestra los créditos"""
-        messagebox.showinfo(
-            "Créditos",
-            "Avatars VS Rooks\n\n" +
-            "Desarrollado por:\n" +
-            "Tu equipo de desarrollo\n\n" +
-            "Tecnológico de Costa Rica\n" +
-            "CE 1105 - Principios de Modelado"
+        ventana_creditos = Toplevel()
+        ventana_creditos.title("Créditos - Avatars vs Rooks")
+        ventana_creditos.geometry("700x500")
+        ventana_creditos.config(bg="black")
+
+        # --- Título ---
+        titulo = Label(
+            ventana_creditos,
+            text="Equipo de Desarrollo - Avatars vs Rooks",
+            font=("Arial Black", 16),
+            fg="white",
+            bg="black"
         )
+        titulo.pack(pady=20)
+
+        # --- Frame principal---
+        frame_equipo = Frame(ventana_creditos, bg="black")
+        frame_equipo.pack(expand=True)
+
+        # --- Lista de integrantes ---
+        integrantes = [
+            {"nombre": "Alanna", "rol": "Desarrollador", "descripcion": "Lider", "foto": "foto1.png"},
+            {"nombre": "Fabricio", "rol": "Desarrollador", "descripcion": "Encargado", "foto": "foto2.png"},
+            {"nombre": "Ariel", "rol": "Desarrollador", "descripcion": "Encargado", "foto": "foto3.png"},
+            {"nombre": "Mauricio", "rol": "Desarrollador", "descripcion": "Encargado", "foto": "foto4.png"},
+        ]
+
+        # --- Cargar imágenes---
+        columnas = 2
+        for i, miembro in enumerate(integrantes):
+            fila = i // columnas
+            columna = i % columnas
+
+            # Marco individual
+            card = Frame(frame_equipo, bg="#1a1a1a", bd=2, relief="ridge", padx=10, pady=10)
+            card.grid(row=fila, column=columna, padx=20, pady=20, sticky="nsew")
+
+            # Imagen
+            try:
+                imagen = Image.open(miembro["foto"]).resize((100, 100))
+                imagen = ImageTk.PhotoImage(imagen)
+                img_label = Label(card, image=imagen, bg="#1a1a1a")
+                img_label.image = imagen
+                img_label.pack(pady=5)
+            except:
+                Label(card, text="[Foto]", fg="white", bg="#1a1a1a").pack(pady=5)
+
+            # Nombre
+            Label(card, text=miembro["nombre"], font=("Arial", 12, "bold"), fg="white", bg="#1a1a1a").pack(pady=2)
+            # Rol
+            Label(card, text=miembro["rol"], font=("Arial", 10, "italic"), fg="#ff4d4d", bg="#1a1a1a").pack()
+            # Descripción
+            Label(card, text=miembro["descripcion"], font=("Arial", 9), fg="white", bg="#1a1a1a", wraplength=200, justify="center").pack(pady=5)
+
+        # --- Botón para cerrar ---
+        boton_cerrar = Button(
+            ventana_creditos,
+            text="Volver",
+            font=("Arial Black", 11),
+            bg="#b30000",
+            fg="white",
+            activebackground="#e60000",
+            activeforeground="white",
+            command=ventana_creditos.destroy
+        )
+        boton_cerrar.pack(pady=10)
+    
+    
+    def show_help(self):
+        ventana_ayuda = Toplevel()
+        ventana_ayuda.title("Ayuda - Avatars vs Rooks")
+        ventana_ayuda.geometry("700x500")
+        ventana_ayuda.config(bg="black")
+
+        # --- Título ---
+        titulo = Label(
+            ventana_ayuda,
+            text="Centro de Ayuda - Avatars vs Rooks",
+            font=("Arial Black", 16),
+            fg="white",
+            bg="black"
+        )
+        titulo.pack(pady=20)
+
+        # --- Contenedor principal ---
+        frame_texto = Frame(ventana_ayuda, bg="black")
+        frame_texto.pack(padx=40, pady=10, fill="both", expand=True)
+
+        # --- Secciones de ayuda ---
+        secciones = [
+            {
+                "titulo": "🔐 Inicio de sesión",
+                "texto": (
+                    "Si ya tienes una cuenta, ingresa tu informacion en los espacios señalados.\n"
+                    "Debes ingresar tu usuario, correo o teléfono y tu contraseña.\n"
+                    "Si tus datos son correctos, podrás acceder al sistema.\n"
+                ),
+            },
+            {
+                "titulo": "🆕 Registro de usuario",
+                "texto": (
+                    "Si eres un nuevo jugador, selecciona 'Registrarse'. \n"
+
+                    "Completa los campos solicitados con tus datos.\n"
+
+                    "Luego de registrarse correctamente volveras a la pagina de Inicio de Sesión.\n"
+                ),
+            },
+            {
+                "titulo": "❓ Recuperar contraseña",
+                "texto": (
+                    "Si olvidaste tu contraseña, haz clic en '¿Olvidaste la contraseña?'. \n"
+                    "Se le guiará por un proceso para restablecerla y recuperar el acceso.\n"
+                ),
+            },
+        ]
+
+        # --- Mostrar texto en pantalla ---
+        for sec in secciones:
+            Label(
+                frame_texto,
+                text=sec["titulo"],
+                font=("Arial Black", 12),
+                fg="#ff4d4d",
+                bg="black",
+                anchor="w",
+                justify="left"
+            ).pack(anchor="w", pady=(10, 0))
+            Label(
+                frame_texto,
+                text=sec["texto"],
+                font=("Arial", 10),
+                fg="white",
+                bg="black",
+                wraplength=600,
+                justify="left"
+            ).pack(anchor="w", pady=(0, 10))
+
+        # --- Botón Volver ---
+        boton_cerrar = Button(
+            ventana_ayuda,
+            text="Volver",
+            font=("Arial Black", 11),
+            bg="#b30000",
+            fg="white",
+            activebackground="#e60000",
+            activeforeground="white",
+            command=ventana_ayuda.destroy
+        )
+        boton_cerrar.pack(pady=10)
+
 
     def google_login(self):
         """Login con Google (simulado)"""
