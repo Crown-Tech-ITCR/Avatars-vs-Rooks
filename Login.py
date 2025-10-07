@@ -4,6 +4,7 @@ import os
 from face_gui import Face_Recognition
 import encrip_aes
 from PersonalizaciónUI import MenuPersonalizacion
+import calendar
 
 class LoginAvatarsRooks:
     def __init__(self, root):
@@ -518,6 +519,27 @@ class LoginAvatarsRooks:
         except Exception as e:
             messagebox.showerror("Error", f"Error en el login facial: {e}")
 
+    def update_days(self, event=None):
+        "Actualizar los dias segun el mes y año seleccionados"
+        try:
+            month_name = self.month_combo.get()
+            month = self.meses.index(month_name) + 1
+            year = int(self.year_combo.get())
+
+            #Obtener numero de dias en el mes
+            import calendar
+            days_in_month = calendar.monthrange(year, month)[1]
+
+            #Actualizar valores de dias
+            current_day = int(self.day_combo.get())
+            self.day_combo['values'] = list(range(1, days_in_month + 1))
+
+            #Si el dia es mayor que los dias del mes, ajustarlo
+            if current_day > days_in_month:
+                self.day_combo.set(days_in_month)
+        except:
+            pass
+
     def create_register_widgets(self):
         """Crea los widgets para el registro con tema oscuro"""
         self.register_frame = tk.Frame(self.root, bg=self.bg_black)
@@ -657,17 +679,43 @@ class LoginAvatarsRooks:
             fg=self.white
         ).pack(anchor="w", pady=(0, 5))
         
-        self.fecha_entry = tk.Entry(
-            inner_frame,
-            font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
-            relief=tk.FLAT
-        )
-        self.fecha_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.fecha_entry.insert(0, "DD/MM/AAAA")
-        self.fecha_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "DD/MM/AAAA"))
-        self.fecha_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "DD/MM/AAAA"))
+        combo_container = tk.Frame(inner_frame, bg=self.white, relief=tk.FLAT)
+        combo_container.pack(fill=tk.X, pady=(0,15), ipady=5, ipadx=5)
+
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure('Custom.TCombobox',
+                        fieldbackground=self.white,
+                        background=self.white,
+                        foreground="#000000",
+                        borderwithd=0)
+        #Dia
+        self.day_combo = ttk.Combobox(combo_container, width=5, state="readonly",
+                                      font=("Arial", 11), style="Custom.TCombobox")
+        self.day_combo ["values"] = list(range(1, 32))
+        self.day_combo.set(1)
+        self.day_combo.pack(side="left", padx=5)
+
+        #Mes
+        self.meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+             "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        self.month_combo = ttk.Combobox(combo_container, width=12, state="readonly",
+                                        font=("Arial", 11), style="Custom.TCombobox")
+        self.month_combo["values"] = self.meses
+        self.month_combo.set("Enero")
+        self.month_combo.pack(side="left", padx=5)
+
+        #Año
+        years = list(range(2025, 1925, -1))
+        self.year_combo = ttk.Combobox(combo_container, width=8, state="readonly",
+                               font=("Arial", 11), style='Custom.TCombobox')
+        self.year_combo['values'] = years
+        self.year_combo.set(2000)
+        self.year_combo.pack(side="left", padx=5)
+
+        #Actualizar
+        self.month_combo.bind('<<ComboboxSelected>>', self.update_days)
+        self.year_combo.bind('<<ComboboxSelected>>', self.update_days)
 
         # Nacionalidad
         tk.Label(

@@ -54,5 +54,12 @@
         "email_enc": "iETza/hlFRSqH8e1AlB0jyxZe0zZA4pADu5iBEO41pEfQUG3K1+N1f4NztXY3WaG3g==",
         "nacionalidad_enc": "+CI7G+3eXONSBjL+mpcr0EYg/MHBACa/dg9JR7jFbpJjiooU+ixIeYw=",
         "apellidos_enc": "RqmtWs/YCv40WOLROF1AtaE+X5KdHM2vh3TTTOW64Mc="
+    },
+    "fabo123": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$iux2bkeB7DkkeDCVC0j0rg$C368rLAmLohxmC81PLzeKVm1Ph9fYcpvH1bnueh8cng",
+        "nombre_enc": "IDwP1F6uOIRQKhXzKi6Xzsl+Yg6cMOkPO957e2QphDU=",
+        "email_enc": "5OfTZpEti6to/dJlmKihSI9nE7Nxqp28hzJFhsVlKz2WXR7Ep+qfyG4gvoU=",
+        "nacionalidad_enc": "nog9MtnM+2AUAXdTJI/clG/00SiiSIioKyXSZKyjY0LSlXxjacU=",
+        "apellidos_enc": "KbkdyvTIjIg/vAT8XRNEp28rtRVfqk2DrpwvCnU2vruPhw=="
     }
 }
