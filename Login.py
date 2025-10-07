@@ -678,17 +678,62 @@ class LoginAvatarsRooks:
             fg=self.white
         ).pack(anchor="w", pady=(0, 5))
 
-        self.nacionalidad_entry = tk.Entry(
+        nacionalidades = [
+            "Alemana",
+            "Argentina",
+            "Australiana",
+            "Boliviana",
+            "Brasileña",
+            "Canadiense",
+            "Chilena",
+            "China",
+            "Colombiana",
+            "Costarricense",
+            "Cubana",
+            "Dominicana",
+            "Ecuatoriana",
+            "Española",
+            "Estadounidense",
+            "Filipina",
+            "Finlandesa",
+            "Francesa",
+            "Galésa",
+            "Gualtemalteca",
+            "Húngara",
+            "Irlandésa",
+            "Inglesa",
+            "Japonesa",
+            "Mexicana",
+            "Nicaragüense",
+            "Panameña",
+            "Paraguaya",
+            "Peruana",
+            "Puertorriqueña",
+            "Salvadoreña",
+            "Uruguaya",
+            "Venezolana",
+        ]
+
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure("Custom.TCombox",
+                        fieldbackground=self.white,
+                        background=self.white,
+                        foreground="#000000",
+                        arrowcolor="#000000",
+                        borderwithd=0,
+                        relief=tk.FLAT)
+        
+        self.nacionalidad_combobox = ttk.Combobox(
             inner_frame,
+            values=nacionalidades,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
-            relief=tk.FLAT
+            state="readonly",
+            style="Custom.TCombobox"
         )
-        self.nacionalidad_entry.pack(fill=tk.X, pady=(0, 25), ipady=5)
-        self.nacionalidad_entry.insert(0, "Ingrese su nacionalidad")
-        self.nacionalidad_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su nacionalidad"))
-        self.nacionalidad_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su nacionalidad"))
+
+        self.nacionalidad_combobox.pack(fill=tk.X, pady=(0,25), ipady=5)
+        self.nacionalidad_combobox.set("Seleciona tu nacionalidad")
 
         # CUENTA Y SEGURIDAD
         tk.Label(
