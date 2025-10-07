@@ -1090,7 +1090,7 @@ class LoginAvatarsRooks:
         """Obtiene y guarda todos los datos del usuario al registrarse"""
         nombre = self.nombre_entry.get()
         apellidos = self.apellidos_entry.get()
-        nacionalidad = self.nacionalidad_entry.get()
+        nacionalidad = self.nacionalidad_combobox.get()
         correo = self.correo_entry.get()
         username = self.usuario_entry.get()
         password = self.new_pass_entry.get()
