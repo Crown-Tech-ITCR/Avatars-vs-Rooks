@@ -469,7 +469,7 @@ class LoginAvatarsRooks:
     def show_credits(self):
         ventana_creditos = Toplevel()
         ventana_creditos.title("Créditos - Avatars vs Rooks")
-        ventana_creditos.geometry("700x500")
+        ventana_creditos.geometry("850x650")
         ventana_creditos.config(bg="black")
 
         # --- Título ---
@@ -488,10 +488,10 @@ class LoginAvatarsRooks:
 
         # --- Lista de integrantes ---
         integrantes = [
-            {"nombre": "Alanna", "rol": "Desarrollador", "descripcion": "Lider", "foto": "foto1.png"},
-            {"nombre": "Fabricio", "rol": "Desarrollador", "descripcion": "Encargado", "foto": "foto2.png"},
-            {"nombre": "Ariel", "rol": "Desarrollador", "descripcion": "Encargado", "foto": "foto3.png"},
-            {"nombre": "Mauricio", "rol": "Desarrollador", "descripcion": "Encargado", "foto": "foto4.png"},
+            {"nombre": "Alanna Mendoza", "rol": "Lider Tecnico\nDesarrollador", "descripcion": "Lider", "foto": "./images/Alanna.png"},
+            {"nombre": "Fabricio Coto", "rol": "Administrador de Infraestructura\nDesarrollador", "descripcion": "Miembro", "foto": "./images/Fabricio.png"},
+            {"nombre": "Ariel Rodriguez", "rol": "Diseñador de experiencia de Usuario\nDesarrollador", "descripcion": "Miembro", "foto": "./images/Ariel.png"},
+            {"nombre": "Mauricio Lopez", "rol": "Lider de Pruebas\nDesarrollador", "descripcion": "Miembro", "foto": "./images/Mau.png"},
         ]
 
         # --- Cargar imágenes---
@@ -501,8 +501,8 @@ class LoginAvatarsRooks:
             columna = i % columnas
 
             # Marco individual
-            card = Frame(frame_equipo, bg="#1a1a1a", bd=2, relief="ridge", padx=10, pady=10)
-            card.grid(row=fila, column=columna, padx=20, pady=20, sticky="nsew")
+            card = Frame(frame_equipo, bg="#1a1a1a", bd=2, relief="ridge", padx=10, pady=10, width=320, height=300)
+            card.grid(row=fila, column=columna, padx=25, pady=25, sticky="nsew")
 
             # Imagen
             try:
