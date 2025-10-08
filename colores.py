@@ -80,52 +80,95 @@ class ColorPicker(tk.Frame):
     def generate_monochromatic_palette(self, base_hue, base_saturation, num_colors=7):
         """
         Genera una paleta monocromática variando el valor (brillo) y ligeramente la saturación
-        Incluye el color exacto seleccionado por el usuario
+        Los últimos dos colores son colores de texto (blanco/negro) legibles sobre el color seleccionado
         """
         colors = []
         
         # Usar el valor actual como referencia central
         base_value = self.value
         
-        # Calcular el índice donde colocar el color seleccionado (en el centro)
-        selected_index = num_colors // 2
+        # Calcular el índice donde colocar el color seleccionado (en el centro de los primeros 5 colores)
+        main_colors = num_colors - 2  # Los primeros 5 colores son variaciones
+        selected_index = main_colors // 2
         
-        # Generar variaciones de brillo alrededor del valor actual
-        for i in range(num_colors):
+        # Determinar si el color base es claro u oscuro
+        r, g, b = colorsys.hsv_to_rgb(base_hue, base_saturation, base_value)
+        base_color_hex = '#{:02x}{:02x}{:02x}'.format(int(r*255), int(g*255), int(b*255))
+        is_base_dark = self.is_dark_color(base_color_hex)
+        
+        # Generar las primeras 5 variaciones de color
+        for i in range(main_colors):
             if i == selected_index:
                 # Usar el color exacto seleccionado por el usuario
                 value = base_value
                 sat_variation = base_saturation
             else:
                 # Crear variaciones para los otros colores
-                # Determinar si estamos antes o después del color seleccionado
                 if i < selected_index:
-                    # Colores más oscuros (valores menores)
+                    # Comportamiento según si el color base es claro u oscuro
                     steps_from_center = selected_index - i
                     max_steps = selected_index
-                    value = base_value * (1 - 0.7 * (steps_from_center / max_steps)) if max_steps > 0 else base_value
-                    value = max(0.1, value)
-                else:
-                    # Colores más claros (valores mayores)
-                    steps_from_center = i - selected_index
-                    max_steps = num_colors - 1 - selected_index
-                    if max_steps > 0:
-                        brightness_increase = (1 - base_value) * (steps_from_center / max_steps)
-                        value = min(1.0, base_value + brightness_increase)
+                    
+                    if is_base_dark:
+                        # Color base oscuro: hacer más oscuros hacia la izquierda
+                        value = base_value * (1 - 0.7 * (steps_from_center / max_steps)) if max_steps > 0 else base_value
+                        value = max(0.1, value)
+                        sat_variation = base_saturation
                     else:
-                        value = base_value
-                
-                # Variar ligeramente la saturación para mayor riqueza visual
-                if base_saturation > 0.1:
-                    sat_variation = base_saturation * (0.7 + 0.6 * (i / (num_colors - 1)))
-                    sat_variation = min(1.0, max(0.1, sat_variation))
+                        # Color base claro: hacer más claros hacia la izquierda
+                        if max_steps > 0:
+                            brightness_increase = (1 - base_value) * (steps_from_center / max_steps)
+                            value = min(1.0, base_value + brightness_increase)
+                            
+                            # NUEVO: Para colores claros, reducir la saturación hacia el blanco
+                            # Mientras más lejos del centro (más steps_from_center), menos saturación
+                            saturation_reduction = (steps_from_center / max_steps) * 0.8  # Reducir hasta 80%
+                            sat_variation = base_saturation * (1 - saturation_reduction)
+                            sat_variation = max(0.0, sat_variation)  # No puede ser negativa
+                            
+                            # Para el primer color (i = 0), hacer especialmente blanco
+                            if i == 0:
+                                sat_variation = base_saturation * 0.1  # Solo 10% de la saturación original
+                                value = min(1.0, base_value + 0.4)  # Muy brillante
+                        else:
+                            value = base_value
+                            sat_variation = base_saturation
                 else:
+                    # Comportamiento según si el color base es claro u oscuro
+                    steps_from_center = i - selected_index
+                    max_steps = main_colors - 1 - selected_index
+                    
+                    if is_base_dark:
+                        # Color base oscuro: hacer más claros hacia la derecha
+                        if max_steps > 0:
+                            brightness_increase = (1 - base_value) * (steps_from_center / max_steps)
+                            value = min(1.0, base_value + brightness_increase)
+                        else:
+                            value = base_value
+                    else:
+                        # Color base claro: hacer más oscuros hacia la derecha
+                        value = base_value * (1 - 0.7 * (steps_from_center / max_steps)) if max_steps > 0 else base_value
+                        value = max(0.1, value)
                     sat_variation = base_saturation
-            
+        
             r, g, b = colorsys.hsv_to_rgb(base_hue, sat_variation, value)
             color_hex = '#{:02x}{:02x}{:02x}'.format(int(r*255), int(g*255), int(b*255))
             colors.append(color_hex)
-        
+
+        # Determinar si el color seleccionado es claro u oscuro para los colores de texto
+        selected_color_hex = colors[selected_index]
+        is_dark = self.is_dark_color(selected_color_hex)
+
+        # Agregar los dos colores de texto legibles
+        if is_dark:
+            # Si el color seleccionado es oscuro, usar blanco y gris claro para texto
+            colors.append("#FFFFFF")  # Blanco puro para texto principal
+            colors.append("#E0E0E0")  # Gris claro para texto secundario
+        else:
+            # Si el color seleccionado es claro, usar negro y gris oscuro para texto
+            colors.append("#000000")  # Negro puro para texto principal
+            colors.append("#333333")  # Gris oscuro para texto secundario
+
         return colors
 
     def create_monochromatic_palette(self):
@@ -143,8 +186,7 @@ class ColorPicker(tk.Frame):
             
             label = Label(self.palette_container, 
                          width=8, height=3, 
-                         bg=color, 
-                         text=color,
+                         bg=color,
                          font=("Arial", 8),
                          fg="white" if self.is_dark_color(color) else "black",
                          relief="solid",
@@ -163,8 +205,7 @@ class ColorPicker(tk.Frame):
             # Marcar el color seleccionado con un borde más grueso
             border_width = 3 if i == selected_index else 1
             
-            label.config(bg=color, 
-                        text=color,
+            label.config(bg=color,
                         fg="white" if self.is_dark_color(color) else "black",
                         borderwidth=border_width)
 

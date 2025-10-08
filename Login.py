@@ -17,15 +17,17 @@ class LoginAvatarsRooks:
         self.root.resizable(False, False)
         
         # Colores del tema
-        self.bg_black = "#000000"
-        self.bg_dark = "#1a1a1a"
-        self.dark_gray = "#535353"
-        self.red_primary = "#cc0000"
-        self.red_dark = "#990000"
-        self.white = "#FFFFFF"
-        self.gray_text = "#CCCCCC"
+        self.c1 = "#000000"
+        self.c2 = "#1a1a1a"
+        self.c3 = "#535353"
+        self.c4 = "#cc0000"
+        self.c5 = "#990000"
+        self.c6 = "#FFFFFF"
+        self.c7 = "#CCCCCC"
+
+        self.colors = [self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7]
         
-        self.root.configure(bg=self.bg_black)
+        self.root.configure(bg=self.colors[0])
         self.center_window()
         
         self.users = {}
@@ -96,10 +98,10 @@ class LoginAvatarsRooks:
         """Crea la interfaz de login siguiendo el diseño de referencia"""
         
         # Frame principal sin borde
-        self.login_frame = tk.Frame(self.root, bg=self.bg_black)
+        self.login_frame = tk.Frame(self.root, bg=self.colors[0])
         
         # BARRA SUPERIOR
-        top_bar = tk.Frame(self.login_frame, bg=self.red_primary, height=40)
+        top_bar = tk.Frame(self.login_frame, bg=self.colors[3], height=40)
         top_bar.pack(fill=tk.X)
         top_bar.pack_propagate(False)
         
@@ -108,16 +110,16 @@ class LoginAvatarsRooks:
             top_bar,
             text="Avatars vs Rooks - Desktop game",
             font=("Arial", 12, "bold"),
-            fg=self.white,
-            bg=self.red_primary
+            fg=self.colors[5],
+            bg=self.colors[3]
         ).pack(side=tk.LEFT, padx=15, pady=8)
         
         # ÁREA DE CONTENIDO
-        content_area = tk.Frame(self.login_frame, bg=self.bg_black)
+        content_area = tk.Frame(self.login_frame, bg=self.colors[0])
         content_area.pack(fill=tk.BOTH, expand=True)
         
         # Botones superiores izquierdos
-        left_buttons_frame = tk.Frame(content_area, bg=self.bg_black)
+        left_buttons_frame = tk.Frame(content_area, bg=self.colors[0])
         left_buttons_frame.place(x=20, y=20)
         
         self.create_round_button(
@@ -133,7 +135,7 @@ class LoginAvatarsRooks:
         ).pack(side=tk.LEFT, padx=5)
         
         # Botones superiores derechos
-        right_buttons_frame = tk.Frame(content_area, bg=self.bg_black)
+        right_buttons_frame = tk.Frame(content_area, bg=self.colors[0])
         right_buttons_frame.place(relx=1.0, x=-20, y=20, anchor='ne')
         
         # Botón reconocimiento facial
@@ -150,8 +152,8 @@ class LoginAvatarsRooks:
             image=face_icon,
             text="👤" if not face_icon else "",
             font=("Arial", 16),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             width=40, 
             height=40,
             relief=tk.FLAT,
@@ -176,8 +178,8 @@ class LoginAvatarsRooks:
             image=dark_icon,
             text="🌙" if not dark_icon else "",
             font=("Arial", 16),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             width=40,  
             height=40,  
             relief=tk.FLAT,
@@ -202,8 +204,8 @@ class LoginAvatarsRooks:
             image=light_icon,
             text="☀️" if not light_icon else "",
             font=("Arial", 16),
-            bg=self.white,
-            fg=self.bg_black,
+            bg=self.colors[5],
+            fg=self.colors[0],
             width=40,  # Ancho en píxeles
             height=40,  # Alto en píxeles
             relief=tk.FLAT,
@@ -216,7 +218,7 @@ class LoginAvatarsRooks:
             light_mode_btn.image = light_icon
         
         # CONTENEDOR CENTRAL DE LOGIN
-        login_container = tk.Frame(content_area, bg=self.bg_black)
+        login_container = tk.Frame(content_area, bg=self.colors[0])
         login_container.place(relx=0.5, rely=0.5, anchor='center')
         
         # Título principal
@@ -224,13 +226,13 @@ class LoginAvatarsRooks:
             login_container,
             text="AVATARS VS ROOKS",
             font=("Arial", 30, "bold"),
-            fg=self.white,
-            bg=self.bg_black
+            fg=self.colors[5],
+            bg=self.colors[0]
         )
         title_label.pack(pady=(0, 40))
         
         # Frame del formulario
-        form_frame = tk.Frame(login_container, bg=self.bg_black)
+        form_frame = tk.Frame(login_container, bg=self.colors[0])
         form_frame.pack()
         
         # Campo Identificador
@@ -238,25 +240,25 @@ class LoginAvatarsRooks:
             form_frame,
             text="Identificador",
             font=("Arial", 11, "bold"),
-            fg=self.white,
-            bg=self.bg_black
+            fg=self.colors[5],
+            bg=self.colors[0]
         ).pack(anchor='w', pady=(0, 5))
 
-        username_frame = tk.Frame(form_frame, bg=self.white)
+        username_frame = tk.Frame(form_frame, bg=self.colors[5])
         username_frame.pack(pady=(0, 20))
 
         self.username_entry = tk.Entry(
             username_frame, 
             font=("Arial", 12),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             width=44,
             relief=tk.FLAT,
             borderwidth=0
         )
         self.username_entry.pack(side=tk.LEFT, padx=5, pady=5) 
         self.username_entry.insert(0, "Ingrese su usuario, correo o telefono")
-        self.username_entry.config(fg=self.dark_gray)
+        self.username_entry.config(fg=self.colors[1])
         self.username_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su usuario, correo o telefono"))
         self.username_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su usuario, correo o telefono"))
 
@@ -265,18 +267,18 @@ class LoginAvatarsRooks:
             form_frame,
             text="Contraseña",
             font=("Arial", 11, "bold"),
-            fg=self.white,
-            bg=self.bg_black
+            fg=self.colors[5],
+            bg=self.colors[0]
         ).pack(anchor='w', pady=(0, 5))
         
-        password_frame = tk.Frame(form_frame, bg=self.white)
+        password_frame = tk.Frame(form_frame, bg=self.colors[5])
         password_frame.pack(pady=(0, 5))
         
         self.password_entry = tk.Entry(
             password_frame,
             font=("Arial", 12),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             width=40,
             show="",
             relief=tk.FLAT,
@@ -286,7 +288,7 @@ class LoginAvatarsRooks:
 
         self.password_entry.pack(side=tk.LEFT, padx=5, pady=5)
         self.password_entry.insert(0, "Ingrese su contraseña")
-        self.password_entry.config(fg=self.dark_gray)
+        self.password_entry.config(fg=self.colors[1])
         self.password_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, "Ingrese su contraseña"))
         self.password_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, "Ingrese su contraseña"))
 
@@ -296,8 +298,8 @@ class LoginAvatarsRooks:
             password_frame,
             text="👁",
             font=("Arial", 12),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0,
             cursor="hand2",
@@ -310,15 +312,15 @@ class LoginAvatarsRooks:
             form_frame,
             text="¿Olvidaste la contraseña?",
             font=("Arial", 9),
-            fg=self.red_primary,
-            bg=self.bg_black,
+            fg=self.colors[3],
+            bg=self.colors[0],
             cursor="hand2"
         )
         forgot_pass_btn.pack(pady=(5, 25))
         forgot_pass_btn.bind('<Button-1>', lambda e: self.forgot_password())
         
         # Botones de acción
-        buttons_frame = tk.Frame(form_frame, bg=self.bg_black)
+        buttons_frame = tk.Frame(form_frame, bg=self.colors[0])
         buttons_frame.pack(pady=(0, 15))
         
         # Botón Iniciar sesión
@@ -326,13 +328,13 @@ class LoginAvatarsRooks:
             buttons_frame,
             text="Iniciar sesión",
             font=("Arial", 12, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             width=19,
             height=1,
             relief=tk.FLAT,
             cursor="hand2",
-            activebackground=self.red_dark,
+            activebackground=self.colors[4],
             command=self.login
         )
         login_btn.pack(side=tk.LEFT, padx=5)
@@ -342,13 +344,13 @@ class LoginAvatarsRooks:
             buttons_frame,
             text="Registrarse",
             font=("Arial", 12, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             width=19,
             height=1,
             relief=tk.FLAT,
             cursor="hand2",
-            activebackground=self.red_dark,
+            activebackground=self.colors[4],
             command=self.show_register_message
         )
         register_btn.pack(side=tk.LEFT, padx=5)
@@ -363,7 +365,7 @@ class LoginAvatarsRooks:
             google_logo = None
 
         # Crear un frame contenedor para controlar el tamaño exacto
-        google_frame = tk.Frame(form_frame, bg=self.red_primary, width=410, height=35)
+        google_frame = tk.Frame(form_frame, bg=self.colors[3], width=410, height=35)
         google_frame.pack(pady=(0, 10))
         google_frame.pack_propagate(False)  # Esto evita que el frame se ajuste al contenido
 
@@ -373,11 +375,11 @@ class LoginAvatarsRooks:
             image=google_logo,
             compound=tk.RIGHT,
             font=("Arial", 12, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             relief=tk.FLAT,
             cursor="hand2",
-            activebackground=self.red_dark,
+            activebackground=self.colors[4],
             command=self.google_login
         )
         google_btn.pack(fill=tk.BOTH, expand=True) 
@@ -396,8 +398,8 @@ class LoginAvatarsRooks:
             parent,
             text=text,
             font=("Arial", 10, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             relief=tk.FLAT,
             cursor="hand2",
             padx=20,
@@ -408,8 +410,8 @@ class LoginAvatarsRooks:
         )
         # Simular bordes redondeados con configuración especial
         btn.config(
-            highlightbackground=self.red_primary,
-            highlightcolor=self.red_primary
+            highlightbackground=self.colors[3],
+            highlightcolor=self.colors[3]
         )
         return btn
 
@@ -418,26 +420,26 @@ class LoginAvatarsRooks:
         """Limpia el placeholder al hacer focus"""
         if event.widget.get() == placeholder:
             event.widget.delete(0, tk.END)
-            event.widget.config(fg="#000000")
+            event.widget.config(fg=self.colors[0])
 
     def restore_placeholder(self, event, placeholder):
         """Restaura el placeholder si el campo está vacío"""
         if event.widget.get() == "":
             event.widget.insert(0, placeholder)
-            event.widget.config(fg="#666666")
+            event.widget.config(fg=self.colors[2])
 
     def clear_placeholder_password(self, event, placeholder):
         """Limpia el placeholder al hacer focus"""
         if event.widget.get() == placeholder:
             event.widget.delete(0, tk.END)
-            event.widget.config(fg="#000000", show="•") 
+            event.widget.config(fg=self.colors[0], show="•") 
 
     def restore_placeholder_password(self, event, placeholder):
         """Restaura el placeholder si el campo está vacío"""
         if event.widget.get() == "":
             event.widget.config(show="") 
             event.widget.insert(0, placeholder)
-            event.widget.config(fg=self.dark_gray)
+            event.widget.config(fg=self.colors[1])
 
     def toggle_password(self):
         """Muestra u oculta la contraseña"""
@@ -470,20 +472,20 @@ class LoginAvatarsRooks:
         ventana_creditos = Toplevel()
         ventana_creditos.title("Créditos - Avatars vs Rooks")
         ventana_creditos.geometry("850x650")
-        ventana_creditos.config(bg="black")
+        ventana_creditos.config(bg=self.colors[0])
 
         # --- Título ---
         titulo = Label(
             ventana_creditos,
             text="Equipo de Desarrollo - Avatars vs Rooks",
             font=("Arial Black", 16),
-            fg="white",
-            bg="black"
+            fg=self.colors[6],
+            bg=self.colors[0]
         )
         titulo.pack(pady=20)
 
         # --- Frame principal---
-        frame_equipo = Frame(ventana_creditos, bg="black")
+        frame_equipo = Frame(ventana_creditos, bg=self.colors[0])
         frame_equipo.pack(expand=True)
 
         # --- Lista de integrantes ---
@@ -501,35 +503,35 @@ class LoginAvatarsRooks:
             columna = i % columnas
 
             # Marco individual
-            card = Frame(frame_equipo, bg="#1a1a1a", bd=2, relief="ridge", padx=10, pady=10, width=320, height=300)
+            card = Frame(frame_equipo, bg=self.colors[1], bd=2, relief="ridge", padx=10, pady=10, width=320, height=300)
             card.grid(row=fila, column=columna, padx=25, pady=25, sticky="nsew")
 
             # Imagen
             try:
                 imagen = Image.open(miembro["foto"]).resize((100, 100))
                 imagen = ImageTk.PhotoImage(imagen)
-                img_label = Label(card, image=imagen, bg="#1a1a1a")
+                img_label = Label(card, image=imagen, bg=self.colors[1])
                 img_label.image = imagen
                 img_label.pack(pady=5)
             except:
-                Label(card, text="[Foto]", fg="white", bg="#1a1a1a").pack(pady=5)
+                Label(card, text="[Foto]", fg=self.colors[6], bg=self.colors[1]).pack(pady=5)
 
             # Nombre
-            Label(card, text=miembro["nombre"], font=("Arial", 12, "bold"), fg="white", bg="#1a1a1a").pack(pady=2)
+            Label(card, text=miembro["nombre"], font=("Arial", 12, "bold"), fg=self.colors[6], bg=self.colors[1]).pack(pady=2)
             # Rol
-            Label(card, text=miembro["rol"], font=("Arial", 10, "italic"), fg="#ff4d4d", bg="#1a1a1a").pack()
+            Label(card, text=miembro["rol"], font=("Arial", 10, "italic"), fg=self.colors[3], bg=self.colors[1]).pack()
             # Descripción
-            Label(card, text=miembro["descripcion"], font=("Arial", 9), fg="white", bg="#1a1a1a", wraplength=200, justify="center").pack(pady=5)
+            Label(card, text=miembro["descripcion"], font=("Arial", 9), fg=self.colors[6], bg=self.colors[1], wraplength=200, justify="center").pack(pady=5)
 
         # --- Botón para cerrar ---
         boton_cerrar = Button(
             ventana_creditos,
             text="Volver",
             font=("Arial Black", 11),
-            bg="#b30000",
-            fg="white",
-            activebackground="#e60000",
-            activeforeground="white",
+            bg=self.colors[4],
+            fg=self.colors[6],
+            activebackground=self.colors[3],
+            activeforeground=self.colors[6],
             command=ventana_creditos.destroy
         )
         boton_cerrar.pack(pady=10)
@@ -539,20 +541,20 @@ class LoginAvatarsRooks:
         ventana_ayuda = Toplevel()
         ventana_ayuda.title("Ayuda - Avatars vs Rooks")
         ventana_ayuda.geometry("700x500")
-        ventana_ayuda.config(bg="black")
+        ventana_ayuda.config(bg=self.colors[0])
 
         # --- Título ---
         titulo = Label(
             ventana_ayuda,
             text="Centro de Ayuda - Avatars vs Rooks",
             font=("Arial Black", 16),
-            fg="white",
-            bg="black"
+            fg=self.colors[6],
+            bg=self.colors[0]
         )
         titulo.pack(pady=20)
 
         # --- Contenedor principal ---
-        frame_texto = Frame(ventana_ayuda, bg="black")
+        frame_texto = Frame(ventana_ayuda, bg=self.colors[0])
         frame_texto.pack(padx=40, pady=10, fill="both", expand=True)
 
         # --- Secciones de ayuda ---
@@ -590,8 +592,8 @@ class LoginAvatarsRooks:
                 frame_texto,
                 text=sec["titulo"],
                 font=("Arial Black", 12),
-                fg="#ff4d4d",
-                bg="black",
+                fg=self.colors[3],
+                bg=self.colors[0],
                 anchor="w",
                 justify="left"
             ).pack(anchor="w", pady=(10, 0))
@@ -599,8 +601,8 @@ class LoginAvatarsRooks:
                 frame_texto,
                 text=sec["texto"],
                 font=("Arial", 10),
-                fg="white",
-                bg="black",
+                fg=self.colors[6],
+                bg=self.colors[0],
                 wraplength=600,
                 justify="left"
             ).pack(anchor="w", pady=(0, 10))
@@ -610,10 +612,10 @@ class LoginAvatarsRooks:
             ventana_ayuda,
             text="Volver",
             font=("Arial Black", 11),
-            bg="#b30000",
-            fg="white",
-            activebackground="#e60000",
-            activeforeground="white",
+            bg=self.colors[4],
+            fg=self.colors[6],
+            activebackground=self.colors[3],
+            activeforeground=self.colors[6],
             command=ventana_ayuda.destroy
         )
         boton_cerrar.pack(pady=10)
@@ -729,13 +731,13 @@ class LoginAvatarsRooks:
 
     def create_register_widgets(self):
         """Crea los widgets para el registro con tema oscuro"""
-        self.register_frame = tk.Frame(self.root, bg=self.bg_black)
+        self.register_frame = tk.Frame(self.root, bg=self.colors[0])
         
         # Contenedor principal con scroll
-        canvas = tk.Canvas(self.register_frame, bg=self.bg_black, highlightthickness=0)
+        canvas = tk.Canvas(self.register_frame, bg=self.colors[0], highlightthickness=0)
         scrollbar = tk.Scrollbar(self.register_frame, orient="vertical", command=canvas.yview)
-        scrollbar.config(bg=self.red_primary, troughcolor=self.bg_black)
-        scrollable_frame = tk.Frame(canvas, bg=self.bg_black)
+        scrollbar.config(bg=self.colors[3], troughcolor=self.colors[0])
+        scrollable_frame = tk.Frame(canvas, bg=self.colors[0])
         
         scrollable_frame.bind(
             "<Configure>",
@@ -746,7 +748,7 @@ class LoginAvatarsRooks:
         canvas.configure(yscrollcommand=scrollbar.set)
         
         # Barra superior
-        top_bar = tk.Frame(scrollable_frame, bg=self.red_primary, height=40)
+        top_bar = tk.Frame(scrollable_frame, bg=self.colors[3], height=40)
         top_bar.pack(fill=tk.X)
         top_bar.pack_propagate(False)
         
@@ -754,8 +756,8 @@ class LoginAvatarsRooks:
             top_bar,
             text="Avatars vs Rooks - Desktop game",
             font=("Arial", 12, "bold"),
-            fg=self.white,
-            bg=self.red_primary
+            fg=self.colors[5],
+            bg=self.colors[3]
         ).pack(side=tk.LEFT, padx=15, pady=8)
         
         # Título Registro
@@ -763,24 +765,24 @@ class LoginAvatarsRooks:
             scrollable_frame,
             text="Registro",
             font=("Arial", 32, "bold"),
-            fg=self.white,
-            bg=self.bg_black
+            fg=self.colors[5],
+            bg=self.colors[0]
         ).pack(pady=(30, 40))
         
         # Frame del formulario con borde
-        form_container = tk.Frame(scrollable_frame, bg=self.bg_black)
+        form_container = tk.Frame(scrollable_frame, bg=self.colors[0])
         form_container.pack(padx=300)
         
         form_frame = tk.Frame(
             form_container,
-            bg=self.bg_black,
-            highlightbackground=self.gray_text,
+            bg=self.colors[0],
+            highlightbackground=self.colors[6],
             highlightthickness=1
         )
         form_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
         # Padding interno
-        inner_frame = tk.Frame(form_frame, bg=self.bg_black)
+        inner_frame = tk.Frame(form_frame, bg=self.colors[0])
         inner_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
 
         # INFORMACIÓN PERSONAL
@@ -788,8 +790,8 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Información personal",
             font=("Arial", 14, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 20))
 
         # Nombre
@@ -797,15 +799,15 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Nombre +",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.nombre_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT
         )
         self.nombre_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
@@ -818,15 +820,15 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Apellidos +",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.apellidos_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT
         )
         self.apellidos_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
@@ -839,16 +841,16 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Foto de perfil",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 10))
         
         self.photo_btn = tk.Button(
             inner_frame,
             text="+\nAgregar foto",
             font=("Arial", 10),
-            bg=self.white,
-            fg="#666666",
+            bg=self.colors[5],
+            fg=self.colors[2],
             width=10,
             height=4,
             relief=tk.FLAT,
@@ -862,18 +864,18 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Fecha de nacimiento +",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
-        combo_container = tk.Frame(inner_frame, bg=self.white, relief=tk.FLAT)
+        combo_container = tk.Frame(inner_frame, bg=self.colors[5], relief=tk.FLAT)
         combo_container.pack(fill=tk.X, pady=(0,15), ipady=5, ipadx=5)
 
         style = ttk.Style()
         style.theme_use('clam')
         style.configure('Custom.TCombobox',
-                        fieldbackground=self.white,
-                        background=self.white,
+                        fieldbackground=self.colors[5],
+                        background=self.colors[5],
                         foreground="#000000",
                         borderwithd=0)
         #Dia
@@ -909,8 +911,8 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Nacionalidad +",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
 
         nacionalidades = [
@@ -952,8 +954,8 @@ class LoginAvatarsRooks:
         style = ttk.Style()
         style.theme_use("clam")
         style.configure("Custom.TCombox",
-                        fieldbackground=self.white,
-                        background=self.white,
+                        fieldbackground=self.colors[5],
+                        background=self.colors[5],
                         foreground="#000000",
                         arrowcolor="#000000",
                         borderwithd=0,
@@ -975,8 +977,8 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Cuenta y seguridad",
             font=("Arial", 14, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(10, 20))
         
         # Usuario
@@ -984,15 +986,15 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Usuario",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.usuario_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT
         )
         self.usuario_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
@@ -1005,15 +1007,15 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Correo electrónico",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
 
         self.correo_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT
         )
         self.correo_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
@@ -1026,19 +1028,19 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Contraseña",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
-        pass_frame1 = tk.Frame(inner_frame, bg=self.white)
+        pass_frame1 = tk.Frame(inner_frame, bg=self.colors[5])
         pass_frame1.pack(fill=tk.X, pady=(0, 15))
         
         self.new_pass_entry = tk.Entry(
             pass_frame1,
             font=("Arial", 11),
             show="•",
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0
         )
@@ -1049,8 +1051,8 @@ class LoginAvatarsRooks:
             pass_frame1,
             text="👁",
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0,
             cursor="hand2",
@@ -1063,19 +1065,19 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Confirmar contraseña",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
-        pass_frame2 = tk.Frame(inner_frame, bg=self.white)
+        pass_frame2 = tk.Frame(inner_frame, bg=self.colors[5])
         pass_frame2.pack(fill=tk.X, pady=(0, 25))
         
         self.confirm_pass_entry = tk.Entry(
             pass_frame2,
             font=("Arial", 11),
             show="•",
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0
         )
@@ -1086,8 +1088,8 @@ class LoginAvatarsRooks:
             pass_frame2,
             text="👁",
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0,
             cursor="hand2",
@@ -1100,8 +1102,8 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Reconocimiento facial (Opcional)",
             font=("Arial", 14, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(10, 15))
         
         self.usar_facial_var = tk.BooleanVar()
@@ -1110,11 +1112,11 @@ class LoginAvatarsRooks:
             text="Habilitar",
             variable=self.usar_facial_var,
             font=("Arial", 10),
-            bg=self.bg_black,
-            fg=self.white,
-            activebackground=self.bg_black,
-            selectcolor=self.bg_black,
-            activeforeground=self.white
+            bg=self.colors[0],
+            fg=self.colors[5],
+            activebackground=self.colors[0],
+            selectcolor=self.colors[0],
+            activeforeground=self.colors[5]
         )
         facial_check.pack(anchor="w", pady=(0, 10))
         
@@ -1122,8 +1124,8 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Capturar rostro",
             font=("Arial", 11, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             relief=tk.FLAT,
             cursor="hand2",
             state=tk.DISABLED,
@@ -1145,8 +1147,8 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Información de pago (opcional)",
             font=("Arial", 14, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(10, 15))
         
         self.guardar_tarjeta_var = tk.BooleanVar()
@@ -1155,11 +1157,11 @@ class LoginAvatarsRooks:
             text="Habilitar",
             variable=self.guardar_tarjeta_var,
             font=("Arial", 10),
-            bg=self.bg_black,
-            fg=self.white,
-            activebackground=self.bg_black,
-            selectcolor=self.bg_black,
-            activeforeground=self.white
+            bg=self.colors[0],
+            fg=self.colors[5],
+            activebackground=self.colors[0],
+            selectcolor=self.colors[0],
+            activeforeground=self.colors[5]
         )
         tarjeta_check.pack(anchor="w", pady=(0, 15))
         
@@ -1168,15 +1170,15 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Numero de tarjeta",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.num_tarjeta_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             state=tk.DISABLED
         )
@@ -1184,49 +1186,49 @@ class LoginAvatarsRooks:
         self.num_tarjeta_entry.insert(0, "Numero de tarjeta")
         
         # Frame para fecha y CVV
-        expiry_cvv_frame = tk.Frame(inner_frame, bg=self.bg_black)
+        expiry_cvv_frame = tk.Frame(inner_frame, bg=self.colors[0])
         expiry_cvv_frame.pack(fill=tk.X, pady=(0, 15))
         
         # Fecha de expiración
-        expiry_left = tk.Frame(expiry_cvv_frame, bg=self.bg_black)
+        expiry_left = tk.Frame(expiry_cvv_frame, bg=self.colors[0])
         expiry_left.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
         
         tk.Label(
             expiry_left,
             text="Fecha de expiración",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.expiry_entry = tk.Entry(
             expiry_left,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             state=tk.DISABLED
         )
         self.expiry_entry.pack(fill=tk.X, ipady=5)
         
         # CVV
-        cvv_right = tk.Frame(expiry_cvv_frame, bg=self.bg_black)
+        cvv_right = tk.Frame(expiry_cvv_frame, bg=self.colors[0])
         cvv_right.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
         tk.Label(
             cvv_right,
             text="CVV",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.cvv_entry = tk.Entry(
             cvv_right,
             font=("Arial", 11),
             show="*",
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             state=tk.DISABLED
         )
@@ -1237,15 +1239,15 @@ class LoginAvatarsRooks:
             inner_frame,
             text="Nombre del titular",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.titular_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             state=tk.DISABLED
         )
@@ -1266,12 +1268,12 @@ class LoginAvatarsRooks:
             scrollable_frame,
             text="Registrarse",
             font=("Arial", 12, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             width=20,
             relief=tk.FLAT,
             cursor="hand2",
-            activebackground=self.red_dark,
+            activebackground=self.colors[4],
             command=self.register_user
         ).pack(pady=(30, 50), ipady=8)
         
@@ -1389,7 +1391,23 @@ class LoginAvatarsRooks:
         except Exception as e:
             messagebox.showerror("Error", f"Error al registrar usuario: {e}")
 
-    def reiniciar_login(self):
+    def reiniciar_login(self, c1, c2, c3, c4, c5, c6, c7):
         """Recrea la interfaz de login"""
+        self.c1 = c1
+        self.c2 = c2
+        self.c3 = c3
+        self.c4 = c4
+        self.c5 = c5
+        self.c6 = c6
+        self.c7 = c7
+        self.colors = [c1, c2, c3, c4, c5, c6, c7]
+
+        # Limpiar la ventana completamente
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        # IMPORTANTE: Actualizar fondo de la ventana principal con self.colors[0]
+        self.root.configure(bg=c1)
+
         self.create_login_widgets()
         self.login_frame.pack(fill=tk.BOTH, expand=True)

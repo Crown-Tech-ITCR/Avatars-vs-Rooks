@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 from MusicaSpotify import SpotifyManager
+from colores import ColorPicker  # Importar el ColorPicker
 
 class MenuPersonalizacion:
     def __init__(self, root, username, nombre, callback_volver):
@@ -11,6 +12,13 @@ class MenuPersonalizacion:
         self.callback_volver = callback_volver
         self.resultados = []
         self.spotify_manager = SpotifyManager()
+        self.c1 = "#000000"
+        self.c2 = "#1a1a1a"
+        self.c3 = "#535353"
+        self.c4 = "#cc0000"
+        self.c5 = "#990000"
+        self.c6 = "#FFFFFF"
+        self.c7 = "#CCCCCC"
         
         # Limpiar ventana actual
         for widget in self.root.winfo_children():
@@ -20,7 +28,7 @@ class MenuPersonalizacion:
         self.root.configure(bg="#F5F5F5")
         
         self.crear_interfaz()
-    
+
     def crear_interfaz(self):
         """Crea toda la interfaz de personalización con layout vertical"""
 
@@ -43,9 +51,43 @@ class MenuPersonalizacion:
         label_titulo_principal.pack(pady=(40, 20))
 
         # SUBTÍTULO
-        label_subtitulo = tk.Label(scrollable_frame, text="Elige tu canción favorita", 
+        label_subtitulo = tk.Label(scrollable_frame, text="Personaliza tu experiencia de juego", 
                                 font=("Arial", 16), bg="#F5F5F5")
         label_subtitulo.pack(pady=(0, 45))
+
+        # ============= SECCIÓN DE COLORES =============
+        
+        # Título de la sección de colores
+        label_colores = tk.Label(scrollable_frame, text="Selecciona tu color favorito", 
+                               font=("Arial", 18, "bold"), bg="#F5F5F5")
+        label_colores.pack(pady=(20, 15))
+
+        # Frame contenedor para el selector de colores
+        frame_colores = tk.Frame(scrollable_frame, bg="#F5F5F5")
+        frame_colores.pack(pady=20)
+
+        # Integrar el ColorPicker
+        self.color_picker = ColorPicker(frame_colores, width=300, height=200, bar_width=30)
+        self.color_picker.pack()
+
+        # Label para mostrar el color seleccionado
+        self.label_color_seleccionado = tk.Label(scrollable_frame, 
+                                               text="Color seleccionado: #FFFFFF", 
+                                               font=("Arial", 12), bg="#F5F5F5")
+        self.label_color_seleccionado.pack(pady=10)
+
+        # Botón para aplicar el color
+        btn_aplicar_color = tk.Button(scrollable_frame, text="Aplicar Color", 
+                                    font=("Arial", 12), 
+                                    command=self.aplicar_color)
+        btn_aplicar_color.pack(pady=10)
+
+        # ============= SECCIÓN DE MÚSICA =============
+
+        # Título de la sección de música
+        label_musica = tk.Label(scrollable_frame, text="Elige tu canción favorita", 
+                              font=("Arial", 18, "bold"), bg="#F5F5F5")
+        label_musica.pack(pady=(40, 15))
 
         #============= SECCIÓN DE PREVIEW =============
 
@@ -89,7 +131,6 @@ class MenuPersonalizacion:
         # Frame para resultados
         self.frame_resultados = tk.Frame(scrollable_frame, bg="#F5F5F5")
         self.frame_resultados.pack(pady=20)
-
 
         # ============= BOTONES =============
 
@@ -170,9 +211,31 @@ class MenuPersonalizacion:
         for widget in self.root.winfo_children():
             widget.destroy()
         # Llamar callback
-        self.callback_volver()
+        self.callback_volver(self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
     
     def continuar_juego(self):
         """Continúa al menú principal del juego"""
         messagebox.showinfo("Próximamente", "Aquí se abrirá el menú principal del juego")
-       
+
+    def aplicar_color(self):
+        """Aplica el color seleccionado y actualiza el label"""
+        color_seleccionado = self.color_picker.selected_color
+        self.label_color_seleccionado.config(text=f"Color seleccionado: {color_seleccionado}")
+        messagebox.showinfo("Color aplicado", f"Has seleccionado el color: {color_seleccionado}")
+        
+        paleta = self.color_picker.generate_monochromatic_palette(
+            self.color_picker.hue, 
+            self.color_picker.saturation, 
+            7
+        )
+
+        self.c1 = paleta[0]
+        self.c2 = paleta[1]
+        self.c3 = paleta[2]
+        self.c4 = color_seleccionado
+        self.c5 = paleta[4]
+        self.c6 = paleta[5]
+        self.c7 = paleta[6]
+
+        # Aquí puedes agregar lógica para guardar el color del usuario
+        print(f"Color seleccionado por {self.username}: {color_seleccionado}")
