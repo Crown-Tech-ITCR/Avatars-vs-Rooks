@@ -7,6 +7,7 @@ from PersonalizaciónUI import MenuPersonalizacion
 import calendar
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
+from password_recovery import PasswordRecovery
 
 class LoginAvatarsRooks:
     def __init__(self, root):
@@ -33,6 +34,7 @@ class LoginAvatarsRooks:
         self.users = {}
         self.cards = {}
         self.master_key = encrip_aes.load_or_create_key()
+        self.password_recovery = PasswordRecovery(self.master_key)
         self.load_users()
         self.load_cards()
         
@@ -727,6 +729,314 @@ class LoginAvatarsRooks:
                 messagebox.showinfo("Éxito", "Foto de perfil cargada correctamente")
             except Exception as e:
                 messagebox.showerror("Error", f"No se pudo cargar la imagen: {str(e)}")
+    
+    def forgot_password(self):
+        self.login_frame.pack_forget()
+
+        recovery_frame = tk.Frame(self.root, bg=self.bg_black)
+        recovery_frame.pack(fill=tk.BOTH, expand=True)
+
+        title_label = tk.Label(
+            recovery_frame, 
+            text="Recuperar Contraseña",
+            font=("Arial", 24, "bold"),
+            fg=self.red_primary,
+            bg=self.bg_black
+        )
+        title_label.pack(pady=30)
+
+        form_frame = tk.Frame(recovery_frame, bg="#FF0000", width=400, height=300)
+        form_frame.pack(pady=20, padx=50)
+        form_frame.pack_propagate(False)
+
+        #Paso 1 Ingresar Usuario
+        tk.Label(
+            form_frame,
+            text="Ingresa tu nombre de usuario:",
+            font=("Arial", 12),
+            fg=self.white,
+            bg=self.bg_dark
+        ).pack(pady=(20, 10))
+    
+        username_entry = tk.Entry(
+            form_frame,
+            font=("Arial", 11),
+            bg=self.dark_gray,
+            fg=self.white,
+            insertbackground=self.white,
+            relief=tk.FLAT,
+            width=30
+        )
+        username_entry.pack(pady=10, ipady=8)
+    
+        def verify_user():
+            username = username_entry.get().strip()
+
+            if not username:
+                messagebox.showerror("Error","Ingrese un nombre de usuario")
+                return
+            #Verificar si el usuario existe
+            users = encrip_aes.load_users_aes()
+            if username not in users:
+                messagebox.showerror("Error", "Usuario no encontrado")
+                return
+            
+            if not self.password_recovery.user_has_security_question(username):
+                messagebox.showerror(
+                    "Error",
+                    "Este usuario no tiene pregunta de seguridad configurada"
+                )
+                return
+            question = self.password_recovery.get_security_question(username)
+
+            if question:
+                self.show_security_question(username,question)
+            else:
+                messagebox.showerror("Error", "Error al recuperar la pregunta de seguridad")
+
+        #Boton Continuar
+        continue_btn = tk.Button(
+            form_frame,
+            text="CONTINUAR",
+            font=("Arial", 11, "bold"),
+            bg=self.red_primary,
+            fg=self.white,
+            activebackground=self.red_dark,
+            activeforeground=self.white,
+            relief=tk.FLAT,
+            cursor="hand2",
+            command=verify_user
+        )
+        continue_btn.pack(pady=20, ipady=10, ipadx=40)
+    
+        # Botón volver
+        back_btn = tk.Label(
+            form_frame,
+            text="← Volver al login",
+            font=("Arial", 10),
+            fg=self.gray_text,
+            bg=self.bg_dark,
+            cursor="hand2"
+        )
+        back_btn.pack(pady=(10, 20))
+        back_btn.bind('<Button-1>', lambda e: self.reiniciar_login())
+
+    def show_security_question(self, username, question):
+        """Muestra la pregunta de seguridad para verificar"""
+        # Limpiar ventana
+        for widget in self.root.winfo_children():
+            widget.destroy()
+    
+        # Frame principal
+        recovery_frame = tk.Frame(self.root, bg=self.bg_black)
+        recovery_frame.pack(fill=tk.BOTH, expand=True)
+    
+        # Título
+        tk.Label(
+            recovery_frame,
+            text="Pregunta de Seguridad",
+            font=("Arial", 24, "bold"),
+            fg=self.red_primary,
+            bg=self.bg_black
+        ).pack(pady=30)
+    
+        # Frame del formulario
+        form_frame = tk.Frame(recovery_frame, bg=self.bg_dark)
+        form_frame.pack(pady=20, padx=50, fill=tk.BOTH, expand=True)
+
+        print("Form frame creado")
+        print(f"widht: {form_frame.winfo_reqwidth()}")
+        print(f"Height: {form_frame.winfo_reqheight()}")
+
+    
+        # Mostrar pregunta
+        tk.Label(
+            form_frame,
+            text=question,
+            font=("Arial", 12, "bold"),
+            fg=self.white,
+            bg=self.bg_dark,
+            wraplength=400
+        ).pack(pady=(20, 10))
+    
+        # Entry para respuesta
+        tk.Label(
+            form_frame,
+            text="Tu respuesta:",
+            font=("Arial", 11),
+            fg=self.gray_text,
+            bg=self.bg_dark
+        ).pack(pady=(10, 5))
+    
+        answer_entry = tk.Entry(
+            form_frame,
+            font=("Arial", 11),
+            bg=self.dark_gray,
+            fg=self.white,
+            insertbackground=self.white,
+            relief=tk.FLAT,
+            width=30
+        )
+        answer_entry.pack(pady=10, ipady=8)
+    
+        def verify_answer():
+            answer = answer_entry.get().strip()
+        
+            if not answer:
+                messagebox.showerror("Error", "Ingresa tu respuesta")
+                return
+        
+            # Verificar respuesta
+            if self.password_recovery.verify_security_answer(username, answer):
+                self.show_reset_password(username)
+            else:
+                messagebox.showerror("Error", "Respuesta incorrecta")
+                answer_entry.delete(0, tk.END)
+    
+        # Botón verificar
+        verify_btn = tk.Button(
+            form_frame,
+            text="VERIFICAR",
+            font=("Arial", 11, "bold"),
+            bg=self.red_primary,
+            fg=self.white,
+            activebackground=self.red_dark,
+            activeforeground=self.white,
+            relief=tk.FLAT,
+            cursor="hand2",
+            command=verify_answer
+        )
+        verify_btn.pack(pady=20, ipady=10, ipadx=40)
+    
+        # Botón cancelar
+        cancel_btn = tk.Label(
+            form_frame,
+            text="Cancelar",
+            font=("Arial", 10),
+            fg=self.gray_text,
+            bg=self.bg_dark,
+            cursor="hand2"
+        )
+        cancel_btn.pack(pady=(10, 20))
+        cancel_btn.bind('<Button-1>', lambda e: self.reiniciar_login())
+    
+    def show_reset_password(self, username):
+        """Muestra el formulario para restablecer contraseña"""
+        # Limpiar ventana
+        for widget in self.root.winfo_children():
+            widget.destroy()
+    
+        # Frame principal
+        recovery_frame = tk.Frame(self.root, bg=self.bg_black)
+        recovery_frame.pack(fill=tk.BOTH, expand=True)
+    
+        # Título
+        tk.Label(
+            recovery_frame,
+            text="Restablecer Contraseña",
+            font=("Arial", 24, "bold"),
+            fg=self.red_primary,
+            bg=self.bg_black
+        ).pack(pady=30)
+    
+        # Frame del formulario
+        form_frame = tk.Frame(recovery_frame, bg=self.bg_dark)  # Cambiar bg="#FF0000" por bg=self.bg_dark
+        form_frame.pack(pady=20, padx=50, fill=tk.BOTH, expand=True)
+    
+        # Nueva contraseña
+        tk.Label(
+            form_frame,
+            text="Nueva Contraseña:",
+            font=("Arial", 11),
+            fg=self.white,
+            bg="#FF0000"
+        ).pack(pady=(20, 5), anchor="w", padx=20)
+    
+        new_password_entry = tk.Entry(
+            form_frame,
+            font=("Arial", 11),
+            bg=self.dark_gray,
+            fg=self.white,
+            insertbackground=self.white,
+            relief=tk.FLAT,
+            show="*",
+            width=30
+        )
+        new_password_entry.pack(pady=5, ipady=8, padx=20)
+    
+        # Confirmar contraseña
+        tk.Label(
+            form_frame,
+            text="Confirmar Contraseña:",
+            font=("Arial", 11),
+            fg=self.white,
+            bg="#FF0000"
+        ).pack(pady=(15, 5), anchor="w", padx=20)
+    
+        confirm_password_entry = tk.Entry(
+            form_frame,
+            font=("Arial", 11),
+            bg=self.dark_gray,
+            fg=self.white,
+            insertbackground=self.white,
+            relief=tk.FLAT,
+            show="*",
+            width=30
+        )
+        confirm_password_entry.pack(pady=5, ipady=8, padx=20)
+    
+        def reset_password():
+            new_pass = new_password_entry.get()
+            confirm_pass = confirm_password_entry.get()
+        
+            if not all([new_pass, confirm_pass]):
+                messagebox.showerror("Error", "Completa todos los campos")
+                return
+        
+            if new_pass != confirm_pass:
+                messagebox.showerror("Error", "Las contraseñas no coinciden")
+                return
+        
+            if len(new_pass) < 4:  # Ajusta según tus requisitos
+                messagebox.showerror("Error", "La contraseña debe tener al menos 4 caracteres")
+                return
+        
+            # Restablecer contraseña
+            if self.password_recovery.reset_password(username, new_pass):
+                messagebox.showinfo(
+                "Éxito", 
+                "Contraseña restablecida correctamente.\n¡Ahora puedes iniciar sesión!"
+                )
+                self.reiniciar_login()
+            else:
+                messagebox.showerror("Error", "Error al restablecer contraseña")
+    
+        # Botón restablecer
+        reset_btn = tk.Button(
+            form_frame,
+            text="RESTABLECER",
+            font=("Arial", 11, "bold"),
+            bg=self.red_primary,
+            fg=self.white,
+            activebackground=self.red_dark,
+            activeforeground=self.white,
+            relief=tk.FLAT,
+            cursor="hand2",
+            command=reset_password
+        )
+        reset_btn.pack(pady=20, ipady=10, ipadx=40)
+    
+        # Botón cancelar
+        cancel_btn = tk.Label(
+            form_frame,
+            text="Cancelar",
+            font=("Arial", 10),
+            fg=self.gray_text,
+            bg="#FF0000",
+            cursor="hand2"
+        )
+        cancel_btn.pack(pady=(10, 20))
+        cancel_btn.bind('<Button-1>', lambda e: self.reiniciar_login())
 
 
     def create_register_widgets(self):
@@ -835,6 +1145,45 @@ class LoginAvatarsRooks:
         self.apellidos_entry.insert(0, "Ingrese sus apellidos")
         self.apellidos_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese sus apellidos"))
         self.apellidos_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese sus apellidos"))
+
+        tk.Label(
+            form_frame,
+            text="Pregunta de Seguridad:",
+            font=("Arial", 10),
+            fg=self.white,
+            bg=self.bg_dark
+        ).pack(pady=(10,5), anchor="w", padx=20)
+
+        self.security_question_combobox = ttk.Combobox(
+            form_frame,
+            values=PasswordRecovery.SECURITY_QUESTIONS,
+            state="readonly",
+            font=("Arial", 10),
+            width=35
+        )
+        self.security_question_combobox.pack(pady=5, padx=20)
+        self.security_question_combobox.current(0)
+
+        tk.Label(
+            form_frame,
+            text="Respuesta de Seguridad:",
+            font=("Arial", 10),
+            fg=self.white,
+            bg=self.bg_dark
+        ).pack(pady=(10, 5), anchor="w", padx=20)
+    
+    # Entry para respuesta
+        self.security_answer_entry = tk.Entry(
+            form_frame,
+            font=("Arial", 10),
+            bg=self.dark_gray,
+            fg=self.white,
+            insertbackground=self.white,
+            relief=tk.FLAT,
+            width=30
+        )
+        self.security_answer_entry.pack(pady=5, padx=20, ipady=5)
+        
 
         # Foto de perfil
         tk.Label(
@@ -1323,6 +1672,8 @@ class LoginAvatarsRooks:
             messagebox.showerror("Error", f"Error al registrar rostro: {e}")
         self.root.attributes('-disabled', False)
 
+
+
     def register_user(self):
         """Obtiene y guarda todos los datos del usuario al registrarse"""
         nombre = self.nombre_entry.get()
@@ -1332,7 +1683,10 @@ class LoginAvatarsRooks:
         username = self.usuario_entry.get()
         password = self.new_pass_entry.get()
         confirm_pass = self.confirm_pass_entry.get()
-        
+        security_question = self.security_question_combobox.get()
+        security_answer = self.security_answer_entry.get()
+
+
         # Validar que no sean placeholders
         if nombre == "Ingrese su nombre" or not nombre:
             messagebox.showerror("Error", "Por favor ingresa tu nombre")
@@ -1341,6 +1695,11 @@ class LoginAvatarsRooks:
         if apellidos == "Ingrese sus apellidos" or not apellidos:
             messagebox.showerror("Error", "Por favor ingresa tus apellidos")
             return
+        
+        if not security_answer.strip():
+            messagebox.showerror("Error", "Debes responder la pregunta de seguridad")
+            return
+        
             
         if nacionalidad == "Ingrese su nacionalidad" or not nacionalidad:
             messagebox.showerror("Error", "Por favor ingresa tu nacionalidad")
@@ -1374,6 +1733,16 @@ class LoginAvatarsRooks:
         try:
             encrip_aes.register_user_aes(username, password, nombre, correo, nacionalidad, apellidos)
             self.load_users()
+
+            success, message = self.password_recovery.add_security_question(
+                username,
+                security_question,
+                security_answer
+            )
+            if not success:
+                messagebox.showerror("Error", f"Error al guardar la pregunta:{message}")
+                return
+            
             
             if self.guardar_tarjeta_var.get():
                 numero = self.num_tarjeta_entry.get().strip()
