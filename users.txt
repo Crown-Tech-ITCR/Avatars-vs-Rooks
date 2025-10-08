@@ -61,5 +61,14 @@
         "email_enc": "5OfTZpEti6to/dJlmKihSI9nE7Nxqp28hzJFhsVlKz2WXR7Ep+qfyG4gvoU=",
         "nacionalidad_enc": "nog9MtnM+2AUAXdTJI/clG/00SiiSIioKyXSZKyjY0LSlXxjacU=",
         "apellidos_enc": "KbkdyvTIjIg/vAT8XRNEp28rtRVfqk2DrpwvCnU2vruPhw=="
+    },
+    "fabycool20": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$FtSITscrjl3rDkG0DePu2w$6kOnPCWSTnh6oBxR5k4YssMy/5ivRQ59wFNQputrlnU",
+        "nombre_enc": "CmkfvFAlr3gX8RKsp0KH5ISuIR+jb1HfcJb232fzeZ8=",
+        "email_enc": "DA8KqsCUa9j7EjxO2KRVvArheON+we4YQtbAEUMc6dKejzzxSuFPMmfGTuBdkw==",
+        "nacionalidad_enc": "exvejSEQjincUEjQPAB3bwmrGSCuxowSZXZbsbeuasNhCVMJSl/whAQ=",
+        "apellidos_enc": "hqzuOokBg0RUj0MSYavQPP4cS3uGDZjV2xf4rV9c3NM=",
+        "security_question_enc": "GbuC1DrVPyvQVQ8C5MwzUTwDlnei/y3S4ZnXvMMzA1UIvWb1lvdxqqY9lmvetcl1NY/N+ov1aQvOImQNmmGdL21K/3clk1A=",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$iXJqwApSvBIVcN/qBlo3NA$revvj1ZCKxJc/emWDFVPPbl+UqVM8P3o1T2ctn7LCEs"
     }
 }
