@@ -1,14 +1,15 @@
 import encrip_aes
+from Traducciones import t, set_language
 
 class PasswordRecovery:
     """Maneja el sistema de preguntas de seguridad para recuperación de contraseña"""
     
     # Preguntas de seguridad disponibles
     SECURITY_QUESTIONS = [
-        "¿Cuál es el nombre de tu primera mascota?",
-        "¿Cuál es el nombre de tu mejor amigo de la infancia?",
-        "¿En qué año conociste a tu mejor amigo?",
-        "¿Cuál fue tu primer trabajo?"
+        t("pregunta1"),
+        t("pregunta2"),
+        t("pregunta3"),
+        t("pregunta4")
     ]
     
     def __init__(self, master_key):

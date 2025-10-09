@@ -10,6 +10,8 @@ from PIL import Image, ImageTk
 from password_recovery import PasswordRecovery
 from Traducciones import t, set_language
 from PIL import Image, ImageTk
+from Modos import apply_dark_mode, apply_light_mode
+
 
 class LoginAvatarsRooks:
     def __init__(self, root):
@@ -100,7 +102,7 @@ class LoginAvatarsRooks:
             self.cards = {}
 
     def create_login_widgets(self):
-        """Crea la interfaz de login siguiendo el diseño de referencia"""
+        """Crea la interfaz de login"""
         
         # Frame principal sin borde
         self.login_frame = tk.Frame(self.root, bg=self.colors[0])
@@ -467,11 +469,11 @@ class LoginAvatarsRooks:
     def set_theme(self, mode):
         """Cambia el tema según el modo seleccionado"""
         if mode == "dark":
-            messagebox.showinfo("Tema", "Modo oscuro activado")
-            # Aquí puedes agregar lógica para cambiar colores
+            apply_dark_mode(self)
         elif mode == "light":
-            messagebox.showinfo("Tema", "Modo claro activado")
-            # Aquí puedes agregar lógica para cambiar colores
+            apply_light_mode(self)
+
+         
 
     def forgot_password(self):
         """Recuperación de contraseña"""
@@ -624,13 +626,13 @@ class LoginAvatarsRooks:
         """Valida credenciales de usuario"""
         username = self.username_entry.get()
         password = self.password_entry.get()
-        
-        if not username or username == "Ingrese su usuario, correo o telefono":
-            messagebox.showerror("Error", "Por favor ingresa tu usuario")
+
+        if not username or username == t("username_placeholder"):
+            messagebox.showerror(t("user_error"))
             return
         
         if not password:
-            messagebox.showerror("Error", "Por favor ingresa tu contraseña")
+            messagebox.showerror(t("password_error"))
             return
         
         users_aes = encrip_aes.load_users_aes()
@@ -647,14 +649,14 @@ class LoginAvatarsRooks:
                         MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login, 
                         self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
                     else:
-                        messagebox.showinfo("Próximamente", "Aquí se abrirá el menú principal del juego")
+                        messagebox.showinfo(t("user_ver"))
 
                 else:
-                    messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+                    messagebox.showerror(t("error_uc"))
             except Exception as e:
-                messagebox.showerror("Error", f"Error al verificar credenciales: {e}")
+                messagebox.showerror(t("error_credentials").format(error=e))
         else:
-            messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+            messagebox.showerror(t("error_uc"))
 
     def face_recognition(self):
         """Login con reconocimiento facial"""
@@ -665,7 +667,7 @@ class LoginAvatarsRooks:
             Face_Recognition(temp_root).login_with_face_gui()
             temp_root.destroy()
         except Exception as e:
-            messagebox.showerror("Error", f"Error en el login facial: {e}")
+            messagebox.showerror(t("error_facial").format(error=e))
 
     def update_days(self, event=None):
         "Actualizar los dias segun el mes y año seleccionados"
@@ -691,7 +693,7 @@ class LoginAvatarsRooks:
     #Seleccionar la foto
     def selec_profile_photo(self):
         file_path = filedialog.askopenfilename(
-            title= "Seleccionar foto de perfil",
+            title= t("photo_perfil"),
             filetypes=[
             ("Archivos de imagen", "*.jpg *.jpeg *.png"),
             ("JPG", "*.jpg *.jpeg"),
@@ -722,9 +724,9 @@ class LoginAvatarsRooks:
 
                 self.photo_btn.image = self.profile_photo_display  # Mantener referencia
             
-                messagebox.showinfo("Éxito", "Foto de perfil cargada correctamente")
+                messagebox.showinfo(t("succes_photo"))
             except Exception as e:
-                messagebox.showerror("Error", f"No se pudo cargar la imagen: {str(e)}")
+                messagebox.showerror(t("error_photo").format(error=e))
     
     def forgot_password(self):
         self.login_frame.pack_forget()
@@ -734,7 +736,7 @@ class LoginAvatarsRooks:
 
         title_label = tk.Label(
             recovery_frame, 
-            text="Recuperar Contraseña",
+            text=t("recover_password"),
             font=("Arial", 24, "bold"),
             fg=self.c4,
             bg=self.bg_black
@@ -748,7 +750,7 @@ class LoginAvatarsRooks:
         #Paso 1 Ingresar Usuario
         tk.Label(
             form_frame,
-            text="Ingresa tu nombre de usuario:",
+            text=t("enter_username"),
             font=("Arial", 12),
             fg=self.c6,
             bg=self.bg_black
@@ -769,18 +771,17 @@ class LoginAvatarsRooks:
             username = username_entry.get().strip()
 
             if not username:
-                messagebox.showerror("Error","Ingrese un nombre de usuario")
+                messagebox.showerror(t("error_username"))
                 return
             #Verificar si el usuario existe
             users = encrip_aes.load_users_aes()
             if username not in users:
-                messagebox.showerror("Error", "Usuario no encontrado")
+                messagebox.showerror(t("error_usernot_found"))
                 return
             
             if not self.password_recovery.user_has_security_question(username):
                 messagebox.showerror(
-                    "Error",
-                    "Este usuario no tiene pregunta de seguridad configurada"
+                    t("error_usernot_question")
                 )
                 return
             question = self.password_recovery.get_security_question(username)
@@ -788,12 +789,12 @@ class LoginAvatarsRooks:
             if question:
                 self.show_security_question(username,question)
             else:
-                messagebox.showerror("Error", "Error al recuperar la pregunta de seguridad")
+                messagebox.showerror(t("error_recovery_question"))
 
         #Boton Continuar
         continue_btn = tk.Button(
             form_frame,
-            text="CONTINUAR",
+            text=t("continue"),
             font=("Arial", 11, "bold"),
             bg=self.c4,
             fg=self.c6,
@@ -808,7 +809,7 @@ class LoginAvatarsRooks:
         # Botón volver
         back_btn = tk.Label(
             form_frame,
-            text="← Volver al login",
+            text=t("return_login"),
             font=("Arial", 10),
             fg=self.c3,
             bg=self.c1,
@@ -830,7 +831,7 @@ class LoginAvatarsRooks:
         # Título
         tk.Label(
             recovery_frame,
-            text="Pregunta de Seguridad",
+            text=t("question_security"),
             font=("Arial", 24, "bold"),
             fg=self.c4,
             bg=self.bg_black
@@ -858,7 +859,7 @@ class LoginAvatarsRooks:
         # Entry para respuesta
         tk.Label(
             form_frame,
-            text="Tu respuesta:",
+            text=t("answer"),
             font=("Arial", 11),
             fg=self.c3,
             bg=self.c1
@@ -879,20 +880,20 @@ class LoginAvatarsRooks:
             answer = answer_entry.get().strip()
         
             if not answer:
-                messagebox.showerror("Error", "Ingresa tu respuesta")
+                messagebox.showerror(t("enter_answer"))
                 return
         
             # Verificar respuesta
             if self.password_recovery.verify_security_answer(username, answer):
                 self.show_reset_password(username)
             else:
-                messagebox.showerror("Error", "Respuesta incorrecta")
+                messagebox.showerror(t("answer_incorrect"))
                 answer_entry.delete(0, tk.END)
     
         # Botón verificar
         verify_btn = tk.Button(
             form_frame,
-            text="VERIFICAR",
+            text=t("verify"),
             font=("Arial", 11, "bold"),
             bg=self.c4,
             fg=self.c6,
@@ -907,7 +908,7 @@ class LoginAvatarsRooks:
         # Botón cancelar
         cancel_btn = tk.Label(
             form_frame,
-            text="Cancelar",
+            text=t("cancel"),
             font=("Arial", 10),
             fg=self.c3,
             bg=self.c1,
@@ -929,7 +930,7 @@ class LoginAvatarsRooks:
         # Título
         tk.Label(
             recovery_frame,
-            text="Restablecer Contraseña",
+            text=t("reset_password"),
             font=("Arial", 24, "bold"),
             fg=self.c4,
             bg=self.bg_black
@@ -942,7 +943,7 @@ class LoginAvatarsRooks:
         # Nueva contraseña
         tk.Label(
             form_frame,
-            text="Nueva Contraseña:",
+            text=t("new_password"),
             font=("Arial", 11),
             fg=self.c6,
             bg="#FF0000"
@@ -963,7 +964,7 @@ class LoginAvatarsRooks:
         # Confirmar contraseña
         tk.Label(
             form_frame,
-            text="Confirmar Contraseña:",
+            text=t("confirm_password"),
             font=("Arial", 11),
             fg=self.c6,
             bg="#FF0000"
@@ -986,31 +987,30 @@ class LoginAvatarsRooks:
             confirm_pass = confirm_password_entry.get()
         
             if not all([new_pass, confirm_pass]):
-                messagebox.showerror("Error", "Completa todos los campos")
+                messagebox.showerror(t("error_enter_all"))
                 return
         
             if new_pass != confirm_pass:
-                messagebox.showerror("Error", "Las contraseñas no coinciden")
+                messagebox.showerror(t("paswords_notmatch"))
                 return
         
             if len(new_pass) < 4:  # Ajusta según tus requisitos
-                messagebox.showerror("Error", "La contraseña debe tener al menos 4 caracteres")
+                messagebox.showerror(t("min_caracters"))
                 return
         
             # Restablecer contraseña
             if self.password_recovery.reset_password(username, new_pass):
                 messagebox.showinfo(
-                "Éxito", 
-                "Contraseña restablecida correctamente.\n¡Ahora puedes iniciar sesión!"
+                t("successful_change")
                 )
                 self.reiniciar_login()
             else:
-                messagebox.showerror("Error", "Error al restablecer contraseña")
+                messagebox.showerror(t("error_change"))
     
         # Botón restablecer
         reset_btn = tk.Button(
             form_frame,
-            text="RESTABLECER",
+            text=t("restore"),
             font=("Arial", 11, "bold"),
             bg=self.c4,
             fg=self.c6,
@@ -1025,7 +1025,7 @@ class LoginAvatarsRooks:
         # Botón cancelar
         cancel_btn = tk.Label(
             form_frame,
-            text="Cancelar",
+            text=t("cancel"),
             font=("Arial", 10),
             fg=self.c3,
             bg="#FF0000",
@@ -1069,7 +1069,7 @@ class LoginAvatarsRooks:
         # Título Registro
         tk.Label(
             scrollable_frame,
-            text="Registro",
+            text=t("register_title"),
             font=("Arial", 32, "bold"),
             fg=self.colors[5],
             bg=self.colors[0]
@@ -1094,7 +1094,7 @@ class LoginAvatarsRooks:
         # INFORMACIÓN PERSONAL
         tk.Label(
             inner_frame,
-            text="Información personal",
+            text=t("personal_information"),
             font=("Arial", 14, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1103,7 +1103,7 @@ class LoginAvatarsRooks:
         # Nombre
         tk.Label(
             inner_frame,
-            text="Nombre +",
+            text=t("username2"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1117,14 +1117,14 @@ class LoginAvatarsRooks:
             relief=tk.FLAT
         )
         self.nombre_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.nombre_entry.insert(0, "Ingrese su nombre")
+        self.nombre_entry.insert(0, t("username3"))
         self.nombre_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su nombre"))
         self.nombre_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su nombre"))
 
         # Apellidos
         tk.Label(
             inner_frame,
-            text="Apellidos +",
+            text=t("lats_name"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1138,13 +1138,13 @@ class LoginAvatarsRooks:
             relief=tk.FLAT
         )
         self.apellidos_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.apellidos_entry.insert(0, "Ingrese sus apellidos")
-        self.apellidos_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese sus apellidos"))
-        self.apellidos_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese sus apellidos"))
+        self.apellidos_entry.insert(0, t("insert_sumernames"))
+        self.apellidos_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, t("insert_sumernames")))
+        self.apellidos_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, t("insert_sumernames")))
 
         tk.Label(
             form_frame,
-            text="Pregunta de Seguridad:",
+            text=t("question_security"),
             font=("Arial", 10),
             fg=self.colors[6],  # Era: self.c6
             bg=self.colors[0]   # Era: self.c1
@@ -1162,7 +1162,7 @@ class LoginAvatarsRooks:
 
         tk.Label(
             form_frame,
-            text="Respuesta de Seguridad:",
+            text=t("answer_security"),
             font=("Arial", 10),
             fg=self.colors[6],    # Era: self.c6
             bg=self.colors[0]   # Era: self.c1
@@ -1184,7 +1184,7 @@ class LoginAvatarsRooks:
         # Foto de perfil
         tk.Label(
             inner_frame,
-            text="Foto de perfil",
+            text=t("photo_perfil"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1192,7 +1192,7 @@ class LoginAvatarsRooks:
         
         self.photo_btn = tk.Button(
             inner_frame,
-            text="+\nAgregar foto",
+            text=t("add_photo"),
             font=("Arial", 10),
             bg=self.colors[5],
             fg=self.colors[2],
@@ -1207,7 +1207,7 @@ class LoginAvatarsRooks:
         # Fecha de nacimiento
         tk.Label(
             inner_frame,
-            text="Fecha de nacimiento +",
+            text=t("date_birthday"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1254,7 +1254,7 @@ class LoginAvatarsRooks:
         # Nacionalidad
         tk.Label(
             inner_frame,
-            text="Nacionalidad +",
+            text=t("nationality"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1315,12 +1315,12 @@ class LoginAvatarsRooks:
         )
 
         self.nacionalidad_combobox.pack(fill=tk.X, pady=(0,25), ipady=5)
-        self.nacionalidad_combobox.set("Seleciona tu nacionalidad")
+        self.nacionalidad_combobox.set(t("selec_nationality"))
 
         # CUENTA Y SEGURIDAD
         tk.Label(
             inner_frame,
-            text="Cuenta y seguridad",
+            text=t("account_security"),
             font=("Arial", 14, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1329,7 +1329,7 @@ class LoginAvatarsRooks:
         # Usuario
         tk.Label(
             inner_frame,
-            text="Usuario",
+            text=t("username"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1343,9 +1343,9 @@ class LoginAvatarsRooks:
             relief=tk.FLAT
         )
         self.usuario_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.usuario_entry.insert(0, "Ingrese su usuario")
-        self.usuario_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su usuario"))
-        self.usuario_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su usuario"))
+        self.usuario_entry.insert(0, t("insert_username"))
+        self.usuario_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, t("insert_username")))
+        self.usuario_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, t("insert_username")))
         self.usuario_entry.bind('<KeyRelease>', self.validar_usuario_tiempo_real)
 
         # Frame para mostrar requisitos de usuario
@@ -1355,7 +1355,7 @@ class LoginAvatarsRooks:
         # Lista de requisitos con sus checks
         self.req_user_length = tk.Label(
             requirements_user_frame,
-            text="❌ Entre 4 y 256 caracteres",
+            text=t("restriccion1"),
             font=("Arial", 9),
             bg=self.c1,
             fg=self.c7,
@@ -1365,7 +1365,7 @@ class LoginAvatarsRooks:
 
         self.req_user_alphanumeric = tk.Label(
             requirements_user_frame,
-            text="❌ Solo letras y números (sin espacios ni caracteres especiales)",
+            text=t("restriccion2"),
             font=("Arial", 9),
             bg=self.c1,
             fg=self.c7,
@@ -1376,7 +1376,7 @@ class LoginAvatarsRooks:
         # Correo electrónico
         tk.Label(
             inner_frame,
-            text="Correo electrónico",
+            text=t("email"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1390,14 +1390,14 @@ class LoginAvatarsRooks:
             relief=tk.FLAT
         )
         self.correo_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.correo_entry.insert(0, "Ingrese su correo electronico")
-        self.correo_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su correo electronico"))
-        self.correo_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su correo electronico"))
+        self.correo_entry.insert(0, t("insert_email"))
+        self.correo_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, t("insert_email")))
+        self.correo_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, t("insert_email")))
 
         # Contraseña
         tk.Label(
             inner_frame,
-            text="Contraseña",
+            text=t("password"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1413,7 +1413,7 @@ class LoginAvatarsRooks:
         # Lista de requisitos con sus checks
         self.req_length = tk.Label(
             requirements_frame,
-            text=" Entre 8 y 23 caracteres",
+            text=t("restriccion3"),
             font=("Arial", 9),
             bg=self.c1,
             fg=self.c7,  # Color gris
@@ -1423,7 +1423,7 @@ class LoginAvatarsRooks:
 
         self.req_alphanumeric = tk.Label(
             requirements_frame,
-            text=" Solo letras y números",
+            text=t("restriccion4"),
             font=("Arial", 9),
             bg=self.c1,
             fg=self.c7,
@@ -1443,7 +1443,7 @@ class LoginAvatarsRooks:
         
         self.req_no_spaces = tk.Label(
             requirements_frame,
-            text=" ❌ Sin espacios ni caracteres especiales",
+            text=t("restriccion5"),
             font=("Arial", 9),
             bg=self.c1,
             fg=self.c7,
@@ -1464,10 +1464,10 @@ class LoginAvatarsRooks:
         self.new_pass_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
         # Vincular validación en tiempo real
         self.new_pass_entry.bind('<KeyRelease>', self.validar_contrasena_tiempo_real)
-        self.new_pass_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, "Ingrese su contraseña"))
-        self.new_pass_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, "Ingrese su contraseña"))
-        self.new_pass_entry.insert(0, "Ingrese su contraseña")
-        
+        self.new_pass_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, t("password_placeholder")))
+        self.new_pass_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, t("password_placeholder")))
+        self.new_pass_entry.insert(0, t("password_placeholder"))
+
         show_pass1_btn = tk.Button(
             pass_frame1,
             text="👁",
@@ -1484,7 +1484,7 @@ class LoginAvatarsRooks:
         # Confirmar contraseña
         tk.Label(
             inner_frame,
-            text="Confirmar contraseña",
+            text=t("confirm_password"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1503,10 +1503,10 @@ class LoginAvatarsRooks:
             borderwidth=0
         )
         self.confirm_pass_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
-        self.confirm_pass_entry.insert(0, "Ingrese su contraseña")
-        
-        self.confirm_pass_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, "Ingrese su contraseña"))
-        self.confirm_pass_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, "Ingrese su contraseña"))
+        self.confirm_pass_entry.insert(0, t("password_placeholder"))
+
+        self.confirm_pass_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, t("password_placeholder")))
+        self.confirm_pass_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, t("password_placeholder")))
 
         show_pass2_btn = tk.Button(
             pass_frame2,
@@ -1524,7 +1524,7 @@ class LoginAvatarsRooks:
         # RECONOCIMIENTO FACIAL (Opcional)
         tk.Label(
             inner_frame,
-            text="Reconocimiento facial (Opcional)",
+            text=t("facial_identification"),
             font=("Arial", 14, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1533,7 +1533,7 @@ class LoginAvatarsRooks:
         self.usar_facial_var = tk.BooleanVar()
         facial_check = tk.Checkbutton(
             inner_frame,
-            text="Habilitar",
+            text=t("enable_facial"),
             variable=self.usar_facial_var,
             font=("Arial", 10),
             bg=self.colors[0],
@@ -1546,7 +1546,7 @@ class LoginAvatarsRooks:
         
         self.facial_button = tk.Button(
             inner_frame,
-            text="Capturar rostro",
+            text=t("capture_face"),
             font=("Arial", 11, "bold"),
             bg=self.colors[3],
             fg=self.colors[5],
@@ -1569,7 +1569,7 @@ class LoginAvatarsRooks:
         # INFORMACIÓN DE PAGO (Opcional)
         tk.Label(
             inner_frame,
-            text="Información de pago (opcional)",
+            text=t("pay_information"),
             font=("Arial", 14, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1578,7 +1578,7 @@ class LoginAvatarsRooks:
         self.guardar_tarjeta_var = tk.BooleanVar()
         tarjeta_check = tk.Checkbutton(
             inner_frame,
-            text="Habilitar",
+            text=t("enable_facial"),
             variable=self.guardar_tarjeta_var,
             font=("Arial", 10),
             bg=self.colors[0],
@@ -1592,7 +1592,7 @@ class LoginAvatarsRooks:
         # Número de tarjeta
         tk.Label(
             inner_frame,
-            text="Numero de tarjeta",
+            text=t("card_number"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1607,7 +1607,7 @@ class LoginAvatarsRooks:
             state=tk.DISABLED
         )
         self.num_tarjeta_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.num_tarjeta_entry.insert(0, "Numero de tarjeta")
+        self.num_tarjeta_entry.insert(0, t("card_number"))
         
         # Frame para fecha y CVV
         expiry_cvv_frame = tk.Frame(inner_frame, bg=self.colors[0])
@@ -1619,7 +1619,7 @@ class LoginAvatarsRooks:
         
         tk.Label(
             expiry_left,
-            text="Fecha de expiración",
+            text=t("expiry_date"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1661,7 +1661,7 @@ class LoginAvatarsRooks:
         # Nombre del titular
         tk.Label(
             inner_frame,
-            text="Nombre del titular",
+            text=t("name_holder"),
             font=("Arial", 10, "bold"),
             bg=self.colors[0],
             fg=self.colors[5]
@@ -1690,7 +1690,7 @@ class LoginAvatarsRooks:
         # BOTÓN REGISTRARSE
         tk.Button(
             scrollable_frame,
-            text="Registrarse",
+            text=t("register_button"),
             font=("Arial", 12, "bold"),
             bg=self.colors[3],
             fg=self.colors[5],
@@ -1807,8 +1807,11 @@ class LoginAvatarsRooks:
         # Recrear la interfaz de login con los nuevos colores
         self.create_login_widgets()
         
-        if hasattr(self, 'register_frame'):
-            self.register_frame.pack_forget()
+        if hasattr(self, 'register_frame') and self.register_frame:
+            try:
+                self.register_frame.pack_forget()
+            except:
+                pass
         
         self.login_frame.pack(fill=tk.BOTH, expand=True)
     
@@ -1833,7 +1836,7 @@ class LoginAvatarsRooks:
             fr = Face_Recognition(self.root, show_main_gui=False)
             fr.register_face_gui()
         except Exception as e:
-            messagebox.showerror("Error", f"Error al registrar rostro: {e}")
+            messagebox.showerror(t("error_register_facial").format(error=e))
         self.root.attributes('-disabled', False)
 
 
@@ -1853,11 +1856,11 @@ class LoginAvatarsRooks:
         confirm_pass = self.confirm_pass_entry.get()
 
         if not self.validar_contrasena_final(password):
-            messagebox.showerror("Error", "Las contraseñas no cumple con los requerimientos")
+            messagebox.showerror(t("error_restr_password"))
         
         # Verificar que las contraseñas coincidan
         if password != confirm_pass:
-            messagebox.showerror("Error", "Las contraseñas no coinciden")
+            messagebox.showerror(t("paswords_notmatch"))
             return
     
         security_question = self.security_question_combobox.get()
@@ -1865,46 +1868,46 @@ class LoginAvatarsRooks:
 
 
         # Validar que no sean placeholders
-        if nombre == "Ingrese su nombre" or not nombre:
-            messagebox.showerror("Error", "Por favor ingresa tu nombre")
+        if nombre == t("username3") or not nombre:
+            messagebox.showerror(t("error_name"))
             return
         
-        if apellidos == "Ingrese sus apellidos" or not apellidos:
-            messagebox.showerror("Error", "Por favor ingresa tus apellidos")
+        if apellidos == t("insert_sumernames") or not apellidos:
+            messagebox.showerror(t("error_sumername"))
             return
         
         if not security_answer.strip():
-            messagebox.showerror("Error", "Debes responder la pregunta de seguridad")
+            messagebox.showerror(t("error_questionsecury"))
             return
         
             
-        if nacionalidad == "Ingrese su nacionalidad" or not nacionalidad:
-            messagebox.showerror("Error", "Por favor ingresa tu nacionalidad")
+        if nacionalidad == t("enter_nationality") or not nacionalidad:
+            messagebox.showerror(t("error_nationality"))
             return
         
-        if correo == "Ingrese su correo electronico" or not correo:
-            messagebox.showerror("Error", "Por favor ingresa tu correo")
+        if correo == t("insert_email") or not correo:
+            messagebox.showerror(t("error_email"))
             return
         
         if "@" not in correo or "." not in correo:
-            messagebox.showerror("Error", "Por favor ingresa un correo electrónico válido")
+            messagebox.showerror(t("error_email2"))
             return
         
-        if username == "Ingrese su usuario" or not username:
-            messagebox.showerror("Error", "Por favor ingresa un nombre de usuario")
+        if username == t("insert_username") or not username:
+            messagebox.showerror(t("user_error"))
             return
         
-        if password == "Ingrese su contraseña" or not password:
-            messagebox.showerror("Error", "Por favor ingresa una contraseña")
+        if password == t("password_placeholder") or not password:
+            messagebox.showerror(t("error_password3"))
             return
         
         if password != confirm_pass:
-            messagebox.showerror("Error", "Las contraseñas no coinciden")
+            messagebox.showerror(t("paswords_notmatch"))
             return
         
         users_aes = encrip_aes.load_users_aes()
         if username in users_aes:
-            messagebox.showerror("Error", "El usuario ya existe")
+            messagebox.showerror(t("user_exist"))
             return
         
         try:
@@ -1917,7 +1920,7 @@ class LoginAvatarsRooks:
                 security_answer
             )
             if not success:
-                messagebox.showerror("Error", f"Error al guardar la pregunta:{message}")
+                messagebox.showerror(t("error_guardar_pregunta"))
                 return
             
             
@@ -1927,15 +1930,15 @@ class LoginAvatarsRooks:
                 cvv = self.cvv_entry.get().strip()
                 titular = self.titular_entry.get().strip()
                 
-                if numero and numero != "Numero de tarjeta" and expiry and cvv and titular:
+                if numero and numero != t("card_number") and expiry and cvv and titular:
                     encrip_aes.register_user_card(username, cvv, numero, expiry, titular)
                     self.load_cards()
             
-            messagebox.showinfo("Éxito", "¡Registro exitoso!")
+            messagebox.showinfo(t("register_succselfol"))
             self.show_login_window()
             
         except Exception as e:
-            messagebox.showerror("Error", f"Error al registrar usuario: {e}")
+            messagebox.showerror("error_register_usuario")
 
     def reiniciar_login(self, c1, c2, c3, c4, c5, c6, c7):
         """Recrea la interfaz de login"""
@@ -1965,28 +1968,28 @@ class LoginAvatarsRooks:
         password = self.new_pass_entry.get()
         
         # Si es el placeholder, no validar
-        if password == "Ingrese su contraseña" or password == "":
-            self.req_length.config(text="❌ Entre 8 y 23 caracteres", fg=self.c7)  # ← Cambiar
-            self.req_alphanumeric.config(text="❌ Solo letras y números", fg=self.c7)  # ← Cambiar
-            self.req_no_spaces.config(text="❌ Sin espacios ni caracteres especiales", fg=self.c7)  # ← Cambiar
+        if password == t("password_placeholder") or password == "":
+            self.req_length.config(text="❌" + t("restriccion3"), fg=self.c7)  # ← Cambiar
+            self.req_alphanumeric.config(text="❌" + t("restriccion4"), fg=self.c7)  # ← Cambiar
+            self.req_no_spaces.config(text="❌" + t("restriccion5"), fg=self.c7)  # ← Cambiar
             return
         
         # Validar longitud (8-23 caracteres)
         if 8 <= len(password) <= 23:
-            self.req_length.config(text="✅ Entre 8 y 23 caracteres", fg="#00CC00")
+            self.req_length.config(text="✅" + t("restriccion3"), fg="#00CC00")
         else:
-            self.req_length.config(text="❌ Entre 8 y 23 caracteres", fg=self.c4) 
-        
+            self.req_length.config(text="❌" + t("restriccion3"), fg=self.c4)
+
         # Validar solo alfanumérico (letras y números, sin caracteres especiales)
         if password.isalnum():
-            self.req_alphanumeric.config(text="✅ Solo letras y números", fg="#00CC00")
-            self.req_no_spaces.config(text="✅ Sin espacios ni caracteres especiales", fg="#00CC00")
+            self.req_alphanumeric.config(text="✅" + t("restriccion4"), fg="#00CC00")
+            self.req_no_spaces.config(text="✅" + t("restriccion5"), fg="#00CC00")
         else:
-            self.req_alphanumeric.config(text="❌ Solo letras y números", fg=self.c4)
+            self.req_alphanumeric.config(text="❌" + t("restriccion4"), fg=self.c4)
             if ' ' in password:
-                self.req_no_spaces.config(text="❌ Sin espacios ni caracteres especiales", fg=self.c4) 
+                self.req_no_spaces.config(text="❌" + t("restriccion5"), fg=self.c4)
             else:
-                self.req_no_spaces.config(text="❌ Sin espacios ni caracteres especiales", fg=self.c4)  
+                self.req_no_spaces.config(text="❌" + t("restriccion5"), fg=self.c4)
 
     def validar_contrasena_final(self, password):
         """Valida la contraseña antes de registrar y muestra mensajes de error"""
@@ -1994,16 +1997,16 @@ class LoginAvatarsRooks:
         # Verificar longitud
         if len(password) < 8 or len(password) > 23:
             messagebox.showerror(
-                "Contraseña inválida",
-                "La contraseña debe tener entre 8 y 23 caracteres alfanuméricos."
+                t("pasword_invalid"),
+                t("condicion_pasword")
             )
             return False
         
         # Verificar solo alfanumérico (sin caracteres especiales ni espacios)
         if not password.isalnum():
             messagebox.showerror(
-                "Contraseña inválida",
-                "La contraseña solo puede contener letras y números\n(sin caracteres especiales ni espacios)."
+                t("pasword_invalid"),
+                t("condicion_pasword2")
             )
             return False
         
@@ -2014,9 +2017,9 @@ class LoginAvatarsRooks:
         username = self.usuario_entry.get()
         
         # Si es el placeholder o está vacío, resetear
-        if username == "Ingrese su usuario" or username == "":
-            self.req_user_length.config(text="❌ Entre 4 y 256 caracteres", fg=self.c7)
-            self.req_user_alphanumeric.config(text="❌ Solo letras y números (sin espacios ni caracteres especiales)", fg=self.c7)
+        if username == t("insert_username") or username == "":
+            self.req_user_length.config(text="❌"+ t("restriccion1") , fg=self.c7)
+            self.req_user_alphanumeric.config(text="❌"+ t("restriccion2"), fg=self.c7)
             return
         
         # Validar longitud (4-256 caracteres)
@@ -2027,35 +2030,35 @@ class LoginAvatarsRooks:
         
         # Validar solo alfanumérico (letras y números, sin caracteres especiales ni espacios)
         if username.isalnum():
-            self.req_user_alphanumeric.config(text="✅ Solo letras y números (sin espacios ni caracteres especiales)", fg="#00CC00")
+            self.req_user_alphanumeric.config(text="✅" + t("restriccion2"), fg="#00CC00")
         else:
-            self.req_user_alphanumeric.config(text="❌ Solo letras y números (sin espacios ni caracteres especiales)", fg=self.c4)
-        
-        
+            self.req_user_alphanumeric.config(text="❌" + t("restriccion2"), fg=self.c4)
+
+
     def validar_usuario_final(self, username):
         """Valida el usuario antes de registrar y muestra mensajes de error"""
         
         # Verificar longitud
         if len(username) < 4 or len(username) > 256:
             messagebox.showerror(
-                "Usuario inválido",
-                "El nombre de usuario debe tener entre 4 y 256 caracteres alfanuméricos."
+                t("user_invalid"),
+                t("condicion_user1")
             )
             return False
         
         # Verificar solo alfanumérico (sin caracteres especiales ni espacios)
         if not username.isalnum():
             messagebox.showerror(
-                "Usuario inválido",
-                "El nombre de usuario solo puede contener letras y números\n(sin caracteres especiales ni espacios)."
+                t("user_invalid"),
+                t("condicion_user2")
             )
             return False
         
         # Verificar que no exista
         if username in self.users:
             messagebox.showerror(
-                "Usuario no disponible",
-                "Este nombre de usuario ya está en uso.\n\nPor favor, elige otro."
+                t("user_ind"),
+                t("user_ocupado")
             )
             return False
         
