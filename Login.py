@@ -639,9 +639,15 @@ class LoginAvatarsRooks:
             try:
                 if encrip_aes.verify_password(users_aes[username]['password_hash'], password):
                     nombre = encrip_aes.decrypt_data(users_aes[username]['nombre_enc'], self.master_key)
-                    self.login_frame.pack_forget()
-                    MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login, 
-                    self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
+                    primerIngreso = users_aes[username]['primerIngreso']
+                    if primerIngreso:
+                        self.login_frame.pack_forget()
+                        users_aes[username]['primerIngreso'] = False
+                        encrip_aes.save_users_aes(users_aes)
+                        MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login, 
+                        self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
+                    else:
+                        messagebox.showinfo("Próximamente", "Aquí se abrirá el menú principal del juego")
 
                 else:
                     messagebox.showerror("Error", "Usuario o contraseña incorrectos")

@@ -162,8 +162,8 @@ class ColorPicker(tk.Frame):
         # Agregar los dos colores de texto legibles
         if is_dark:
             # Si el color seleccionado es oscuro, usar blanco y gris claro para texto
-            colors.append("#FFFFFF")  # Blanco puro para texto principal
-            colors.append("#E0E0E0")  # Gris claro para texto secundario
+            colors.append("#ffffff")  # Blanco puro para texto principal
+            colors.append("#e0e0e0")  # Gris claro para texto secundario
         else:
             # Si el color seleccionado es claro, usar negro y gris oscuro para texto
             colors.append("#000000")  # Negro puro para texto principal

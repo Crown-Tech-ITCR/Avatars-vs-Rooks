@@ -60,7 +60,7 @@ class MenuPersonalizacion:
             text="← Volver",
             font=("Arial", 11, "bold"),
             bg="#000000",
-            fg="#FFFFFF",
+            fg="#ffffff",
             relief=tk.FLAT,
             cursor="hand2",
             padx=20,
@@ -152,7 +152,7 @@ class MenuPersonalizacion:
         
         self.label_color_seleccionado = tk.Label(
             color_display_frame,
-            text="#FFFFFF",
+            text="#ffffff",
             font=("Arial", 11, "bold"),
             bg=self.c2,
             fg=self.c4
@@ -453,38 +453,89 @@ class MenuPersonalizacion:
 
     def aplicar_color(self):
         """Aplica el color seleccionado y actualiza el label"""
-        color_seleccionado = self.color_picker.selected_color
-        self.label_color_seleccionado.config(text=color_seleccionado)
+        try:
+            # Verificar que el color picker existe y tiene un color válido
+            if not hasattr(self, 'color_picker'):
+                messagebox.showerror("Error", "No se ha inicializado el selector de colores")
+                return
+            
+            # Obtener el color seleccionado
+            color_seleccionado = getattr(self.color_picker, 'selected_color', None)
+            
+            # Validar que el color es válido
+            if not color_seleccionado or color_seleccionado in [None, "", "#FFFFFFFF"]:
+                # Usar color por defecto si no hay selección
+                color_seleccionado = "#cc0000"  # Rojo por defecto
+                messagebox.showinfo("Color por defecto", "No se había seleccionado ningún color.\nSe aplicará el color rojo por defecto.")
+            
+            # Validar formato hexadecimal
+            if not color_seleccionado.startswith('#') or len(color_seleccionado) not in [7, 9]:
+                color_seleccionado = "#cc0000"
+                messagebox.showwarning("Color inválido", "El color seleccionado no es válido.\nSe aplicará el color rojo por defecto.")
+            
+            # Actualizar el label
+            self.label_color_seleccionado.config(text=color_seleccionado)
 
-        #Guarda los colores antiguos para realizar comparaciones
-        colores_antiguos = {
-            'c1': self.c1,
-            'c2': self.c2,
-            'c3': self.c3,
-            'c4': self.c4,
-            'c5': self.c5,
-            'c6': self.c6,
-            'c7': self.c7
-        }
-        
-        paleta = self.color_picker.generate_monochromatic_palette(
-            self.color_picker.hue, 
-            self.color_picker.saturation, 
-            7
-        )
+            # Guardar los colores antiguos para realizar comparaciones
+            colores_antiguos = {
+                'c1': self.c1,
+                'c2': self.c2,
+                'c3': self.c3,
+                'c4': self.c4,
+                'c5': self.c5,
+                'c6': self.c6,
+                'c7': self.c7
+            }
+            
+            # Generar paleta monocromática
+            try:
+                # Verificar que el color picker tiene los valores HSV necesarios
+                hue = getattr(self.color_picker, 'hue', 0.0)
+                saturation = getattr(self.color_picker, 'saturation', 1.0)
+                
+                # Validar valores HSV
+                if not (0.0 <= hue <= 1.0):
+                    hue = 0.0
+                if not (0.0 <= saturation <= 1.0):
+                    saturation = 1.0
+                
+                paleta = self.color_picker.generate_monochromatic_palette(hue, saturation, 7)
+                
+                # Validar que la paleta tiene suficientes colores
+                if len(paleta) < 7:
+                    raise ValueError("La paleta generada no tiene suficientes colores")
+                    
+            except Exception as e:
+                print(f"Error generando paleta: {e}")
+                # Paleta por defecto en caso de error
+                paleta = [
+                    "#000000",  # c1 - negro
+                    "#1a1a1a",  # c2 - gris muy oscuro
+                    "#535353",  # c3 - gris medio
+                    color_seleccionado,  # c4 - color seleccionado
+                    "#990000",  # c5 - versión oscura del color
+                    "#FFFFFF",  # c6 - blanco
+                    "#CCCCCC"   # c7 - gris claro
+                ]
 
-        self.c1 = paleta[0]
-        self.c2 = paleta[1]
-        self.c3 = paleta[2]
-        self.c4 = color_seleccionado
-        self.c5 = paleta[4]
-        self.c6 = paleta[5]
-        self.c7 = paleta[6]
+            # Asignar nuevos colores
+            self.c1 = paleta[0]
+            self.c2 = paleta[1]
+            self.c3 = paleta[2]
+            self.c4 = color_seleccionado
+            self.c5 = paleta[4]
+            self.c6 = paleta[5]
+            self.c7 = paleta[6]
 
-        self.actualizar_colores_ui(colores_antiguos)
+            # Actualizar la interfaz
+            self.actualizar_colores_ui(colores_antiguos)
 
-        messagebox.showinfo("Color aplicado", f"Has seleccionado el color: {color_seleccionado}")
-        print(f"Color seleccionado por {self.username}: {color_seleccionado}")
+            messagebox.showinfo("Color aplicado", f"Has seleccionado el color: {color_seleccionado}")
+            print(f"Color seleccionado por {self.username}: {color_seleccionado}")
+            
+        except Exception as e:
+            print(f"Error en aplicar_color: {e}")
+            messagebox.showerror("Error", f"Ocurrió un error al aplicar el color: {str(e)}")
 
     def actualizar_colores_ui(self, colores_antiguos):
         """Actualiza los colores de toda la interfaz en tiempo real"""
