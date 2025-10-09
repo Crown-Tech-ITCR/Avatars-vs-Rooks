@@ -8,6 +8,10 @@ import calendar
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 from password_recovery import PasswordRecovery
+from Traducciones import t, set_language
+from PIL import Image, ImageTk
+from Modos import apply_dark_mode, apply_light_mode
+
 
 class LoginAvatarsRooks:
     def __init__(self, root):
@@ -18,15 +22,18 @@ class LoginAvatarsRooks:
         self.root.resizable(False, False)
         
         # Colores del tema
-        self.bg_black = "#000000"
-        self.bg_dark = "#1a1a1a"
-        self.dark_gray = "#535353"
-        self.red_primary = "#cc0000"
-        self.red_dark = "#990000"
-        self.white = "#FFFFFF"
-        self.gray_text = "#CCCCCC"
-        
-        self.root.configure(bg=self.bg_black)
+        self.c1 = "#000000"
+        self.c2 = "#1a1a1a"
+        self.c3 = "#535353"
+        self.c4 = "#cc0000"
+        self.c5 = "#990000"
+        self.c6 = "#FFFFFF"
+        self.c7 = "#CCCCCC"
+
+        self.colors = [self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7]
+        self.bg_black = self.c1
+
+        self.root.configure(bg=self.colors[0])
         self.center_window()
         
         self.users = {}
@@ -95,13 +102,13 @@ class LoginAvatarsRooks:
             self.cards = {}
 
     def create_login_widgets(self):
-        """Crea la interfaz de login siguiendo el diseño de referencia"""
+        """Crea la interfaz de login"""
         
         # Frame principal sin borde
-        self.login_frame = tk.Frame(self.root, bg=self.bg_black)
+        self.login_frame = tk.Frame(self.root, bg=self.colors[0])
         
         # BARRA SUPERIOR
-        top_bar = tk.Frame(self.login_frame, bg=self.red_primary, height=40)
+        top_bar = tk.Frame(self.login_frame, bg=self.colors[3], height=40)
         top_bar.pack(fill=tk.X)
         top_bar.pack_propagate(False)
         
@@ -110,32 +117,34 @@ class LoginAvatarsRooks:
             top_bar,
             text="Avatars vs Rooks - Desktop game",
             font=("Arial", 12, "bold"),
-            fg=self.white,
-            bg=self.red_primary
+            fg=self.colors[5],
+            bg=self.colors[3]
         ).pack(side=tk.LEFT, padx=15, pady=8)
         
         # ÁREA DE CONTENIDO
-        content_area = tk.Frame(self.login_frame, bg=self.bg_black)
+        content_area = tk.Frame(self.login_frame, bg=self.colors[0])
         content_area.pack(fill=tk.BOTH, expand=True)
         
         # Botones superiores izquierdos
-        left_buttons_frame = tk.Frame(content_area, bg=self.bg_black)
+        left_buttons_frame = tk.Frame(content_area, bg=self.colors[0])
         left_buttons_frame.place(x=20, y=20)
         
-        self.create_round_button(
+        self.help_btn = self.create_round_button(
             left_buttons_frame,
-            "Ayuda",
+            t("help_button"),
             self.show_help
-        ).pack(side=tk.LEFT, padx=5)
-        
-        self.create_round_button(
+        )
+        self.help_btn.pack(side=tk.LEFT, padx=5)
+
+        self.credits_btn = self.create_round_button(
             left_buttons_frame,
-            "Créditos",
+            t("credits_button"),
             lambda: self.show_credits()
-        ).pack(side=tk.LEFT, padx=5)
+        )
+        self.credits_btn.pack(side=tk.LEFT, padx=5)
         
         # Botones superiores derechos
-        right_buttons_frame = tk.Frame(content_area, bg=self.bg_black)
+        right_buttons_frame = tk.Frame(content_area, bg=self.colors[0])
         right_buttons_frame.place(relx=1.0, x=-20, y=20, anchor='ne')
         
         # Botón reconocimiento facial
@@ -152,8 +161,8 @@ class LoginAvatarsRooks:
             image=face_icon,
             text="👤" if not face_icon else "",
             font=("Arial", 16),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             width=40, 
             height=40,
             relief=tk.FLAT,
@@ -178,8 +187,8 @@ class LoginAvatarsRooks:
             image=dark_icon,
             text="🌙" if not dark_icon else "",
             font=("Arial", 16),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             width=40,  
             height=40,  
             relief=tk.FLAT,
@@ -204,8 +213,8 @@ class LoginAvatarsRooks:
             image=light_icon,
             text="☀️" if not light_icon else "",
             font=("Arial", 16),
-            bg=self.white,
-            fg=self.bg_black,
+            bg=self.colors[5],
+            fg=self.colors[0],
             width=40,  # Ancho en píxeles
             height=40,  # Alto en píxeles
             relief=tk.FLAT,
@@ -218,67 +227,69 @@ class LoginAvatarsRooks:
             light_mode_btn.image = light_icon
         
         # CONTENEDOR CENTRAL DE LOGIN
-        login_container = tk.Frame(content_area, bg=self.bg_black)
+        login_container = tk.Frame(content_area, bg=self.colors[0])
         login_container.place(relx=0.5, rely=0.5, anchor='center')
         
         # Título principal
-        title_label = tk.Label(
+        self.title_label = tk.Label(
             login_container,
-            text="AVATARS VS ROOKS",
+            text=t("login_title"),
             font=("Arial", 30, "bold"),
-            fg=self.white,
-            bg=self.bg_black
+            fg=self.colors[5],
+            bg=self.colors[0]
         )
-        title_label.pack(pady=(0, 40))
+        self.title_label.pack(pady=(0, 40))
         
         # Frame del formulario
-        form_frame = tk.Frame(login_container, bg=self.bg_black)
+        form_frame = tk.Frame(login_container, bg=self.colors[0])
         form_frame.pack()
         
         # Campo Identificador
-        tk.Label(
+        self.username_label = tk.Label(
             form_frame,
-            text="Identificador",
+            text=t("username"),
             font=("Arial", 11, "bold"),
-            fg=self.white,
-            bg=self.bg_black
-        ).pack(anchor='w', pady=(0, 5))
+            fg=self.colors[5],
+            bg=self.colors[0]
+        )
+        self.username_label.pack(anchor='w', pady=(0, 5))
 
-        username_frame = tk.Frame(form_frame, bg=self.white)
+        username_frame = tk.Frame(form_frame, bg=self.colors[5])
         username_frame.pack(pady=(0, 20))
 
         self.username_entry = tk.Entry(
             username_frame, 
             font=("Arial", 12),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             width=44,
             relief=tk.FLAT,
             borderwidth=0
         )
         self.username_entry.pack(side=tk.LEFT, padx=5, pady=5) 
-        self.username_entry.insert(0, "Ingrese su usuario, correo o telefono")
-        self.username_entry.config(fg=self.dark_gray)
-        self.username_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su usuario, correo o telefono"))
-        self.username_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su usuario, correo o telefono"))
+        self.username_entry.insert(0, t("username_placeholder"))
+        self.username_entry.config(fg=self.colors[1])
+        self.username_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, t("username_placeholder")))
+        self.username_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, t("username_placeholder")))
 
         # Campo Contraseña
-        tk.Label(
+        self.password_label = tk.Label(
             form_frame,
-            text="Contraseña",
+            text=t("password"),
             font=("Arial", 11, "bold"),
-            fg=self.white,
-            bg=self.bg_black
-        ).pack(anchor='w', pady=(0, 5))
-        
-        password_frame = tk.Frame(form_frame, bg=self.white)
+            fg=self.colors[5],
+            bg=self.colors[0]
+        )
+        self.password_label.pack(anchor='w', pady=(0, 5))
+
+        password_frame = tk.Frame(form_frame, bg=self.colors[5])
         password_frame.pack(pady=(0, 5))
         
         self.password_entry = tk.Entry(
             password_frame,
             font=("Arial", 12),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             width=40,
             show="",
             relief=tk.FLAT,
@@ -287,19 +298,18 @@ class LoginAvatarsRooks:
         self.password_entry.pack(side=tk.LEFT, padx=5, pady=5)
 
         self.password_entry.pack(side=tk.LEFT, padx=5, pady=5)
-        self.password_entry.insert(0, "Ingrese su contraseña")
-        self.password_entry.config(fg=self.dark_gray)
-        self.password_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, "Ingrese su contraseña"))
-        self.password_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, "Ingrese su contraseña"))
+        self.password_entry.insert(0, t("password_placeholder"))
+        self.password_entry.config(fg=self.colors[1])
+        self.password_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, t("password_placeholder")))
+        self.password_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, t("password_placeholder")))
 
-        
         # Botón mostrar/ocultar contraseña
         self.show_pass_btn = tk.Button(
             password_frame,
             text="👁",
             font=("Arial", 12),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0,
             cursor="hand2",
@@ -308,52 +318,52 @@ class LoginAvatarsRooks:
         self.show_pass_btn.pack(side=tk.RIGHT, padx=5)
         
         # ¿Olvidaste la contraseña?
-        forgot_pass_btn = tk.Label(
+        self.forgot_pass_btn = tk.Label(
             form_frame,
-            text="¿Olvidaste la contraseña?",
+            text=t("forgot_password"),
             font=("Arial", 9),
-            fg=self.red_primary,
-            bg=self.bg_black,
+            fg=self.colors[3],
+            bg=self.colors[0],
             cursor="hand2"
         )
-        forgot_pass_btn.pack(pady=(5, 25))
-        forgot_pass_btn.bind('<Button-1>', lambda e: self.forgot_password())
+        self.forgot_pass_btn.pack(pady=(5, 25))
+        self.forgot_pass_btn.bind('<Button-1>', lambda e: self.forgot_password())
         
         # Botones de acción
-        buttons_frame = tk.Frame(form_frame, bg=self.bg_black)
+        buttons_frame = tk.Frame(form_frame, bg=self.colors[0])
         buttons_frame.pack(pady=(0, 15))
         
         # Botón Iniciar sesión
-        login_btn = tk.Button(
+        self.login_btn = tk.Button(
             buttons_frame,
-            text="Iniciar sesión",
+            text=t("login_button"),
             font=("Arial", 12, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             width=19,
             height=1,
             relief=tk.FLAT,
             cursor="hand2",
-            activebackground=self.red_dark,
+            activebackground=self.colors[4],
             command=self.login
         )
-        login_btn.pack(side=tk.LEFT, padx=5)
+        self.login_btn.pack(side=tk.LEFT, padx=5)
         
         # Botón Registrarse
-        register_btn = tk.Button(
+        self.register_btn = tk.Button(
             buttons_frame,
-            text="Registrarse",
+            text=t("register_button"),
             font=("Arial", 12, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             width=19,
             height=1,
             relief=tk.FLAT,
             cursor="hand2",
-            activebackground=self.red_dark,
+            activebackground=self.colors[4],
             command=self.show_register_message
         )
-        register_btn.pack(side=tk.LEFT, padx=5)
+        self.register_btn.pack(side=tk.LEFT, padx=5)
         
         # Botón de iniciar sesion con google
         try:
@@ -364,32 +374,36 @@ class LoginAvatarsRooks:
             # Si hay error cargando la imagen, usar texto como fallback
             google_logo = None
 
-        # Crear un frame contenedor para controlar el tamaño exacto
-        google_frame = tk.Frame(form_frame, bg=self.red_primary, width=410, height=35)
+        
+        google_frame = tk.Frame(form_frame, bg=self.colors[3], width=410, height=35)
         google_frame.pack(pady=(0, 10))
         google_frame.pack_propagate(False)  # Esto evita que el frame se ajuste al contenido
 
-        google_btn = tk.Button(
+        self.google_btn = tk.Button(
             google_frame,
-            text=" Iniciar sesión con  ",
+            text=t("google_login"),
             image=google_logo,
             compound=tk.RIGHT,
             font=("Arial", 12, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             relief=tk.FLAT,
             cursor="hand2",
-            activebackground=self.red_dark,
+            activebackground=self.colors[4],
             command=self.google_login
         )
-        google_btn.pack(fill=tk.BOTH, expand=True) 
+        self.google_btn.pack(fill=tk.BOTH, expand=True) 
 
         if google_logo:
-            google_btn.image = google_logo
+            self.google_btn.image = google_logo
 
         # Guardar referencia de la imagen para evitar que sea eliminada por el garbage collector
         if google_logo:
-            google_btn.image = google_logo
+            self.google_btn.image = google_logo
+        #Boton de banderas
+        bottom_right_frame = tk.Frame(self.login_frame, bg=self.bg_black)
+        bottom_right_frame.place(relx=1.0, rely=1.0, anchor='se')
+        self.add_language_selector(bottom_right_frame)
 
         
     def create_round_button(self, parent, text, command):
@@ -398,8 +412,8 @@ class LoginAvatarsRooks:
             parent,
             text=text,
             font=("Arial", 10, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             relief=tk.FLAT,
             cursor="hand2",
             padx=20,
@@ -410,8 +424,8 @@ class LoginAvatarsRooks:
         )
         # Simular bordes redondeados con configuración especial
         btn.config(
-            highlightbackground=self.red_primary,
-            highlightcolor=self.red_primary
+            highlightbackground=self.colors[3],
+            highlightcolor=self.colors[3]
         )
         return btn
 
@@ -420,26 +434,27 @@ class LoginAvatarsRooks:
         """Limpia el placeholder al hacer focus"""
         if event.widget.get() == placeholder:
             event.widget.delete(0, tk.END)
-            event.widget.config(fg="#000000")
+            event.widget.config(fg=self.colors[0])
 
     def restore_placeholder(self, event, placeholder):
         """Restaura el placeholder si el campo está vacío"""
         if event.widget.get() == "":
             event.widget.insert(0, placeholder)
-            event.widget.config(fg="#666666")
+            event.widget.config(fg=self.colors[2])
 
-    def clear_placeholder_password(self, event, placeholder):
-        """Limpia el placeholder al hacer focus"""
-        if event.widget.get() == placeholder:
-            event.widget.delete(0, tk.END)
-            event.widget.config(fg="#000000", show="•") 
+    def clear_placeholder_password(self, event, placeholder_text):
+        """Limpia el placeholder de los campos de contraseña"""
+        entry = event.widget
+        if entry.get() == placeholder_text:
+            entry.delete(0, tk.END)
+            entry.config(show="•", fg=self.c1) 
 
-    def restore_placeholder_password(self, event, placeholder):
+    def restore_placeholder_password(self, event, placeholder_text):
         """Restaura el placeholder si el campo está vacío"""
-        if event.widget.get() == "":
-            event.widget.config(show="") 
-            event.widget.insert(0, placeholder)
-            event.widget.config(fg=self.dark_gray)
+        entry = event.widget
+        if entry.get() == "":
+            entry.insert(0, placeholder_text)
+            entry.config(show="", fg=self.c3) 
 
     def toggle_password(self):
         """Muestra u oculta la contraseña"""
@@ -454,11 +469,11 @@ class LoginAvatarsRooks:
     def set_theme(self, mode):
         """Cambia el tema según el modo seleccionado"""
         if mode == "dark":
-            messagebox.showinfo("Tema", "Modo oscuro activado")
-            # Aquí puedes agregar lógica para cambiar colores
+            apply_dark_mode(self)
         elif mode == "light":
-            messagebox.showinfo("Tema", "Modo claro activado")
-            # Aquí puedes agregar lógica para cambiar colores
+            apply_light_mode(self)
+
+         
 
     def forgot_password(self):
         """Recuperación de contraseña"""
@@ -470,30 +485,30 @@ class LoginAvatarsRooks:
 
     def show_credits(self):
         ventana_creditos = Toplevel()
-        ventana_creditos.title("Créditos - Avatars vs Rooks")
+        ventana_creditos.title(t("credits_title"))
         ventana_creditos.geometry("850x650")
-        ventana_creditos.config(bg="black")
+        ventana_creditos.config(bg=self.colors[0])
 
         # --- Título ---
         titulo = Label(
             ventana_creditos,
-            text="Equipo de Desarrollo - Avatars vs Rooks",
+            text=t("credits_title"),
             font=("Arial Black", 16),
-            fg="white",
-            bg="black"
+            fg=self.colors[6],
+            bg=self.colors[0]
         )
         titulo.pack(pady=20)
 
         # --- Frame principal---
-        frame_equipo = Frame(ventana_creditos, bg="black")
+        frame_equipo = Frame(ventana_creditos, bg=self.colors[0])
         frame_equipo.pack(expand=True)
 
         # --- Lista de integrantes ---
         integrantes = [
-            {"nombre": "Alanna Mendoza", "rol": "Lider Tecnico\nDesarrollador", "descripcion": "Lider", "foto": "./images/Alanna.png"},
-            {"nombre": "Fabricio Coto", "rol": "Administrador de Infraestructura\nDesarrollador", "descripcion": "Miembro", "foto": "./images/Fabricio.png"},
-            {"nombre": "Ariel Rodriguez", "rol": "Diseñador de experiencia de Usuario\nDesarrollador", "descripcion": "Miembro", "foto": "./images/Ariel.png"},
-            {"nombre": "Mauricio Lopez", "rol": "Lider de Pruebas\nDesarrollador", "descripcion": "Miembro", "foto": "./images/Mau.png"},
+            {"nombre": "Alanna Mendoza", "rol": t("credits_leader"), "descripcion": t("credits_leader"), "foto": "./images/Alanna.png"},
+            {"nombre": "Fabricio Coto", "rol": t("credits_admin"), "descripcion": t("credits_member"), "foto": "./images/Fabricio.png"},
+            {"nombre": "Ariel Rodriguez", "rol": t("credits_ux"), "descripcion": t("credits_member"), "foto": "./images/Ariel.png"},
+            {"nombre": "Mauricio Lopez", "rol": t("credits_tester"), "descripcion": t("credits_member"), "foto": "./images/Mau.png"},
         ]
 
         # --- Cargar imágenes---
@@ -503,35 +518,35 @@ class LoginAvatarsRooks:
             columna = i % columnas
 
             # Marco individual
-            card = Frame(frame_equipo, bg="#1a1a1a", bd=2, relief="ridge", padx=10, pady=10, width=320, height=300)
+            card = Frame(frame_equipo, bg=self.colors[1], bd=2, relief="ridge", padx=10, pady=10, width=320, height=300)
             card.grid(row=fila, column=columna, padx=25, pady=25, sticky="nsew")
 
             # Imagen
             try:
                 imagen = Image.open(miembro["foto"]).resize((100, 100))
                 imagen = ImageTk.PhotoImage(imagen)
-                img_label = Label(card, image=imagen, bg="#1a1a1a")
+                img_label = Label(card, image=imagen, bg=self.colors[1])
                 img_label.image = imagen
                 img_label.pack(pady=5)
             except:
-                Label(card, text="[Foto]", fg="white", bg="#1a1a1a").pack(pady=5)
+                Label(card, text="[Foto]", fg=self.colors[6], bg=self.colors[1]).pack(pady=5)
 
             # Nombre
-            Label(card, text=miembro["nombre"], font=("Arial", 12, "bold"), fg="white", bg="#1a1a1a").pack(pady=2)
+            Label(card, text=miembro["nombre"], font=("Arial", 12, "bold"), fg=self.colors[6], bg=self.colors[1]).pack(pady=2)
             # Rol
-            Label(card, text=miembro["rol"], font=("Arial", 10, "italic"), fg="#ff4d4d", bg="#1a1a1a").pack()
+            Label(card, text=miembro["rol"], font=("Arial", 10, "italic"), fg=self.colors[3], bg=self.colors[1]).pack()
             # Descripción
-            Label(card, text=miembro["descripcion"], font=("Arial", 9), fg="white", bg="#1a1a1a", wraplength=200, justify="center").pack(pady=5)
+            Label(card, text=miembro["descripcion"], font=("Arial", 9), fg=self.colors[6], bg=self.colors[1], wraplength=200, justify="center").pack(pady=5)
 
         # --- Botón para cerrar ---
         boton_cerrar = Button(
             ventana_creditos,
-            text="Volver",
+            text=t("credits_back"),
             font=("Arial Black", 11),
-            bg="#b30000",
-            fg="white",
-            activebackground="#e60000",
-            activeforeground="white",
+            bg=self.colors[4],
+            fg=self.colors[6],
+            activebackground=self.colors[3],
+            activeforeground=self.colors[6],
             command=ventana_creditos.destroy
         )
         boton_cerrar.pack(pady=10)
@@ -539,51 +554,29 @@ class LoginAvatarsRooks:
     
     def show_help(self):
         ventana_ayuda = Toplevel()
-        ventana_ayuda.title("Ayuda - Avatars vs Rooks")
+        ventana_ayuda.title(t("help_title"))
         ventana_ayuda.geometry("700x500")
-        ventana_ayuda.config(bg="black")
+        ventana_ayuda.config(bg=self.colors[0])
 
         # --- Título ---
         titulo = Label(
             ventana_ayuda,
-            text="Centro de Ayuda - Avatars vs Rooks",
+            text=t("help_title"),
             font=("Arial Black", 16),
-            fg="white",
-            bg="black"
+            fg=self.colors[6],
+            bg=self.colors[0]
         )
         titulo.pack(pady=20)
 
         # --- Contenedor principal ---
-        frame_texto = Frame(ventana_ayuda, bg="black")
+        frame_texto = Frame(ventana_ayuda, bg=self.colors[0])
         frame_texto.pack(padx=40, pady=10, fill="both", expand=True)
 
         # --- Secciones de ayuda ---
         secciones = [
-            {
-                "titulo": "🔐 Inicio de sesión",
-                "texto": (
-                    "Si ya tienes una cuenta, ingresa tu informacion en los espacios señalados.\n"
-                    "Debes ingresar tu usuario, correo o teléfono y tu contraseña.\n"
-                    "Si tus datos son correctos, podrás acceder al sistema.\n"
-                ),
-            },
-            {
-                "titulo": "🆕 Registro de usuario",
-                "texto": (
-                    "Si eres un nuevo jugador, selecciona 'Registrarse'. \n"
-
-                    "Completa los campos solicitados con tus datos.\n"
-
-                    "Luego de registrarse correctamente volveras a la pagina de Inicio de Sesión.\n"
-                ),
-            },
-            {
-                "titulo": "❓ Recuperar contraseña",
-                "texto": (
-                    "Si olvidaste tu contraseña, haz clic en '¿Olvidaste la contraseña?'. \n"
-                    "Se le guiará por un proceso para restablecerla y recuperar el acceso.\n"
-                ),
-            },
+            {"titulo": t("help_section_login"), "texto": t("help_section_login_text")},
+            {"titulo": t("help_section_register"), "texto": t("help_section_register_text")},
+            {"titulo": t("help_section_forgot"), "texto": t("help_section_forgot_text")},
         ]
 
         # --- Mostrar texto en pantalla ---
@@ -592,8 +585,8 @@ class LoginAvatarsRooks:
                 frame_texto,
                 text=sec["titulo"],
                 font=("Arial Black", 12),
-                fg="#ff4d4d",
-                bg="black",
+                fg=self.colors[3],
+                bg=self.colors[0],
                 anchor="w",
                 justify="left"
             ).pack(anchor="w", pady=(10, 0))
@@ -601,8 +594,8 @@ class LoginAvatarsRooks:
                 frame_texto,
                 text=sec["texto"],
                 font=("Arial", 10),
-                fg="white",
-                bg="black",
+                fg=self.colors[6],
+                bg=self.colors[0],
                 wraplength=600,
                 justify="left"
             ).pack(anchor="w", pady=(0, 10))
@@ -610,12 +603,12 @@ class LoginAvatarsRooks:
         # --- Botón Volver ---
         boton_cerrar = Button(
             ventana_ayuda,
-            text="Volver",
+            text=t("help_back"),
             font=("Arial Black", 11),
-            bg="#b30000",
-            fg="white",
-            activebackground="#e60000",
-            activeforeground="white",
+            bg=self.colors[4],
+            fg=self.colors[6],
+            activebackground=self.colors[3],
+            activeforeground=self.colors[6],
             command=ventana_ayuda.destroy
         )
         boton_cerrar.pack(pady=10)
@@ -633,13 +626,13 @@ class LoginAvatarsRooks:
         """Valida credenciales de usuario"""
         username = self.username_entry.get()
         password = self.password_entry.get()
-        
-        if not username or username == "Ingrese su usuario, correo o telefono":
-            messagebox.showerror("Error", "Por favor ingresa tu usuario")
+
+        if not username or username == t("username_placeholder"):
+            messagebox.showerror(t("user_error"))
             return
         
         if not password:
-            messagebox.showerror("Error", "Por favor ingresa tu contraseña")
+            messagebox.showerror(t("password_error"))
             return
         
         users_aes = encrip_aes.load_users_aes()
@@ -648,15 +641,22 @@ class LoginAvatarsRooks:
             try:
                 if encrip_aes.verify_password(users_aes[username]['password_hash'], password):
                     nombre = encrip_aes.decrypt_data(users_aes[username]['nombre_enc'], self.master_key)
-                    self.login_frame.pack_forget()
-                    MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login)
+                    primerIngreso = users_aes[username]['primerIngreso']
+                    if primerIngreso:
+                        self.login_frame.pack_forget()
+                        users_aes[username]['primerIngreso'] = False
+                        encrip_aes.save_users_aes(users_aes)
+                        MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login, 
+                        self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
+                    else:
+                        messagebox.showinfo(t("user_ver"))
 
                 else:
-                    messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+                    messagebox.showerror(t("error_uc"))
             except Exception as e:
-                messagebox.showerror("Error", f"Error al verificar credenciales: {e}")
+                messagebox.showerror(t("error_credentials").format(error=e))
         else:
-            messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+            messagebox.showerror(t("error_uc"))
 
     def face_recognition(self):
         """Login con reconocimiento facial"""
@@ -667,7 +667,7 @@ class LoginAvatarsRooks:
             Face_Recognition(temp_root).login_with_face_gui()
             temp_root.destroy()
         except Exception as e:
-            messagebox.showerror("Error", f"Error en el login facial: {e}")
+            messagebox.showerror(t("error_facial").format(error=e))
 
     def update_days(self, event=None):
         "Actualizar los dias segun el mes y año seleccionados"
@@ -693,7 +693,7 @@ class LoginAvatarsRooks:
     #Seleccionar la foto
     def selec_profile_photo(self):
         file_path = filedialog.askopenfilename(
-            title= "Seleccionar foto de perfil",
+            title= t("photo_perfil"),
             filetypes=[
             ("Archivos de imagen", "*.jpg *.jpeg *.png"),
             ("JPG", "*.jpg *.jpeg"),
@@ -724,9 +724,9 @@ class LoginAvatarsRooks:
 
                 self.photo_btn.image = self.profile_photo_display  # Mantener referencia
             
-                messagebox.showinfo("Éxito", "Foto de perfil cargada correctamente")
+                messagebox.showinfo(t("succes_photo"))
             except Exception as e:
-                messagebox.showerror("Error", f"No se pudo cargar la imagen: {str(e)}")
+                messagebox.showerror(t("error_photo").format(error=e))
     
     def forgot_password(self):
         self.login_frame.pack_forget()
@@ -736,9 +736,9 @@ class LoginAvatarsRooks:
 
         title_label = tk.Label(
             recovery_frame, 
-            text="Recuperar Contraseña",
+            text=t("recover_password"),
             font=("Arial", 24, "bold"),
-            fg=self.red_primary,
+            fg=self.c4,
             bg=self.bg_black
         )
         title_label.pack(pady=30)
@@ -750,18 +750,18 @@ class LoginAvatarsRooks:
         #Paso 1 Ingresar Usuario
         tk.Label(
             form_frame,
-            text="Ingresa tu nombre de usuario:",
+            text=t("enter_username"),
             font=("Arial", 12),
-            fg=self.white,
-            bg=self.bg_dark
+            fg=self.c6,
+            bg=self.bg_black
         ).pack(pady=(20, 10))
     
         username_entry = tk.Entry(
             form_frame,
             font=("Arial", 11),
-            bg=self.dark_gray,
-            fg=self.white,
-            insertbackground=self.white,
+            bg=self.c2,
+            fg=self.c6,
+            insertbackground=self.c6,
             relief=tk.FLAT,
             width=30
         )
@@ -771,18 +771,17 @@ class LoginAvatarsRooks:
             username = username_entry.get().strip()
 
             if not username:
-                messagebox.showerror("Error","Ingrese un nombre de usuario")
+                messagebox.showerror(t("error_username"))
                 return
             #Verificar si el usuario existe
             users = encrip_aes.load_users_aes()
             if username not in users:
-                messagebox.showerror("Error", "Usuario no encontrado")
+                messagebox.showerror(t("error_usernot_found"))
                 return
             
             if not self.password_recovery.user_has_security_question(username):
                 messagebox.showerror(
-                    "Error",
-                    "Este usuario no tiene pregunta de seguridad configurada"
+                    t("error_usernot_question")
                 )
                 return
             question = self.password_recovery.get_security_question(username)
@@ -790,17 +789,17 @@ class LoginAvatarsRooks:
             if question:
                 self.show_security_question(username,question)
             else:
-                messagebox.showerror("Error", "Error al recuperar la pregunta de seguridad")
+                messagebox.showerror(t("error_recovery_question"))
 
         #Boton Continuar
         continue_btn = tk.Button(
             form_frame,
-            text="CONTINUAR",
+            text=t("continue"),
             font=("Arial", 11, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
-            activebackground=self.red_dark,
-            activeforeground=self.white,
+            bg=self.c4,
+            fg=self.c6,
+            activebackground=self.c5,
+            activeforeground=self.c6,
             relief=tk.FLAT,
             cursor="hand2",
             command=verify_user
@@ -810,10 +809,10 @@ class LoginAvatarsRooks:
         # Botón volver
         back_btn = tk.Label(
             form_frame,
-            text="← Volver al login",
+            text=t("return_login"),
             font=("Arial", 10),
-            fg=self.gray_text,
-            bg=self.bg_dark,
+            fg=self.c3,
+            bg=self.c1,
             cursor="hand2"
         )
         back_btn.pack(pady=(10, 20))
@@ -832,14 +831,14 @@ class LoginAvatarsRooks:
         # Título
         tk.Label(
             recovery_frame,
-            text="Pregunta de Seguridad",
+            text=t("question_security"),
             font=("Arial", 24, "bold"),
-            fg=self.red_primary,
+            fg=self.c4,
             bg=self.bg_black
         ).pack(pady=30)
     
         # Frame del formulario
-        form_frame = tk.Frame(recovery_frame, bg=self.bg_dark)
+        form_frame = tk.Frame(recovery_frame, bg=self.c1)
         form_frame.pack(pady=20, padx=50, fill=tk.BOTH, expand=True)
 
         print("Form frame creado")
@@ -852,26 +851,26 @@ class LoginAvatarsRooks:
             form_frame,
             text=question,
             font=("Arial", 12, "bold"),
-            fg=self.white,
-            bg=self.bg_dark,
+            fg=self.c6,
+            bg=self.c1,
             wraplength=400
         ).pack(pady=(20, 10))
     
         # Entry para respuesta
         tk.Label(
             form_frame,
-            text="Tu respuesta:",
+            text=t("answer"),
             font=("Arial", 11),
-            fg=self.gray_text,
-            bg=self.bg_dark
+            fg=self.c3,
+            bg=self.c1
         ).pack(pady=(10, 5))
     
         answer_entry = tk.Entry(
             form_frame,
             font=("Arial", 11),
-            bg=self.dark_gray,
-            fg=self.white,
-            insertbackground=self.white,
+            bg=self.c2,
+            fg=self.c6,
+            insertbackground=self.c6,
             relief=tk.FLAT,
             width=30
         )
@@ -881,25 +880,25 @@ class LoginAvatarsRooks:
             answer = answer_entry.get().strip()
         
             if not answer:
-                messagebox.showerror("Error", "Ingresa tu respuesta")
+                messagebox.showerror(t("enter_answer"))
                 return
         
             # Verificar respuesta
             if self.password_recovery.verify_security_answer(username, answer):
                 self.show_reset_password(username)
             else:
-                messagebox.showerror("Error", "Respuesta incorrecta")
+                messagebox.showerror(t("answer_incorrect"))
                 answer_entry.delete(0, tk.END)
     
         # Botón verificar
         verify_btn = tk.Button(
             form_frame,
-            text="VERIFICAR",
+            text=t("verify"),
             font=("Arial", 11, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
-            activebackground=self.red_dark,
-            activeforeground=self.white,
+            bg=self.c4,
+            fg=self.c6,
+            activebackground=self.c5,
+            activeforeground=self.c6,
             relief=tk.FLAT,
             cursor="hand2",
             command=verify_answer
@@ -909,10 +908,10 @@ class LoginAvatarsRooks:
         # Botón cancelar
         cancel_btn = tk.Label(
             form_frame,
-            text="Cancelar",
+            text=t("cancel"),
             font=("Arial", 10),
-            fg=self.gray_text,
-            bg=self.bg_dark,
+            fg=self.c3,
+            bg=self.c1,
             cursor="hand2"
         )
         cancel_btn.pack(pady=(10, 20))
@@ -931,31 +930,31 @@ class LoginAvatarsRooks:
         # Título
         tk.Label(
             recovery_frame,
-            text="Restablecer Contraseña",
+            text=t("reset_password"),
             font=("Arial", 24, "bold"),
-            fg=self.red_primary,
+            fg=self.c4,
             bg=self.bg_black
         ).pack(pady=30)
     
         # Frame del formulario
-        form_frame = tk.Frame(recovery_frame, bg=self.bg_dark)  # Cambiar bg="#FF0000" por bg=self.bg_dark
+        form_frame = tk.Frame(recovery_frame, bg=self.c1)  # Cambiar bg="#FF0000" por bg=self.c1
         form_frame.pack(pady=20, padx=50, fill=tk.BOTH, expand=True)
     
         # Nueva contraseña
         tk.Label(
             form_frame,
-            text="Nueva Contraseña:",
+            text=t("new_password"),
             font=("Arial", 11),
-            fg=self.white,
+            fg=self.c6,
             bg="#FF0000"
         ).pack(pady=(20, 5), anchor="w", padx=20)
     
         new_password_entry = tk.Entry(
             form_frame,
             font=("Arial", 11),
-            bg=self.dark_gray,
-            fg=self.white,
-            insertbackground=self.white,
+            bg=self.c2,
+            fg=self.c6,
+            insertbackground=self.c6,
             relief=tk.FLAT,
             show="*",
             width=30
@@ -965,18 +964,18 @@ class LoginAvatarsRooks:
         # Confirmar contraseña
         tk.Label(
             form_frame,
-            text="Confirmar Contraseña:",
+            text=t("confirm_password"),
             font=("Arial", 11),
-            fg=self.white,
+            fg=self.c6,
             bg="#FF0000"
         ).pack(pady=(15, 5), anchor="w", padx=20)
     
         confirm_password_entry = tk.Entry(
             form_frame,
             font=("Arial", 11),
-            bg=self.dark_gray,
-            fg=self.white,
-            insertbackground=self.white,
+            bg=self.c2,
+            fg=self.c6,
+            insertbackground=self.c6,
             relief=tk.FLAT,
             show="*",
             width=30
@@ -988,36 +987,35 @@ class LoginAvatarsRooks:
             confirm_pass = confirm_password_entry.get()
         
             if not all([new_pass, confirm_pass]):
-                messagebox.showerror("Error", "Completa todos los campos")
+                messagebox.showerror(t("error_enter_all"))
                 return
         
             if new_pass != confirm_pass:
-                messagebox.showerror("Error", "Las contraseñas no coinciden")
+                messagebox.showerror(t("paswords_notmatch"))
                 return
         
             if len(new_pass) < 4:  # Ajusta según tus requisitos
-                messagebox.showerror("Error", "La contraseña debe tener al menos 4 caracteres")
+                messagebox.showerror(t("min_caracters"))
                 return
         
             # Restablecer contraseña
             if self.password_recovery.reset_password(username, new_pass):
                 messagebox.showinfo(
-                "Éxito", 
-                "Contraseña restablecida correctamente.\n¡Ahora puedes iniciar sesión!"
+                t("successful_change")
                 )
                 self.reiniciar_login()
             else:
-                messagebox.showerror("Error", "Error al restablecer contraseña")
+                messagebox.showerror(t("error_change"))
     
         # Botón restablecer
         reset_btn = tk.Button(
             form_frame,
-            text="RESTABLECER",
+            text=t("restore"),
             font=("Arial", 11, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
-            activebackground=self.red_dark,
-            activeforeground=self.white,
+            bg=self.c4,
+            fg=self.c6,
+            activebackground=self.c5,
+            activeforeground=self.c6,
             relief=tk.FLAT,
             cursor="hand2",
             command=reset_password
@@ -1027,9 +1025,9 @@ class LoginAvatarsRooks:
         # Botón cancelar
         cancel_btn = tk.Label(
             form_frame,
-            text="Cancelar",
+            text=t("cancel"),
             font=("Arial", 10),
-            fg=self.gray_text,
+            fg=self.c3,
             bg="#FF0000",
             cursor="hand2"
         )
@@ -1039,13 +1037,13 @@ class LoginAvatarsRooks:
 
     def create_register_widgets(self):
         """Crea los widgets para el registro con tema oscuro"""
-        self.register_frame = tk.Frame(self.root, bg=self.bg_black)
+        self.register_frame = tk.Frame(self.root, bg=self.colors[0])  # ✅ Correcto
         
         # Contenedor principal con scroll
-        canvas = tk.Canvas(self.register_frame, bg=self.bg_black, highlightthickness=0)
+        canvas = tk.Canvas(self.register_frame, bg=self.colors[0], highlightthickness=0)
         scrollbar = tk.Scrollbar(self.register_frame, orient="vertical", command=canvas.yview)
-        scrollbar.config(bg=self.red_primary, troughcolor=self.bg_black)
-        scrollable_frame = tk.Frame(canvas, bg=self.bg_black)
+        scrollbar.config(bg=self.colors[3], troughcolor=self.colors[0])
+        scrollable_frame = tk.Frame(canvas, bg=self.colors[0])
         
         scrollable_frame.bind(
             "<Configure>",
@@ -1056,7 +1054,7 @@ class LoginAvatarsRooks:
         canvas.configure(yscrollcommand=scrollbar.set)
         
         # Barra superior
-        top_bar = tk.Frame(scrollable_frame, bg=self.red_primary, height=40)
+        top_bar = tk.Frame(scrollable_frame, bg=self.colors[3], height=40)
         top_bar.pack(fill=tk.X)
         top_bar.pack_propagate(False)
         
@@ -1064,92 +1062,92 @@ class LoginAvatarsRooks:
             top_bar,
             text="Avatars vs Rooks - Desktop game",
             font=("Arial", 12, "bold"),
-            fg=self.white,
-            bg=self.red_primary
+            fg=self.colors[5],
+            bg=self.colors[3]
         ).pack(side=tk.LEFT, padx=15, pady=8)
         
         # Título Registro
         tk.Label(
             scrollable_frame,
-            text="Registro",
+            text=t("register_title"),
             font=("Arial", 32, "bold"),
-            fg=self.white,
-            bg=self.bg_black
+            fg=self.colors[5],
+            bg=self.colors[0]
         ).pack(pady=(30, 40))
         
         # Frame del formulario con borde
-        form_container = tk.Frame(scrollable_frame, bg=self.bg_black)
+        form_container = tk.Frame(scrollable_frame, bg=self.colors[0])
         form_container.pack(padx=300)
         
         form_frame = tk.Frame(
             form_container,
-            bg=self.bg_black,
-            highlightbackground=self.gray_text,
+            bg=self.colors[0],
+            highlightbackground=self.colors[6],
             highlightthickness=1
         )
         form_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
         # Padding interno
-        inner_frame = tk.Frame(form_frame, bg=self.bg_black)
+        inner_frame = tk.Frame(form_frame, bg=self.colors[0])
         inner_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
 
         # INFORMACIÓN PERSONAL
         tk.Label(
             inner_frame,
-            text="Información personal",
+            text=t("personal_information"),
             font=("Arial", 14, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 20))
 
         # Nombre
         tk.Label(
             inner_frame,
-            text="Nombre +",
+            text=t("username2"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.nombre_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT
         )
         self.nombre_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.nombre_entry.insert(0, "Ingrese su nombre")
+        self.nombre_entry.insert(0, t("username3"))
         self.nombre_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su nombre"))
         self.nombre_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su nombre"))
 
         # Apellidos
         tk.Label(
             inner_frame,
-            text="Apellidos +",
+            text=t("lats_name"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.apellidos_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT
         )
         self.apellidos_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.apellidos_entry.insert(0, "Ingrese sus apellidos")
-        self.apellidos_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese sus apellidos"))
-        self.apellidos_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese sus apellidos"))
+        self.apellidos_entry.insert(0, t("insert_sumernames"))
+        self.apellidos_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, t("insert_sumernames")))
+        self.apellidos_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, t("insert_sumernames")))
 
         tk.Label(
             form_frame,
-            text="Pregunta de Seguridad:",
+            text=t("question_security"),
             font=("Arial", 10),
-            fg=self.white,
-            bg=self.bg_dark
+            fg=self.colors[6],  # Era: self.c6
+            bg=self.colors[0]   # Era: self.c1
         ).pack(pady=(10,5), anchor="w", padx=20)
 
         self.security_question_combobox = ttk.Combobox(
@@ -1164,19 +1162,19 @@ class LoginAvatarsRooks:
 
         tk.Label(
             form_frame,
-            text="Respuesta de Seguridad:",
+            text=t("answer_security"),
             font=("Arial", 10),
-            fg=self.white,
-            bg=self.bg_dark
+            fg=self.colors[6],    # Era: self.c6
+            bg=self.colors[0]   # Era: self.c1
         ).pack(pady=(10, 5), anchor="w", padx=20)
     
     # Entry para respuesta
         self.security_answer_entry = tk.Entry(
             form_frame,
             font=("Arial", 10),
-            bg=self.dark_gray,
-            fg=self.white,
-            insertbackground=self.white,
+            bg=self.colors[2],    # Era: self.c2
+            fg=self.colors[6],    # Era: self.c6
+            insertbackground=self.colors[6],  # Era: self.c6
             relief=tk.FLAT,
             width=30
         )
@@ -1186,18 +1184,18 @@ class LoginAvatarsRooks:
         # Foto de perfil
         tk.Label(
             inner_frame,
-            text="Foto de perfil",
+            text=t("photo_perfil"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 10))
         
         self.photo_btn = tk.Button(
             inner_frame,
-            text="+\nAgregar foto",
+            text=t("add_photo"),
             font=("Arial", 10),
-            bg=self.white,
-            fg="#666666",
+            bg=self.colors[5],
+            fg=self.colors[2],
             width=10,
             height=4,
             relief=tk.FLAT,
@@ -1209,20 +1207,20 @@ class LoginAvatarsRooks:
         # Fecha de nacimiento
         tk.Label(
             inner_frame,
-            text="Fecha de nacimiento +",
+            text=t("date_birthday"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
-        combo_container = tk.Frame(inner_frame, bg=self.white, relief=tk.FLAT)
+        combo_container = tk.Frame(inner_frame, bg=self.colors[5], relief=tk.FLAT)
         combo_container.pack(fill=tk.X, pady=(0,15), ipady=5, ipadx=5)
 
         style = ttk.Style()
         style.theme_use('clam')
         style.configure('Custom.TCombobox',
-                        fieldbackground=self.white,
-                        background=self.white,
+                        fieldbackground=self.colors[5],
+                        background=self.colors[5],
                         foreground="#000000",
                         borderwithd=0)
         #Dia
@@ -1256,10 +1254,10 @@ class LoginAvatarsRooks:
         # Nacionalidad
         tk.Label(
             inner_frame,
-            text="Nacionalidad +",
+            text=t("nationality"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
 
         nacionalidades = [
@@ -1301,8 +1299,8 @@ class LoginAvatarsRooks:
         style = ttk.Style()
         style.theme_use("clam")
         style.configure("Custom.TCombox",
-                        fieldbackground=self.white,
-                        background=self.white,
+                        fieldbackground=self.colors[5],
+                        background=self.colors[5],
                         foreground="#000000",
                         arrowcolor="#000000",
                         borderwithd=0,
@@ -1317,89 +1315,165 @@ class LoginAvatarsRooks:
         )
 
         self.nacionalidad_combobox.pack(fill=tk.X, pady=(0,25), ipady=5)
-        self.nacionalidad_combobox.set("Seleciona tu nacionalidad")
+        self.nacionalidad_combobox.set(t("selec_nationality"))
 
         # CUENTA Y SEGURIDAD
         tk.Label(
             inner_frame,
-            text="Cuenta y seguridad",
+            text=t("account_security"),
             font=("Arial", 14, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(10, 20))
         
         # Usuario
         tk.Label(
             inner_frame,
-            text="Usuario",
+            text=t("username"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.usuario_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT
         )
         self.usuario_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.usuario_entry.insert(0, "Ingrese su usuario")
-        self.usuario_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su usuario"))
-        self.usuario_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su usuario"))
+        self.usuario_entry.insert(0, t("insert_username"))
+        self.usuario_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, t("insert_username")))
+        self.usuario_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, t("insert_username")))
+        self.usuario_entry.bind('<KeyRelease>', self.validar_usuario_tiempo_real)
+
+        # Frame para mostrar requisitos de usuario
+        requirements_user_frame = tk.Frame(inner_frame, bg=self.c1)
+        requirements_user_frame.pack(fill=tk.X, pady=(5, 15))
+
+        # Lista de requisitos con sus checks
+        self.req_user_length = tk.Label(
+            requirements_user_frame,
+            text=t("restriccion1"),
+            font=("Arial", 9),
+            bg=self.c1,
+            fg=self.c7,
+            anchor="w"
+        )
+        self.req_user_length.pack(anchor="w", pady=2)
+
+        self.req_user_alphanumeric = tk.Label(
+            requirements_user_frame,
+            text=t("restriccion2"),
+            font=("Arial", 9),
+            bg=self.c1,
+            fg=self.c7,
+            anchor="w"
+        )
+        self.req_user_alphanumeric.pack(anchor="w", pady=2)
 
         # Correo electrónico
         tk.Label(
             inner_frame,
-            text="Correo electrónico",
+            text=t("email"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
 
         self.correo_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT
         )
         self.correo_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.correo_entry.insert(0, "Ingrese su correo electronico")
-        self.correo_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su correo electronico"))
-        self.correo_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su correo electronico"))
+        self.correo_entry.insert(0, t("insert_email"))
+        self.correo_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, t("insert_email")))
+        self.correo_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, t("insert_email")))
 
         # Contraseña
         tk.Label(
             inner_frame,
-            text="Contraseña",
+            text=t("password"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
-        pass_frame1 = tk.Frame(inner_frame, bg=self.white)
+        pass_frame1 = tk.Frame(inner_frame, bg=self.colors[5])
         pass_frame1.pack(fill=tk.X, pady=(0, 15))
         
+        # Frame para mostrar requisitos de contraseña
+        requirements_frame = tk.Frame(inner_frame, bg=self.colors[0])
+        requirements_frame.pack(fill=tk.X, pady=(5, 15))
+
+        # Lista de requisitos con sus checks
+        self.req_length = tk.Label(
+            requirements_frame,
+            text=t("restriccion3"),
+            font=("Arial", 9),
+            bg=self.c1,
+            fg=self.c7,  # Color gris
+            anchor="w"
+        )
+        self.req_length.pack(anchor="w", pady=2)
+
+        self.req_alphanumeric = tk.Label(
+            requirements_frame,
+            text=t("restriccion4"),
+            font=("Arial", 9),
+            bg=self.c1,
+            fg=self.c7,
+            anchor="w"
+        )
+        self.req_alphanumeric.pack(anchor="w", pady=2)
+
         self.new_pass_entry = tk.Entry(
             pass_frame1,
             font=("Arial", 11),
-            show="•",
-            bg=self.white,
-            fg="#000000",
+            show="",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0
         )
-        self.new_pass_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
-        self.new_pass_entry.insert(0, "Ingrese su contraseña")
         
+        self.req_no_spaces = tk.Label(
+            requirements_frame,
+            text=t("restriccion5"),
+            font=("Arial", 9),
+            bg=self.c1,
+            fg=self.c7,
+            anchor="w"
+        )
+        self.req_no_spaces.pack(anchor="w", pady=2)
+
+        self.new_pass_entry = tk.Entry(
+            pass_frame1,
+            font=("Arial", 11),
+            show="",
+            bg=self.colors[5],
+            fg=self.colors[0],
+            relief=tk.FLAT,
+            borderwidth=0
+        )
+
+        self.new_pass_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
+        # Vincular validación en tiempo real
+        self.new_pass_entry.bind('<KeyRelease>', self.validar_contrasena_tiempo_real)
+        self.new_pass_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, t("password_placeholder")))
+        self.new_pass_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, t("password_placeholder")))
+        self.new_pass_entry.insert(0, t("password_placeholder"))
+
         show_pass1_btn = tk.Button(
             pass_frame1,
             text="👁",
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0,
             cursor="hand2",
@@ -1410,33 +1484,36 @@ class LoginAvatarsRooks:
         # Confirmar contraseña
         tk.Label(
             inner_frame,
-            text="Confirmar contraseña",
+            text=t("confirm_password"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
-        pass_frame2 = tk.Frame(inner_frame, bg=self.white)
+        pass_frame2 = tk.Frame(inner_frame, bg=self.colors[5])
         pass_frame2.pack(fill=tk.X, pady=(0, 25))
         
         self.confirm_pass_entry = tk.Entry(
             pass_frame2,
             font=("Arial", 11),
-            show="•",
-            bg=self.white,
-            fg="#000000",
+            show="",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0
         )
         self.confirm_pass_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
-        self.confirm_pass_entry.insert(0, "Ingrese su contraseña")
-        
+        self.confirm_pass_entry.insert(0, t("password_placeholder"))
+
+        self.confirm_pass_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, t("password_placeholder")))
+        self.confirm_pass_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, t("password_placeholder")))
+
         show_pass2_btn = tk.Button(
             pass_frame2,
             text="👁",
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0,
             cursor="hand2",
@@ -1447,32 +1524,32 @@ class LoginAvatarsRooks:
         # RECONOCIMIENTO FACIAL (Opcional)
         tk.Label(
             inner_frame,
-            text="Reconocimiento facial (Opcional)",
+            text=t("facial_identification"),
             font=("Arial", 14, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(10, 15))
         
         self.usar_facial_var = tk.BooleanVar()
         facial_check = tk.Checkbutton(
             inner_frame,
-            text="Habilitar",
+            text=t("enable_facial"),
             variable=self.usar_facial_var,
             font=("Arial", 10),
-            bg=self.bg_black,
-            fg=self.white,
-            activebackground=self.bg_black,
-            selectcolor=self.bg_black,
-            activeforeground=self.white
+            bg=self.colors[0],
+            fg=self.colors[5],
+            activebackground=self.colors[0],
+            selectcolor=self.colors[0],
+            activeforeground=self.colors[5]
         )
         facial_check.pack(anchor="w", pady=(0, 10))
         
         self.facial_button = tk.Button(
             inner_frame,
-            text="Capturar rostro",
+            text=t("capture_face"),
             font=("Arial", 11, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             relief=tk.FLAT,
             cursor="hand2",
             state=tk.DISABLED,
@@ -1492,90 +1569,90 @@ class LoginAvatarsRooks:
         # INFORMACIÓN DE PAGO (Opcional)
         tk.Label(
             inner_frame,
-            text="Información de pago (opcional)",
+            text=t("pay_information"),
             font=("Arial", 14, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(10, 15))
         
         self.guardar_tarjeta_var = tk.BooleanVar()
         tarjeta_check = tk.Checkbutton(
             inner_frame,
-            text="Habilitar",
+            text=t("enable_facial"),
             variable=self.guardar_tarjeta_var,
             font=("Arial", 10),
-            bg=self.bg_black,
-            fg=self.white,
-            activebackground=self.bg_black,
-            selectcolor=self.bg_black,
-            activeforeground=self.white
+            bg=self.colors[0],
+            fg=self.colors[5],
+            activebackground=self.colors[0],
+            selectcolor=self.colors[0],
+            activeforeground=self.colors[5]
         )
         tarjeta_check.pack(anchor="w", pady=(0, 15))
         
         # Número de tarjeta
         tk.Label(
             inner_frame,
-            text="Numero de tarjeta",
+            text=t("card_number"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.num_tarjeta_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             state=tk.DISABLED
         )
         self.num_tarjeta_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
-        self.num_tarjeta_entry.insert(0, "Numero de tarjeta")
+        self.num_tarjeta_entry.insert(0, t("card_number"))
         
         # Frame para fecha y CVV
-        expiry_cvv_frame = tk.Frame(inner_frame, bg=self.bg_black)
+        expiry_cvv_frame = tk.Frame(inner_frame, bg=self.colors[0])
         expiry_cvv_frame.pack(fill=tk.X, pady=(0, 15))
         
         # Fecha de expiración
-        expiry_left = tk.Frame(expiry_cvv_frame, bg=self.bg_black)
+        expiry_left = tk.Frame(expiry_cvv_frame, bg=self.colors[0])
         expiry_left.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
         
         tk.Label(
             expiry_left,
-            text="Fecha de expiración",
+            text=t("expiry_date"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.expiry_entry = tk.Entry(
             expiry_left,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             state=tk.DISABLED
         )
         self.expiry_entry.pack(fill=tk.X, ipady=5)
         
         # CVV
-        cvv_right = tk.Frame(expiry_cvv_frame, bg=self.bg_black)
+        cvv_right = tk.Frame(expiry_cvv_frame, bg=self.colors[0])
         cvv_right.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
         tk.Label(
             cvv_right,
             text="CVV",
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.cvv_entry = tk.Entry(
             cvv_right,
             font=("Arial", 11),
             show="*",
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             state=tk.DISABLED
         )
@@ -1584,17 +1661,17 @@ class LoginAvatarsRooks:
         # Nombre del titular
         tk.Label(
             inner_frame,
-            text="Nombre del titular",
+            text=t("name_holder"),
             font=("Arial", 10, "bold"),
-            bg=self.bg_black,
-            fg=self.white
+            bg=self.colors[0],
+            fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 5))
         
         self.titular_entry = tk.Entry(
             inner_frame,
             font=("Arial", 11),
-            bg=self.white,
-            fg="#000000",
+            bg=self.colors[5],
+            fg=self.colors[0],
             relief=tk.FLAT,
             state=tk.DISABLED
         )
@@ -1613,14 +1690,14 @@ class LoginAvatarsRooks:
         # BOTÓN REGISTRARSE
         tk.Button(
             scrollable_frame,
-            text="Registrarse",
+            text=t("register_button"),
             font=("Arial", 12, "bold"),
-            bg=self.red_primary,
-            fg=self.white,
+            bg=self.colors[3],
+            fg=self.colors[5],
             width=20,
             relief=tk.FLAT,
             cursor="hand2",
-            activebackground=self.red_dark,
+            activebackground=self.colors[4],
             command=self.register_user
         ).pack(pady=(30, 50), ipady=8)
         
@@ -1645,19 +1722,111 @@ class LoginAvatarsRooks:
             entry.config(show='•')
             button.config(text='👁')
 
+    def add_language_selector(self, parent):
+        self.flags = {
+            "es": ImageTk.PhotoImage(Image.open("./images/bandera_españa.png").resize((60, 31))),
+            "en": ImageTk.PhotoImage(Image.open("./images/bandera_ru.png").resize((60, 31))),
+            "hu": ImageTk.PhotoImage(Image.open("./images/bandera_hungria.png").resize((60, 31))),
+        }
+        self.current_flag = "es"
+        self.flag_btn = tk.Button(
+            parent,
+            image=self.flags[self.current_flag],
+            relief=tk.FLAT,
+            bg=self.bg_black,
+            command=self.show_language_menu,
+            cursor="hand2"
+        )
+        self.flag_btn.pack(side=tk.LEFT, padx=10, pady=10)
+
+    def show_language_menu(self):
+        menu = tk.Menu(self.root, tearoff=0)
+        menu.add_command(
+            label="Español", image=self.flags["es"], compound="left",
+            command=lambda: self.change_language("es")
+        )
+        menu.add_command(
+            label="English", image=self.flags["en"], compound="left",
+            command=lambda: self.change_language("en")
+        )
+        menu.add_command(
+            label="Magyar", image=self.flags["hu"], compound="left",
+            command=lambda: self.change_language("hu")
+        )
+        x = self.flag_btn.winfo_rootx()
+        y = self.flag_btn.winfo_rooty() + self.flag_btn.winfo_height()
+        menu.tk_popup(x, y)
+
+    def change_language(self, lang_code):
+        set_language(lang_code)
+        self.current_flag = lang_code
+        self.flag_btn.config(image=self.flags[lang_code])
+        self.refresh_texts()
+
+    def refresh_texts(self):
+        # Actualiza los textos de los labels y botones principales del login
+        self.title_label.config(text=t("login_title"))
+        self.username_label.config(text=t("username"))
+        self.password_label.config(text=t("password"))
+        self.forgot_pass_btn.config(text=t("forgot_password"))
+        self.login_btn.config(text=t("login_button"))
+        self.register_btn.config(text=t("register_button"))
+        self.google_btn.config(text=t("google_login"))
+        self.help_btn.config(text=t("help_button"))
+        self.credits_btn.config(text=t("credits_button"))
+
+        # Actualiza el placeholder del usuario si está vacío o es el placeholder anterior
+        if self.username_entry.get() == "" or self.username_entry.get() in [
+            t("username_placeholder"),
+            "Ingrese su usuario, correo o teléfono",
+            "Enter your username, email or phone",
+            "Adja meg felhasználónevét, e-mailjét vagy telefonszámát"
+        ]:
+            self.username_entry.delete(0, tk.END)
+            self.username_entry.insert(0, t("username_placeholder"))
+            self.username_entry.config(fg=self.colors[1])
+
+        # Actualiza el placeholder de la contraseña si está vacío o es el placeholder anterior
+        if self.password_entry.get() == "" or self.password_entry.get() in [
+            t("password_placeholder"),
+            "Ingrese su contraseña",
+            "Enter your password",
+            "Adja meg jelszavát"
+        ]:
+            self.password_entry.delete(0, tk.END)
+            self.password_entry.insert(0, t("password_placeholder"))
+            self.password_entry.config(fg=self.colors[1])
+            self.password_entry.config(show="")  # Asegura que el placeholder no oculte el texto
+
     def show_login_window(self):
         """Muestra la ventana de login y oculta la de registro"""
-        if hasattr(self, 'register_frame'):
-            self.register_frame.pack_forget()
-        if hasattr(self, 'login_frame'):
-            self.login_frame.pack(fill=tk.BOTH, expand=True)
+        # IMPORTANTE: Recrear la interfaz de login con los colores actualizados
+        if hasattr(self, 'login_frame') and self.login_frame:
+            self.login_frame.destroy()
+        
+        # Recrear la interfaz de login con los nuevos colores
+        self.create_login_widgets()
+        
+        if hasattr(self, 'register_frame') and self.register_frame:
+            try:
+                self.register_frame.pack_forget()
+            except:
+                pass
+        
+        self.login_frame.pack(fill=tk.BOTH, expand=True)
     
     def show_register_window(self):
         """Muestra la ventana de registro y oculta la de login"""
-        if not hasattr(self, 'register_frame') or self.register_frame is None:
-            self.create_register_widgets()
+        # IMPORTANTE: Recrear la interfaz de registro con los colores actualizados
+        if hasattr(self, 'register_frame') and self.register_frame:
+            self.register_frame.destroy()
+        
+        # Recrear la interfaz de registro con los nuevos colores
+        self.create_register_widgets()
+        
         if hasattr(self, 'login_frame'):
             self.login_frame.pack_forget()
+        
         self.register_frame.pack(fill=tk.BOTH, expand=True)
 
     def open_face_gui(self):
@@ -1667,7 +1836,7 @@ class LoginAvatarsRooks:
             fr = Face_Recognition(self.root, show_main_gui=False)
             fr.register_face_gui()
         except Exception as e:
-            messagebox.showerror("Error", f"Error al registrar rostro: {e}")
+            messagebox.showerror(t("error_register_facial").format(error=e))
         self.root.attributes('-disabled', False)
 
 
@@ -1679,53 +1848,66 @@ class LoginAvatarsRooks:
         nacionalidad = self.nacionalidad_combobox.get()
         correo = self.correo_entry.get()
         username = self.usuario_entry.get()
+
+        if not self.validar_usuario_final(username):
+            return  # No continuar si el usuario no es válid
+    
         password = self.new_pass_entry.get()
         confirm_pass = self.confirm_pass_entry.get()
+
+        if not self.validar_contrasena_final(password):
+            messagebox.showerror(t("error_restr_password"))
+        
+        # Verificar que las contraseñas coincidan
+        if password != confirm_pass:
+            messagebox.showerror(t("paswords_notmatch"))
+            return
+    
         security_question = self.security_question_combobox.get()
         security_answer = self.security_answer_entry.get()
 
 
         # Validar que no sean placeholders
-        if nombre == "Ingrese su nombre" or not nombre:
-            messagebox.showerror("Error", "Por favor ingresa tu nombre")
+        if nombre == t("username3") or not nombre:
+            messagebox.showerror(t("error_name"))
             return
         
-        if apellidos == "Ingrese sus apellidos" or not apellidos:
-            messagebox.showerror("Error", "Por favor ingresa tus apellidos")
+        if apellidos == t("insert_sumernames") or not apellidos:
+            messagebox.showerror(t("error_sumername"))
             return
         
         if not security_answer.strip():
-            messagebox.showerror("Error", "Debes responder la pregunta de seguridad")
+            messagebox.showerror(t("error_questionsecury"))
             return
         
             
-        if nacionalidad == "Ingrese su nacionalidad" or not nacionalidad:
-            messagebox.showerror("Error", "Por favor ingresa tu nacionalidad")
+        if nacionalidad == t("enter_nationality") or not nacionalidad:
+            messagebox.showerror(t("error_nationality"))
             return
         
-        if correo == "Ingrese su correo electronico" or not correo:
-            messagebox.showerror("Error", "Por favor ingresa tu correo")
+        if correo == t("insert_email") or not correo:
+            messagebox.showerror(t("error_email"))
             return
         
         if "@" not in correo or "." not in correo:
-            messagebox.showerror("Error", "Por favor ingresa un correo electrónico válido")
+            messagebox.showerror(t("error_email2"))
             return
         
-        if username == "Ingrese su usuario" or not username:
-            messagebox.showerror("Error", "Por favor ingresa un nombre de usuario")
+        if username == t("insert_username") or not username:
+            messagebox.showerror(t("user_error"))
             return
         
-        if password == "Ingrese su contraseña" or not password:
-            messagebox.showerror("Error", "Por favor ingresa una contraseña")
+        if password == t("password_placeholder") or not password:
+            messagebox.showerror(t("error_password3"))
             return
         
         if password != confirm_pass:
-            messagebox.showerror("Error", "Las contraseñas no coinciden")
+            messagebox.showerror(t("paswords_notmatch"))
             return
         
         users_aes = encrip_aes.load_users_aes()
         if username in users_aes:
-            messagebox.showerror("Error", "El usuario ya existe")
+            messagebox.showerror(t("user_exist"))
             return
         
         try:
@@ -1738,7 +1920,7 @@ class LoginAvatarsRooks:
                 security_answer
             )
             if not success:
-                messagebox.showerror("Error", f"Error al guardar la pregunta:{message}")
+                messagebox.showerror(t("error_guardar_pregunta"))
                 return
             
             
@@ -1748,22 +1930,136 @@ class LoginAvatarsRooks:
                 cvv = self.cvv_entry.get().strip()
                 titular = self.titular_entry.get().strip()
                 
-                if numero and numero != "Numero de tarjeta" and expiry and cvv and titular:
+                if numero and numero != t("card_number") and expiry and cvv and titular:
                     encrip_aes.register_user_card(username, cvv, numero, expiry, titular)
                     self.load_cards()
             
-            messagebox.showinfo("Éxito", "¡Registro exitoso!")
+            messagebox.showinfo(t("register_succselfol"))
             self.show_login_window()
             
         except Exception as e:
-            messagebox.showerror("Error", f"Error al registrar usuario: {e}")
+            messagebox.showerror("error_register_usuario")
 
-    def reiniciar_login(self):
+    def reiniciar_login(self, c1, c2, c3, c4, c5, c6, c7):
         """Recrea la interfaz de login"""
-        #Limpiar los widgets primero
-        for widget in self.root.winfo.children():
-            widget.destroy()
+        self.c1 = c1
+        self.c2 = c2
+        self.c3 = c3
+        self.c4 = c4
+        self.c5 = c5
+        self.c6 = c6
+        self.c7 = c7
+        self.colors = [c1, c2, c3, c4, c5, c6, c7]
 
-        #Nueva Interfaz del login
+        # Limpiar la ventana completamente
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        # Actualizar fondo de la ventana principal con self.colors[0]
+        self.root.configure(bg=c1)
+
         self.create_login_widgets()
         self.login_frame.pack(fill=tk.BOTH, expand=True)
+
+    #Estas funciones verifican que el usuario o la contrasena sean validos
+
+    def validar_contrasena_tiempo_real(self, event=None):
+        """Valida la contraseña en tiempo real y actualiza los checks visuales"""
+        password = self.new_pass_entry.get()
+        
+        # Si es el placeholder, no validar
+        if password == t("password_placeholder") or password == "":
+            self.req_length.config(text="❌" + t("restriccion3"), fg=self.c7)  # ← Cambiar
+            self.req_alphanumeric.config(text="❌" + t("restriccion4"), fg=self.c7)  # ← Cambiar
+            self.req_no_spaces.config(text="❌" + t("restriccion5"), fg=self.c7)  # ← Cambiar
+            return
+        
+        # Validar longitud (8-23 caracteres)
+        if 8 <= len(password) <= 23:
+            self.req_length.config(text="✅" + t("restriccion3"), fg="#00CC00")
+        else:
+            self.req_length.config(text="❌" + t("restriccion3"), fg=self.c4)
+
+        # Validar solo alfanumérico (letras y números, sin caracteres especiales)
+        if password.isalnum():
+            self.req_alphanumeric.config(text="✅" + t("restriccion4"), fg="#00CC00")
+            self.req_no_spaces.config(text="✅" + t("restriccion5"), fg="#00CC00")
+        else:
+            self.req_alphanumeric.config(text="❌" + t("restriccion4"), fg=self.c4)
+            if ' ' in password:
+                self.req_no_spaces.config(text="❌" + t("restriccion5"), fg=self.c4)
+            else:
+                self.req_no_spaces.config(text="❌" + t("restriccion5"), fg=self.c4)
+
+    def validar_contrasena_final(self, password):
+        """Valida la contraseña antes de registrar y muestra mensajes de error"""
+        
+        # Verificar longitud
+        if len(password) < 8 or len(password) > 23:
+            messagebox.showerror(
+                t("pasword_invalid"),
+                t("condicion_pasword")
+            )
+            return False
+        
+        # Verificar solo alfanumérico (sin caracteres especiales ni espacios)
+        if not password.isalnum():
+            messagebox.showerror(
+                t("pasword_invalid"),
+                t("condicion_pasword2")
+            )
+            return False
+        
+        return True
+    
+    def validar_usuario_tiempo_real(self, event=None):
+        """Valida el usuario en tiempo real y actualiza los checks visuales"""
+        username = self.usuario_entry.get()
+        
+        # Si es el placeholder o está vacío, resetear
+        if username == t("insert_username") or username == "":
+            self.req_user_length.config(text="❌"+ t("restriccion1") , fg=self.c7)
+            self.req_user_alphanumeric.config(text="❌"+ t("restriccion2"), fg=self.c7)
+            return
+        
+        # Validar longitud (4-256 caracteres)
+        if 4 <= len(username) <= 256:
+            self.req_user_length.config(text="✅ Entre 4 y 256 caracteres", fg="#00CC00")
+        else:
+            self.req_user_length.config(text="❌ Entre 4 y 256 caracteres", fg=self.c4)
+        
+        # Validar solo alfanumérico (letras y números, sin caracteres especiales ni espacios)
+        if username.isalnum():
+            self.req_user_alphanumeric.config(text="✅" + t("restriccion2"), fg="#00CC00")
+        else:
+            self.req_user_alphanumeric.config(text="❌" + t("restriccion2"), fg=self.c4)
+
+
+    def validar_usuario_final(self, username):
+        """Valida el usuario antes de registrar y muestra mensajes de error"""
+        
+        # Verificar longitud
+        if len(username) < 4 or len(username) > 256:
+            messagebox.showerror(
+                t("user_invalid"),
+                t("condicion_user1")
+            )
+            return False
+        
+        # Verificar solo alfanumérico (sin caracteres especiales ni espacios)
+        if not username.isalnum():
+            messagebox.showerror(
+                t("user_invalid"),
+                t("condicion_user2")
+            )
+            return False
+        
+        # Verificar que no exista
+        if username in self.users:
+            messagebox.showerror(
+                t("user_ind"),
+                t("user_ocupado")
+            )
+            return False
+        
+        return True

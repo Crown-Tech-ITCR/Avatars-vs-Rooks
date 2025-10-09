@@ -1,8 +1,0 @@
-{
-    "oijoijr": {
-        "numero_enc": "rwFK2yNXgobCo+d/nca+Ab9XaEPrH/puKzZmlL0XB+TksISy6w==",
-        "expiry_enc": "ILXQchlfoAcQ7xWU6XqC7j40C+OmfrzajTygy7ZNFC1q",
-        "cvv_hash": "$argon2id$v=19$m=65536,t=3,p=4$atJtYstoAF3pI28A48lxUQ$SpIwNOiyEROQf376D17JPax+3T6RSLU+tBWOUayfO6c",
-        "titular_enc": "eixeazIB9dUzB9UNEzsB0A1JaDtspohZwYXrzuuyZHeWM6zogJw="
-    }
-}

@@ -136,7 +136,8 @@ def register_user_aes(username: str, password: str, nombre: str, email: str, nac
         "nombre_enc": enc_nombre,
         "email_enc": enc_email,
         "nacionalidad_enc": enc_nacionalidad,
-        "apellidos_enc": enc_apellidos
+        "apellidos_enc": enc_apellidos,
+        "primerIngreso": True
 
     }
     save_users_aes(users)
@@ -161,7 +162,6 @@ def register_user_card(username: str, cvv: str, numero: str, expiry: str, titula
         "expiry_enc": enc_expiry,
         "cvv_hash": cvv_hash,
         "titular_enc": enc_titular
-
     }
     save_cards_aes(cards)
     print(f"✅ Tarjeta del usuario {username} registrada con éxito")
