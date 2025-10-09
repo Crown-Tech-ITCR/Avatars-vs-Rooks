@@ -127,6 +127,7 @@ LANGUAGES = {
         "pregunta2":"¿Cuál es el nombre de tu mejor amigo de la infancia?",
         "pregunta3":"¿En qué año conociste a tu mejor amigo?",
         "pregunta4":"¿Cuál fue tu primer trabajo?",
+        "correos_permit":"Solo se permiten correos de Gmail, Hotmail u Outlook."
 
 
 
@@ -256,6 +257,7 @@ LANGUAGES = {
         "pregunta2":"What is the name of your best childhood friend?",
         "pregunta3":"What year did you meet your best friend?",
         "pregunta4":"What was your first job?",
+        "correos_permit":"Only Gmail, Hotmail or Outlook emails are allowed."
 
     },
 
@@ -382,6 +384,7 @@ LANGUAGES = {
         "pregunta2":"Mi volt a legjobb gyerekkori barátod neve?",
         "pregunta3":"Melyik évben ismerkedtél meg a legjobb barátoddal?",
         "pregunta4":"Mi volt az első munkád?",
+        "correos_permit":"Csak Gmail, Hotmail vagy Outlook e-mailek engedélyezettek."
 
 
 

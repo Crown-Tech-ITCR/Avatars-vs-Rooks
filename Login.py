@@ -923,11 +923,11 @@ class LoginAvatarsRooks:
         # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
-    
+
         # Frame principal
         recovery_frame = tk.Frame(self.root, bg=self.bg_black)
         recovery_frame.pack(fill=tk.BOTH, expand=True)
-    
+
         # Título
         tk.Label(
             recovery_frame,
@@ -936,78 +936,111 @@ class LoginAvatarsRooks:
             fg=self.c4,
             bg=self.bg_black
         ).pack(pady=30)
-    
+
         # Frame del formulario
-        form_frame = tk.Frame(recovery_frame, bg=self.c1)  # Cambiar bg="#FF0000" por bg=self.c1
+        form_frame = tk.Frame(recovery_frame, bg=self.c1)
         form_frame.pack(pady=20, padx=50, fill=tk.BOTH, expand=True)
-    
-        # Nueva contraseña
+
+        # --- Nueva contraseña ---
         tk.Label(
             form_frame,
             text=t("new_password"),
             font=("Arial", 11),
             fg=self.c6,
-            bg="#FF0000"
+            bg=self.c1
         ).pack(pady=(20, 5), anchor="w", padx=20)
-    
+
+        new_pass_frame = tk.Frame(form_frame, bg=self.c2)
+        new_pass_frame.pack(fill=tk.X, padx=20, pady=5)
+
         new_password_entry = tk.Entry(
-            form_frame,
+            new_pass_frame,
             font=("Arial", 11),
             bg=self.c2,
             fg=self.c6,
             insertbackground=self.c6,
             relief=tk.FLAT,
-            show="*",
+            show="•",
             width=30
         )
-        new_password_entry.pack(pady=5, ipady=8, padx=20)
-    
-        # Confirmar contraseña
+        new_password_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=8)
+
+        # 👁 Botón mostrar/ocultar contraseña nueva
+        show_new_pass_btn = tk.Button(
+            new_pass_frame,
+            text="👁",
+            font=("Arial", 11),
+            bg=self.c2,
+            fg=self.c6,
+            relief=tk.FLAT,
+            borderwidth=0,
+            cursor="hand2",
+            command=lambda: self.toggle_password_field(new_password_entry, show_new_pass_btn)
+        )
+        show_new_pass_btn.pack(side=tk.RIGHT, padx=5)
+
+        # --- Confirmar contraseña ---
         tk.Label(
             form_frame,
             text=t("confirm_password"),
             font=("Arial", 11),
             fg=self.c6,
-            bg="#FF0000"
+            bg=self.c1
         ).pack(pady=(15, 5), anchor="w", padx=20)
-    
+
+        confirm_pass_frame = tk.Frame(form_frame, bg=self.c2)
+        confirm_pass_frame.pack(fill=tk.X, padx=20, pady=5)
+
         confirm_password_entry = tk.Entry(
-            form_frame,
+            confirm_pass_frame,
             font=("Arial", 11),
             bg=self.c2,
             fg=self.c6,
             insertbackground=self.c6,
             relief=tk.FLAT,
-            show="*",
+            show="•",
             width=30
         )
-        confirm_password_entry.pack(pady=5, ipady=8, padx=20)
-    
+        confirm_password_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=8)
+
+        # 👁 Botón mostrar/ocultar confirmación
+        show_confirm_pass_btn = tk.Button(
+            confirm_pass_frame,
+            text="👁",
+            font=("Arial", 11),
+            bg=self.c2,
+            fg=self.c6,
+            relief=tk.FLAT,
+            borderwidth=0,
+            cursor="hand2",
+            command=lambda: self.toggle_password_field(confirm_password_entry, show_confirm_pass_btn)
+        )
+        show_confirm_pass_btn.pack(side=tk.RIGHT, padx=5)
+
+        # --- Función para confirmar el cambio ---
         def reset_password():
             new_pass = new_password_entry.get()
             confirm_pass = confirm_password_entry.get()
-        
+
             if not all([new_pass, confirm_pass]):
                 messagebox.showerror(t("error_enter_all"))
                 return
-        
+
             if new_pass != confirm_pass:
                 messagebox.showerror(t("paswords_notmatch"))
                 return
-        
-            if len(new_pass) < 4:  # Ajusta según tus requisitos
+
+            if len(new_pass) < 4:
                 messagebox.showerror(t("min_caracters"))
                 return
-        
+
             # Restablecer contraseña
             if self.password_recovery.reset_password(username, new_pass):
-                messagebox.showinfo(
-                t("successful_change")
-                )
-                self.reiniciar_login()
+                messagebox.showinfo(t("successful_change"))
+                self.reiniciar_login(self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
             else:
                 messagebox.showerror(t("error_change"))
-    
+
         # Botón restablecer
         reset_btn = tk.Button(
             form_frame,
@@ -1022,20 +1055,21 @@ class LoginAvatarsRooks:
             command=reset_password
         )
         reset_btn.pack(pady=20, ipady=10, ipadx=40)
-    
+
         # Botón cancelar
         cancel_btn = tk.Label(
             form_frame,
             text=t("cancel"),
             font=("Arial", 10),
             fg=self.c3,
-            bg="#FF0000",
+            bg=self.c1,
             cursor="hand2"
         )
         cancel_btn.pack(pady=(10, 20))
         cancel_btn.bind('<Button-1>', lambda e: self.reiniciar_login(
             self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
         ))
+
 
 
     def create_register_widgets(self):
@@ -1892,9 +1926,25 @@ class LoginAvatarsRooks:
             messagebox.showerror(t("error_email"))
             return
         
+        # Validación del correo electrónico
         if "@" not in correo or "." not in correo:
-            messagebox.showerror(t("error_email2"))
+            messagebox.showerror("Error", "Correo electrónico no válido.")
             return
+
+        # Convertir a minúsculas para evitar errores por mayúsculas
+        correo = correo.lower()
+
+        # Dominios permitidos
+        dominios_permitidos = ["@gmail.com", "@hotmail.com", "@outlook.com", "@outlook.es"]
+
+        # Verificar dominio permitido
+        if not any(correo.endswith(dominio) for dominio in dominios_permitidos):
+            messagebox.showerror(
+                t("error_email2"),
+                t("correos_permit")
+            )
+            return
+
         
         if username == t("insert_username") or not username:
             messagebox.showerror(t("user_error"))

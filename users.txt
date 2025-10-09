@@ -18,5 +18,15 @@
         "primerIngreso": true,
         "security_question_enc": "XSFNBMNJhHyOHfVWmOJxip4CxAgKBh4QRZIh5KU47Z+vEobevdpM/9CYlzKSvLg2VJC57vYReK7GO8jWAZupOfAkkmn3mA==",
         "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$NKu1h/mrEZw4CGT3EBl4+A$4qFhAeUVdHYSLbJBPp88daez/l15lf2evL0kNC1maP0"
+    },
+    "Arima": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$92UyRA+fQOAp5TFsgtFVpQ$Z9GpkU7eOh6W/J0onp+J4LNEP/ri0XQceMIy5/9SiDo",
+        "nombre_enc": "+cK/lcOWy5KSbOqVi3iAOH0b0epWj8C3A1Uh61ntBFVO",
+        "email_enc": "F91r1ygyj8BJXp0HORvySInJXQNvkk+isk6vojR6xnlbFBTYArHO8wEj",
+        "nacionalidad_enc": "/hCtU5nwxhXFVCLheEoozHdJbjxtG3CpyeTRjZ+TnLg0mwA=",
+        "apellidos_enc": "t7z8TqbD/WVEa47dhnOCDBPjqN9F0IfT7DlcNb9IHEjZ6+w2",
+        "primerIngreso": true,
+        "security_question_enc": "m/ZQMtZh3R8QftgENWa8FBOPPKdoIA/LrRyoNLj6OdpZ7W0/r2f4nK+01HWSLHSC5l7cRtLHfdsJFHiT37uzS4z+pYnHSrw=",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$bKj9ThXOuht4iKZt7GrSsA$DqQmwfwVyPqvWnXFccjCltP3ZOM/Afk6gi1h5sF4MyM"
     }
 }
