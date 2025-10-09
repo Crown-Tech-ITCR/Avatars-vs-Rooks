@@ -639,7 +639,8 @@ class LoginAvatarsRooks:
                 if encrip_aes.verify_password(users_aes[username]['password_hash'], password):
                     nombre = encrip_aes.decrypt_data(users_aes[username]['nombre_enc'], self.master_key)
                     self.login_frame.pack_forget()
-                    MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login)
+                    MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login, 
+                    self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
 
                 else:
                     messagebox.showerror("Error", "Usuario o contraseña incorrectos")

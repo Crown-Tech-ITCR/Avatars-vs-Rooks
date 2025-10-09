@@ -70,5 +70,14 @@
         "apellidos_enc": "hqzuOokBg0RUj0MSYavQPP4cS3uGDZjV2xf4rV9c3NM=",
         "security_question_enc": "GbuC1DrVPyvQVQ8C5MwzUTwDlnei/y3S4ZnXvMMzA1UIvWb1lvdxqqY9lmvetcl1NY/N+ov1aQvOImQNmmGdL21K/3clk1A=",
         "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$iXJqwApSvBIVcN/qBlo3NA$revvj1ZCKxJc/emWDFVPPbl+UqVM8P3o1T2ctn7LCEs"
+    },
+    "Lanita": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$BsMJqlnMQmbPzs6msMUE6w$BaG6l7BtbRlNbLdK8PlEPbryh7d3BWNq0Hq9m2mYxCo",
+        "nombre_enc": "gAOcIyG9UcwjzHcmDeVA3FNdL+f7PrzApUbuV3cneRRMOg==",
+        "email_enc": "ePKbzor2u+5HK/PjmOqXgMwJ9YwRrbEVdZChOCv4DgNsGtlMs/EnACyPyKGlmzPSp9o=",
+        "nacionalidad_enc": "+B3yO5gJX1ad9jY6w9pI/Pg1G1nPzn5Ld4ICr3tb8hpPCEVmlO1k",
+        "apellidos_enc": "9H4XGS9IPv65qgbsYU4RrBGok0N2Eg93nYEm4ZHG8sYqUDA=",
+        "security_question_enc": "qUGEWOw5zgtA5iwMYla+vidaSP7iEencI4Ya8p6uLbro9arXt/w3vW6F1dZIylZfO+hQ2Hj1rvhy1SzLbQQgVr4BUd4d0Nc=",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$Ve6KXXiXZT/AkUr/eCNgPw$X9sfG4tUXxzxCSX443itwEaZ66feJrkURGUPWdNeRHQ"
     }
 }
