@@ -811,12 +811,14 @@ class LoginAvatarsRooks:
             form_frame,
             text=t("return_login"),
             font=("Arial", 10),
-            fg=self.c3,
+            fg=self.c6,
             bg=self.c1,
             cursor="hand2"
         )
         back_btn.pack(pady=(10, 20))
-        back_btn.bind('<Button-1>', lambda e: self.reiniciar_login())
+        back_btn.bind('<Button-1>', lambda e: self.reiniciar_login(
+            self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+        ))
 
     def show_security_question(self, username, question):
         """Muestra la pregunta de seguridad para verificar"""
@@ -840,10 +842,7 @@ class LoginAvatarsRooks:
         # Frame del formulario
         form_frame = tk.Frame(recovery_frame, bg=self.c1)
         form_frame.pack(pady=20, padx=50, fill=tk.BOTH, expand=True)
-
-        print("Form frame creado")
-        print(f"widht: {form_frame.winfo_reqwidth()}")
-        print(f"Height: {form_frame.winfo_reqheight()}")
+        
 
     
         # Mostrar pregunta
@@ -915,7 +914,9 @@ class LoginAvatarsRooks:
             cursor="hand2"
         )
         cancel_btn.pack(pady=(10, 20))
-        cancel_btn.bind('<Button-1>', lambda e: self.reiniciar_login())
+        cancel_btn.bind('<Button-1>', lambda e: self.reiniciar_login(
+            self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+        ))
     
     def show_reset_password(self, username):
         """Muestra el formulario para restablecer contraseña"""
@@ -1032,7 +1033,9 @@ class LoginAvatarsRooks:
             cursor="hand2"
         )
         cancel_btn.pack(pady=(10, 20))
-        cancel_btn.bind('<Button-1>', lambda e: self.reiniciar_login())
+        cancel_btn.bind('<Button-1>', lambda e: self.reiniciar_login(
+            self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+        ))
 
 
     def create_register_widgets(self):
