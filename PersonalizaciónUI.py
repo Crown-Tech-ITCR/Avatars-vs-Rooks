@@ -28,6 +28,8 @@ class MenuPersonalizacion:
         
         self.root.title("Personalización de Usuario")
         self.root.configure(bg=self.c1)
+
+        self.root.protocol("WM_DELETE_WINDOW", self.cerrar_ventana)
         
         self.crear_interfaz()
 
@@ -239,6 +241,28 @@ class MenuPersonalizacion:
             fg=self.c7
         )
         self.label_artista.pack(pady=(2, 5))
+
+        # ========== CONTROLES DE REPRODUCCIÓN ==========
+        controls_frame = tk.Frame(content_musica, bg=self.c2)
+        controls_frame.pack(pady=15)
+
+        # Botón Pausar/Reanudar
+        self.btn_pausar = tk.Button(
+            controls_frame,
+            text="⏸ Pausar",
+            font=("Arial", 11, "bold"),
+            bg=self.c4,
+            fg=self.c6,
+            relief=tk.FLAT,
+            cursor="hand2",
+            padx=20,
+            pady=6,
+            command=self.toggle_pausa
+        )
+        self.btn_pausar.pack(side=tk.LEFT, padx=5)
+
+        # Variable para saber si está pausado
+        self.musica_pausada = False
 
         # ========== BÚSQUEDA ==========
         search_frame = tk.Frame(content_musica, bg=self.c2)
@@ -572,3 +596,25 @@ class MenuPersonalizacion:
         
         # Forzar actualización visual
         self.root.update_idletasks()
+
+    def toggle_pausa(self):
+        """Alterna entre pausar y reanudar la música"""
+        if self.musica_pausada:
+            # Reanudar
+            self.spotify_manager.reanudar_musica()
+            self.btn_pausar.config(text="⏸ Pausar")
+            self.musica_pausada = False
+        else:
+            # Pausar
+            self.spotify_manager.pausar_musica()
+            self.btn_pausar.config(text="▶ Reanudar")
+            self.musica_pausada = True
+
+    def cerrar_ventana(self):
+        """Maneja el cierre de la ventana, deteniendo la música primero"""
+        try:
+            self.spotify_manager.detener_musica()
+        except:
+            pass  # Ignorar errores al detener música
+        
+        self.root.destroy()  # Cierra la aplicación

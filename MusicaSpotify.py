@@ -40,6 +40,7 @@ class SpotifyManager:
         
         if not device_id:
             return False
+            
         
         self.sp.start_playback(device_id=device_id, uris=[track_uri])
         self.sp.repeat("track", device_id=device_id)

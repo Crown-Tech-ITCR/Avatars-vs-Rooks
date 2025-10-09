@@ -440,18 +440,19 @@ class LoginAvatarsRooks:
             event.widget.insert(0, placeholder)
             event.widget.config(fg=self.colors[2])
 
-    def clear_placeholder_password(self, event, placeholder):
-        """Limpia el placeholder al hacer focus"""
-        if event.widget.get() == placeholder:
-            event.widget.delete(0, tk.END)
-            event.widget.config(fg=self.colors[0], show="•") 
+    def clear_placeholder_password(self, event, placeholder_text):
+        """Limpia el placeholder de los campos de contraseña"""
+        entry = event.widget
+        if entry.get() == placeholder_text:
+            entry.delete(0, tk.END)
+            entry.config(show="•", fg=self.c1) 
 
-    def restore_placeholder_password(self, event, placeholder):
+    def restore_placeholder_password(self, event, placeholder_text):
         """Restaura el placeholder si el campo está vacío"""
-        if event.widget.get() == "":
-            event.widget.config(show="") 
-            event.widget.insert(0, placeholder)
-            event.widget.config(fg=self.colors[1])
+        entry = event.widget
+        if entry.get() == "":
+            entry.insert(0, placeholder_text)
+            entry.config(show="", fg=self.c3) 
 
     def toggle_password(self):
         """Muestra u oculta la contraseña"""
@@ -1339,6 +1340,32 @@ class LoginAvatarsRooks:
         self.usuario_entry.insert(0, "Ingrese su usuario")
         self.usuario_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su usuario"))
         self.usuario_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su usuario"))
+        self.usuario_entry.bind('<KeyRelease>', self.validar_usuario_tiempo_real)
+
+        # Frame para mostrar requisitos de usuario
+        requirements_user_frame = tk.Frame(inner_frame, bg=self.c1)
+        requirements_user_frame.pack(fill=tk.X, pady=(5, 15))
+
+        # Lista de requisitos con sus checks
+        self.req_user_length = tk.Label(
+            requirements_user_frame,
+            text="❌ Entre 4 y 256 caracteres",
+            font=("Arial", 9),
+            bg=self.c1,
+            fg=self.c7,
+            anchor="w"
+        )
+        self.req_user_length.pack(anchor="w", pady=2)
+
+        self.req_user_alphanumeric = tk.Label(
+            requirements_user_frame,
+            text="❌ Solo letras y números (sin espacios ni caracteres especiales)",
+            font=("Arial", 9),
+            bg=self.c1,
+            fg=self.c7,
+            anchor="w"
+        )
+        self.req_user_alphanumeric.pack(anchor="w", pady=2)
 
         # Correo electrónico
         tk.Label(
@@ -1373,16 +1400,66 @@ class LoginAvatarsRooks:
         pass_frame1 = tk.Frame(inner_frame, bg=self.colors[5])
         pass_frame1.pack(fill=tk.X, pady=(0, 15))
         
+        # Frame para mostrar requisitos de contraseña
+        requirements_frame = tk.Frame(inner_frame, bg=self.colors[0])
+        requirements_frame.pack(fill=tk.X, pady=(5, 15))
+
+        # Lista de requisitos con sus checks
+        self.req_length = tk.Label(
+            requirements_frame,
+            text=" Entre 8 y 23 caracteres",
+            font=("Arial", 9),
+            bg=self.c1,
+            fg=self.c7,  # Color gris
+            anchor="w"
+        )
+        self.req_length.pack(anchor="w", pady=2)
+
+        self.req_alphanumeric = tk.Label(
+            requirements_frame,
+            text=" Solo letras y números",
+            font=("Arial", 9),
+            bg=self.c1,
+            fg=self.c7,
+            anchor="w"
+        )
+        self.req_alphanumeric.pack(anchor="w", pady=2)
+
         self.new_pass_entry = tk.Entry(
             pass_frame1,
             font=("Arial", 11),
-            show="•",
+            show="",
             bg=self.colors[5],
             fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0
         )
+        
+        self.req_no_spaces = tk.Label(
+            requirements_frame,
+            text=" ❌ Sin espacios ni caracteres especiales",
+            font=("Arial", 9),
+            bg=self.c1,
+            fg=self.c7,
+            anchor="w"
+        )
+        self.req_no_spaces.pack(anchor="w", pady=2)
+
+        self.new_pass_entry = tk.Entry(
+            pass_frame1,
+            font=("Arial", 11),
+            show="",
+            bg=self.colors[5],
+            fg=self.colors[0],
+            relief=tk.FLAT,
+            borderwidth=0
+        )
+
         self.new_pass_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
+        # Vincular validación en tiempo real
+        self.new_pass_entry.bind('<KeyRelease>', self.validar_contrasena_tiempo_real)
+        self.new_pass_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, "Ingrese su contraseña"))
+        self.new_pass_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, "Ingrese su contraseña"))
         self.new_pass_entry.insert(0, "Ingrese su contraseña")
         
         show_pass1_btn = tk.Button(
@@ -1413,7 +1490,7 @@ class LoginAvatarsRooks:
         self.confirm_pass_entry = tk.Entry(
             pass_frame2,
             font=("Arial", 11),
-            show="•",
+            show="",
             bg=self.colors[5],
             fg=self.colors[0],
             relief=tk.FLAT,
@@ -1422,6 +1499,9 @@ class LoginAvatarsRooks:
         self.confirm_pass_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
         self.confirm_pass_entry.insert(0, "Ingrese su contraseña")
         
+        self.confirm_pass_entry.bind('<FocusIn>', lambda e: self.clear_placeholder_password(e, "Ingrese su contraseña"))
+        self.confirm_pass_entry.bind('<FocusOut>', lambda e: self.restore_placeholder_password(e, "Ingrese su contraseña"))
+
         show_pass2_btn = tk.Button(
             pass_frame2,
             text="👁",
@@ -1759,8 +1839,21 @@ class LoginAvatarsRooks:
         nacionalidad = self.nacionalidad_combobox.get()
         correo = self.correo_entry.get()
         username = self.usuario_entry.get()
+
+        if not self.validar_usuario_final(username):
+            return  # No continuar si el usuario no es válid
+    
         password = self.new_pass_entry.get()
         confirm_pass = self.confirm_pass_entry.get()
+
+        if not self.validar_contrasena_final(password):
+            messagebox.showerror("Error", "Las contraseñas no cumple con los requerimientos")
+        
+        # Verificar que las contraseñas coincidan
+        if password != confirm_pass:
+            messagebox.showerror("Error", "Las contraseñas no coinciden")
+            return
+    
         security_question = self.security_question_combobox.get()
         security_answer = self.security_answer_entry.get()
 
@@ -1853,8 +1946,111 @@ class LoginAvatarsRooks:
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        # IMPORTANTE: Actualizar fondo de la ventana principal con self.colors[0]
+        # Actualizar fondo de la ventana principal con self.colors[0]
         self.root.configure(bg=c1)
 
         self.create_login_widgets()
         self.login_frame.pack(fill=tk.BOTH, expand=True)
+
+    #Estas funciones verifican que el usuario o la contrasena sean validos
+
+    def validar_contrasena_tiempo_real(self, event=None):
+        """Valida la contraseña en tiempo real y actualiza los checks visuales"""
+        password = self.new_pass_entry.get()
+        
+        # Si es el placeholder, no validar
+        if password == "Ingrese su contraseña" or password == "":
+            self.req_length.config(text="❌ Entre 8 y 23 caracteres", fg=self.c7)  # ← Cambiar
+            self.req_alphanumeric.config(text="❌ Solo letras y números", fg=self.c7)  # ← Cambiar
+            self.req_no_spaces.config(text="❌ Sin espacios ni caracteres especiales", fg=self.c7)  # ← Cambiar
+            return
+        
+        # Validar longitud (8-23 caracteres)
+        if 8 <= len(password) <= 23:
+            self.req_length.config(text="✅ Entre 8 y 23 caracteres", fg="#00CC00")
+        else:
+            self.req_length.config(text="❌ Entre 8 y 23 caracteres", fg=self.c4) 
+        
+        # Validar solo alfanumérico (letras y números, sin caracteres especiales)
+        if password.isalnum():
+            self.req_alphanumeric.config(text="✅ Solo letras y números", fg="#00CC00")
+            self.req_no_spaces.config(text="✅ Sin espacios ni caracteres especiales", fg="#00CC00")
+        else:
+            self.req_alphanumeric.config(text="❌ Solo letras y números", fg=self.c4)
+            if ' ' in password:
+                self.req_no_spaces.config(text="❌ Sin espacios ni caracteres especiales", fg=self.c4) 
+            else:
+                self.req_no_spaces.config(text="❌ Sin espacios ni caracteres especiales", fg=self.c4)  
+
+    def validar_contrasena_final(self, password):
+        """Valida la contraseña antes de registrar y muestra mensajes de error"""
+        
+        # Verificar longitud
+        if len(password) < 8 or len(password) > 23:
+            messagebox.showerror(
+                "Contraseña inválida",
+                "La contraseña debe tener entre 8 y 23 caracteres alfanuméricos."
+            )
+            return False
+        
+        # Verificar solo alfanumérico (sin caracteres especiales ni espacios)
+        if not password.isalnum():
+            messagebox.showerror(
+                "Contraseña inválida",
+                "La contraseña solo puede contener letras y números\n(sin caracteres especiales ni espacios)."
+            )
+            return False
+        
+        return True
+    
+    def validar_usuario_tiempo_real(self, event=None):
+        """Valida el usuario en tiempo real y actualiza los checks visuales"""
+        username = self.usuario_entry.get()
+        
+        # Si es el placeholder o está vacío, resetear
+        if username == "Ingrese su usuario" or username == "":
+            self.req_user_length.config(text="❌ Entre 4 y 256 caracteres", fg=self.c7)
+            self.req_user_alphanumeric.config(text="❌ Solo letras y números (sin espacios ni caracteres especiales)", fg=self.c7)
+            return
+        
+        # Validar longitud (4-256 caracteres)
+        if 4 <= len(username) <= 256:
+            self.req_user_length.config(text="✅ Entre 4 y 256 caracteres", fg="#00CC00")
+        else:
+            self.req_user_length.config(text="❌ Entre 4 y 256 caracteres", fg=self.c4)
+        
+        # Validar solo alfanumérico (letras y números, sin caracteres especiales ni espacios)
+        if username.isalnum():
+            self.req_user_alphanumeric.config(text="✅ Solo letras y números (sin espacios ni caracteres especiales)", fg="#00CC00")
+        else:
+            self.req_user_alphanumeric.config(text="❌ Solo letras y números (sin espacios ni caracteres especiales)", fg=self.c4)
+        
+        
+    def validar_usuario_final(self, username):
+        """Valida el usuario antes de registrar y muestra mensajes de error"""
+        
+        # Verificar longitud
+        if len(username) < 4 or len(username) > 256:
+            messagebox.showerror(
+                "Usuario inválido",
+                "El nombre de usuario debe tener entre 4 y 256 caracteres alfanuméricos."
+            )
+            return False
+        
+        # Verificar solo alfanumérico (sin caracteres especiales ni espacios)
+        if not username.isalnum():
+            messagebox.showerror(
+                "Usuario inválido",
+                "El nombre de usuario solo puede contener letras y números\n(sin caracteres especiales ni espacios)."
+            )
+            return False
+        
+        # Verificar que no exista
+        if username in self.users:
+            messagebox.showerror(
+                "Usuario no disponible",
+                "Este nombre de usuario ya está en uso.\n\nPor favor, elige otro."
+            )
+            return False
+        
+        return True
