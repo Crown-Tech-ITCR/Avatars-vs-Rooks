@@ -113,6 +113,32 @@ def save_cards_aes(cards: dict):
     with open(CARDS_FILE, "w", encoding="utf-8") as f:
         json.dump(cards, f, ensure_ascii=False, indent=4)
 
+
+
+def get_users_decrypted() -> dict:
+    users_enc = load_users_aes()
+    users_dec = {}
+    for enc_username, data in users_enc.items():
+        try:
+            dec_username = decrypt_data(enc_username, master_key)
+            users_dec[dec_username] = data
+        except Exception:
+            continue
+    return users_dec
+
+def get_cards_decrypted() -> dict:
+    cards_enc = load_cards_aes()
+    cards_dec = {}
+    for enc_username, data in cards_enc.items():
+        try:
+            dec_username = decrypt_data(enc_username, master_key)
+            cards_dec[dec_username] = data
+        except Exception:
+            continue
+    return cards_dec
+
+
+
 # -----------------------
 # Registro y login
 # -----------------------
@@ -126,12 +152,13 @@ def register_user_aes(username: str, password: str, nombre: str, email: str, nac
     pwd_hash = hash_password(password)
 
     # Cifrado de datos personales
+    enc_username = encrypt_data(username, master_key)
     enc_nombre = encrypt_data(nombre, master_key)
     enc_email = encrypt_data(email, master_key)
     enc_nacionalidad = encrypt_data(nacionalidad, master_key)
     enc_apellidos = encrypt_data(apellidos, master_key)
 
-    users[username] = {
+    users[enc_username] = {
         "password_hash": pwd_hash,
         "nombre_enc": enc_nombre,
         "email_enc": enc_email,
@@ -153,11 +180,12 @@ def register_user_card(username: str, cvv: str, numero: str, expiry: str, titula
     cvv_hash = hash_password(cvv)
 
     # Cifrado de datos personales
+    enc_username = encrypt_data(username, master_key)
     enc_numero = encrypt_data(numero, master_key)
     enc_expiry = encrypt_data(expiry, master_key)
     enc_titular = encrypt_data(titular, master_key)
 
-    cards[username] = {
+    cards[enc_username] = {
         "numero_enc": enc_numero,
         "expiry_enc": enc_expiry,
         "cvv_hash": cvv_hash,
@@ -168,7 +196,17 @@ def register_user_card(username: str, cvv: str, numero: str, expiry: str, titula
 
 def login_user(username: str, password: str):
     users = load_users_aes()
-    if username not in users:
+    key = None
+    for enc_username in users:
+        try:
+            dec_username = decrypt_data(enc_username, master_key)
+            if username == dec_username:
+                key = enc_username
+                break
+        except Exception:
+            continue
+    
+    if not key:
         print("❌ Usuario no encontrado")
         return
 

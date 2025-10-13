@@ -1,0 +1,8 @@
+{
+    "mxEidm3wds7PbYmizzHBbNyuQixcFRSLwwEhs0aiBGoEX10=": {
+        "numero_enc": "fXkd/skwrTVvh7NM7V+3No1rnmdShI1X/ewshzokM6GdSflI+Q==",
+        "expiry_enc": "UjhX2nwvjZkkD077jIn46GUOOlevHYn55nwddWbFRiw=",
+        "cvv_hash": "$argon2id$v=19$m=65536,t=3,p=4$KZTOnFIyPC983imTJS8vEQ$sf85vRybjLyS2TijuGH6FO95+zHgy95W1qIn6G1xHcg",
+        "titular_enc": "XBEGUrTzep2OM5WQ2bzbViG54b1uFcmCZrqEh2ttWYpaYGaZ7nw="
+    }
+}

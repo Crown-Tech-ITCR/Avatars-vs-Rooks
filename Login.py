@@ -69,7 +69,7 @@ class LoginAvatarsRooks:
     def load_users(self):
         """Carga todos los datos de usuarios"""
         try:
-            datos = encrip_aes.load_users_aes()
+            datos = encrip_aes.get_users_decrypted()
             self.users = {}
             
             for username, user_data in datos.items():
@@ -87,7 +87,7 @@ class LoginAvatarsRooks:
     def load_cards(self):
         """Carga datos de tarjetas"""
         try:
-            cartas = encrip_aes.load_cards_aes()
+            cartas = encrip_aes.get_cards_decrypted()
             self.cards = {}
             
             for username, card_data in cartas.items():
@@ -635,7 +635,7 @@ class LoginAvatarsRooks:
             messagebox.showerror(t("password_error"))
             return
         
-        users_aes = encrip_aes.load_users_aes()
+        users_aes = encrip_aes.get_users_decrypted()
         
         if username in users_aes:
             try:
@@ -774,7 +774,7 @@ class LoginAvatarsRooks:
                 messagebox.showerror(t("error_username"))
                 return
             #Verificar si el usuario existe
-            users = encrip_aes.load_users_aes()
+            users = encrip_aes.get_users_decrypted()
             if username not in users:
                 messagebox.showerror(t("error_usernot_found"))
                 return
@@ -1958,7 +1958,7 @@ class LoginAvatarsRooks:
             messagebox.showerror(t("paswords_notmatch"))
             return
         
-        users_aes = encrip_aes.load_users_aes()
+        users_aes = encrip_aes.get_users_decrypted()
         if username in users_aes:
             messagebox.showerror(t("user_exist"))
             return
