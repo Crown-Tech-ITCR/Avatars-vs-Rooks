@@ -80,6 +80,7 @@ class LoginAvatarsRooks:
                     'nacionalidad': encrip_aes.decrypt_data(user_data['nacionalidad_enc'], self.master_key),
                     'correo': encrip_aes.decrypt_data(user_data['email_enc'], self.master_key)
                 }
+            print(self.users)
         except Exception as e:
             print(f"Error al cargar usuarios: {e}")
             self.users = {}
@@ -623,38 +624,35 @@ class LoginAvatarsRooks:
         self.show_register_window()
 
     def login(self):
-        """Valida credenciales de usuario"""
         username = self.username_entry.get()
         password = self.password_entry.get()
-
-        if not username or username == t("username_placeholder"):
-            messagebox.showerror(t("user_error"))
-            return
-        
-        if not password:
-            messagebox.showerror(t("password_error"))
-            return
-        
-        users_aes = encrip_aes.get_users_decrypted()
-        
-        if username in users_aes:
+        users_enc = encrip_aes.load_users_aes()  # Diccionario con claves encriptadas
+        key = None
+        for enc_username in users_enc:
             try:
-                if encrip_aes.verify_password(users_aes[username]['password_hash'], password):
-                    nombre = encrip_aes.decrypt_data(users_aes[username]['nombre_enc'], self.master_key)
-                    primerIngreso = users_aes[username]['primerIngreso']
-                    if primerIngreso:
-                        self.login_frame.pack_forget()
-                        users_aes[username]['primerIngreso'] = False
-                        encrip_aes.save_users_aes(users_aes)
-                        MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login, 
-                        self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
-                    else:
-                        messagebox.showinfo(t("user_ver"))
+                dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
+                if username == dec_username:
+                    key = enc_username
+                    break
+            except Exception:
+                continue
 
-                else:
-                    messagebox.showerror(t("error_uc"))
-            except Exception as e:
-                messagebox.showerror(t("error_credentials").format(error=e))
+        if not key:
+            messagebox.showerror(t("error_uc"))
+            return
+
+        record = users_enc[key]
+        if encrip_aes.verify_password(record['password_hash'], password):
+            nombre = encrip_aes.decrypt_data(record['nombre_enc'], self.master_key)
+            primerIngreso = record['primerIngreso']
+            if primerIngreso:
+                self.login_frame.pack_forget()
+                users_enc[key]['primerIngreso'] = False  # Actualiza en el diccionario cifrado
+                encrip_aes.save_users_aes(users_enc)     # Guarda el diccionario cifrado
+                MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login,
+                                self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
+            else:
+                messagebox.showinfo("Próximamente", "Aquí se abrirá el menú principal del juego")
         else:
             messagebox.showerror(t("error_uc"))
 
