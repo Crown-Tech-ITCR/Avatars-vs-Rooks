@@ -142,7 +142,7 @@ def get_cards_decrypted() -> dict:
 # -----------------------
 # Registro y login
 # -----------------------
-def register_user_aes(username: str, password: str, nombre: str, email: str, nacionalidad: str, apellidos: str):
+def register_user_aes(username: str, password: str, nombre: str, email: str, nacionalidad: str, apellidos: str, telefono : str):
     users = load_users_aes()
     if username in users:
         print("❌ Usuario ya existe")
@@ -157,6 +157,7 @@ def register_user_aes(username: str, password: str, nombre: str, email: str, nac
     enc_email = encrypt_data(email, master_key)
     enc_nacionalidad = encrypt_data(nacionalidad, master_key)
     enc_apellidos = encrypt_data(apellidos, master_key)
+    enc_telefono = encrypt_data(telefono, master_key)
 
     users[enc_username] = {
         "password_hash": pwd_hash,
@@ -164,6 +165,7 @@ def register_user_aes(username: str, password: str, nombre: str, email: str, nac
         "email_enc": enc_email,
         "nacionalidad_enc": enc_nacionalidad,
         "apellidos_enc": enc_apellidos,
+        "telefono_enc": enc_telefono,
         "primerIngreso": True
 
     }
