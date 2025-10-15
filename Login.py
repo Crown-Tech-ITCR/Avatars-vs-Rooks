@@ -78,7 +78,8 @@ class LoginAvatarsRooks:
                     'nombre': encrip_aes.decrypt_data(user_data['nombre_enc'], self.master_key),
                     'apellidos': encrip_aes.decrypt_data(user_data['apellidos_enc'], self.master_key),
                     'nacionalidad': encrip_aes.decrypt_data(user_data['nacionalidad_enc'], self.master_key),
-                    'correo': encrip_aes.decrypt_data(user_data['email_enc'], self.master_key)
+                    'correo': encrip_aes.decrypt_data(user_data['email_enc'], self.master_key),
+                    'telefono': encrip_aes.decrypt_data(user_data['telefono_enc'], self.master_key) 
                 }
             print(self.users)
         except Exception as e:
@@ -654,7 +655,7 @@ class LoginAvatarsRooks:
             else:
                 messagebox.showinfo("Próximamente", "Aquí se abrirá el menú principal del juego")
         else:
-            messagebox.showerror(t("error_uc"))
+            messagebox.showerror("Error",t("error_uc"))
 
     def face_recognition(self):
         """Login con reconocimiento facial"""
@@ -665,7 +666,7 @@ class LoginAvatarsRooks:
             Face_Recognition(temp_root).login_with_face_gui()
             temp_root.destroy()
         except Exception as e:
-            messagebox.showerror(t("error_facial").format(error=e))
+            messagebox.showerror("Error",t("error_facial").format(error=e))
 
     def update_days(self, event=None):
         "Actualizar los dias segun el mes y año seleccionados"
@@ -722,9 +723,9 @@ class LoginAvatarsRooks:
 
                 self.photo_btn.image = self.profile_photo_display  # Mantener referencia
             
-                messagebox.showinfo(t("succes_photo"))
+                messagebox.showinfo("Error",t("succes_photo"))
             except Exception as e:
-                messagebox.showerror(t("error_photo").format(error=e))
+                messagebox.showerror("Error",t("error_photo").format(error=e))
     
     def forgot_password(self):
         self.login_frame.pack_forget()
@@ -769,25 +770,23 @@ class LoginAvatarsRooks:
             username = username_entry.get().strip()
 
             if not username:
-                messagebox.showerror(t("error_username"))
+                messagebox.showerror("Error",t("error_username"))
                 return
             #Verificar si el usuario existe
             users = encrip_aes.get_users_decrypted()
             if username not in users:
-                messagebox.showerror(t("error_usernot_found"))
+                messagebox.showerror("Error",t("error_usernot_found"))
                 return
             
             if not self.password_recovery.user_has_security_question(username):
-                messagebox.showerror(
-                    t("error_usernot_question")
-                )
+                messagebox.showerror("Error",t("error_usernot_question"))
                 return
             question = self.password_recovery.get_security_question(username)
 
             if question:
                 self.show_security_question(username,question)
             else:
-                messagebox.showerror(t("error_recovery_question"))
+                messagebox.showerror("Error",t("error_recovery_question"))
 
         #Boton Continuar
         continue_btn = tk.Button(
@@ -877,7 +876,7 @@ class LoginAvatarsRooks:
             answer = answer_entry.get().strip()
         
             if not answer:
-                messagebox.showerror(t("enter_answer"))
+                messagebox.showerror("Error",t("enter_answer"))
                 return
         
             # Verificar respuesta
@@ -1021,15 +1020,15 @@ class LoginAvatarsRooks:
             confirm_pass = confirm_password_entry.get()
 
             if not all([new_pass, confirm_pass]):
-                messagebox.showerror(t("error_enter_all"))
+                messagebox.showerror("Error",t("error_enter_all"))
                 return
 
             if new_pass != confirm_pass:
-                messagebox.showerror(t("paswords_notmatch"))
+                messagebox.showerror("Error",t("paswords_notmatch"))
                 return
 
             if len(new_pass) < 4:
-                messagebox.showerror(t("min_caracters"))
+                messagebox.showerror("Error",t("min_caracters"))
                 return
 
             # Restablecer contraseña
@@ -1037,7 +1036,7 @@ class LoginAvatarsRooks:
                 messagebox.showinfo(t("successful_change"))
                 self.reiniciar_login(self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
             else:
-                messagebox.showerror(t("error_change"))
+                messagebox.showerror("Error",t("error_change"))
 
         # Botón restablecer
         reset_btn = tk.Button(
@@ -1428,6 +1427,28 @@ class LoginAvatarsRooks:
         self.correo_entry.insert(0, t("insert_email"))
         self.correo_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, t("insert_email")))
         self.correo_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, t("insert_email")))
+
+        #Correo electronico
+        tk.Label(
+            inner_frame,
+            text="Teléfono", 
+            font=("Arial", 10, "bold"),
+            bg=self.colors[0],
+            fg=self.colors[5]
+        ).pack(anchor="w", pady=(0, 5))
+
+        self.telefono_entry = tk.Entry(
+            inner_frame,
+            font=("Arial", 11),
+            bg=self.colors[5],
+            fg=self.colors[0],
+            relief=tk.FLAT
+        )
+        self.telefono_entry.pack(fill=tk.X, pady=(0, 15), ipady=5)
+        self.telefono_entry.insert(0, "Ingrese su número de teléfono")
+        self.telefono_entry.bind('<FocusIn>', lambda e: self.clear_placeholder(e, "Ingrese su número de teléfono"))
+        self.telefono_entry.bind('<FocusOut>', lambda e: self.restore_placeholder(e, "Ingrese su número de teléfono"))
+
 
         # Contraseña
         tk.Label(
@@ -1882,87 +1903,92 @@ class LoginAvatarsRooks:
         apellidos = self.apellidos_entry.get()
         nacionalidad = self.nacionalidad_combobox.get()
         correo = self.correo_entry.get()
+        telefono = self.telefono_entry.get()
         username = self.usuario_entry.get()
-
-        if not self.validar_usuario_final(username):
-            return  # No continuar si el usuario no es válid
-    
         password = self.new_pass_entry.get()
         confirm_pass = self.confirm_pass_entry.get()
-
-        if not self.validar_contrasena_final(password):
-            messagebox.showerror(t("error_restr_password"))
-        
-        # Verificar que las contraseñas coincidan
-        if password != confirm_pass:
-            messagebox.showerror(t("paswords_notmatch"))
-            return
-    
         security_question = self.security_question_combobox.get()
         security_answer = self.security_answer_entry.get()
 
-
-        # Validar que no sean placeholders
+        #Validaciones
+        # Verifica que todos los campos esten llenos
         if nombre == t("username3") or not nombre:
-            messagebox.showerror(t("error_name"))
+            messagebox.showerror("Error", t("error_name"))
             return
         
         if apellidos == t("insert_sumernames") or not apellidos:
-            messagebox.showerror(t("error_sumername"))
+            messagebox.showerror("Error",t("error_sumername"))
             return
         
-        if not security_answer.strip():
-            messagebox.showerror(t("error_questionsecury"))
-            return
-        
-            
-        if nacionalidad == t("enter_nationality") or not nacionalidad:
-            messagebox.showerror(t("error_nationality"))
+        if nacionalidad == t("enter_nationality") or not nacionalidad or nacionalidad == t("selec_nationality"):
+            messagebox.showerror("Error",t("error_nationality"))
             return
         
         if correo == t("insert_email") or not correo:
-            messagebox.showerror(t("error_email"))
+            messagebox.showerror("Error",t("error_email"))
             return
         
-        # Validación del correo electrónico
+        if telefono == t("insert_phone") or not telefono:
+            messagebox.showerror("Error",t("error_phone"))
+            return
+        
+        if username == t("insert_username") or not username:
+            messagebox.showerror("Error",t("user_error"))
+            return
+        
+        if password == t("password_placeholder") or not password:
+            messagebox.showerror("Error",t("error_password3"))
+            return
+        
+        if confirm_pass == t("password_placeholder") or not confirm_pass:
+            messagebox.showerror("Error",t("error_password3"))
+            return
+        
+        if not security_answer.strip():
+            messagebox.showerror("Error",t("error_questionsecury"))
+            return
+
+        # Verifica que cada uno de los campos tenga el formato correcto
+        
+        # Validar formato de correo
         if "@" not in correo or "." not in correo:
             messagebox.showerror("Error", "Correo electrónico no válido.")
             return
 
-        # Convertir a minúsculas para evitar errores por mayúsculas
+        # Normalizar correo a minúsculas
         correo = correo.lower()
 
-        # Dominios permitidos
+        # Validar dominio permitido
         dominios_permitidos = ["@gmail.com", "@hotmail.com", "@outlook.com", "@outlook.es"]
-
-        # Verificar dominio permitido
         if not any(correo.endswith(dominio) for dominio in dominios_permitidos):
             messagebox.showerror(
                 t("error_email2"),
                 t("correos_permit")
             )
             return
-
         
-        if username == t("insert_username") or not username:
-            messagebox.showerror(t("user_error"))
+        # Validar formato de teléfono
+        telefono_limpio = telefono.replace("-", "").replace(" ", "")
+        if not telefono_limpio.isdigit() or len(telefono_limpio) < 8:
+            messagebox.showerror("Error",t("error_phone_invalid"))
             return
         
-        if password == t("password_placeholder") or not password:
-            messagebox.showerror(t("error_password3"))
+        # Validar formato de usuario (alfanumérico, longitud)
+        if not self.validar_usuario_final(username):
             return
         
+        # Validar formato de contraseña (alfanumérico, longitud)
+        if not self.validar_contrasena_final(password):
+            messagebox.showerror("Error",t("error_restr_password"))
+            return
+        
+        # Verificar que las contraseñas coincidan
         if password != confirm_pass:
-            messagebox.showerror(t("paswords_notmatch"))
+            messagebox.showerror("Error",t("paswords_notmatch"))
             return
-        
-        users_aes = encrip_aes.get_users_decrypted()
-        if username in users_aes:
-            messagebox.showerror(t("user_exist"))
-            return
-        
+             
         try:
-            encrip_aes.register_user_aes(username, password, nombre, correo, nacionalidad, apellidos)
+            encrip_aes.register_user_aes(username, password, nombre, correo, nacionalidad, apellidos, telefono)
             self.load_users()
 
             success, message = self.password_recovery.add_security_question(
@@ -1971,7 +1997,7 @@ class LoginAvatarsRooks:
                 security_answer
             )
             if not success:
-                messagebox.showerror(t("error_guardar_pregunta"))
+                messagebox.showerror("Error",t("error_guardar_pregunta"))
                 return
             
             
@@ -1985,11 +2011,11 @@ class LoginAvatarsRooks:
                     encrip_aes.register_user_card(username, cvv, numero, expiry, titular)
                     self.load_cards()
             
-            messagebox.showinfo(t("register_succselfol"))
+            messagebox.showinfo("Exito",t("register_succselfol"))
             self.show_login_window()
             
         except Exception as e:
-            messagebox.showerror("error_register_usuario")
+            messagebox.showerror("Error", f"{t('error_register_usuario')}\n\nDetalles: {str(e)}")
 
     def reiniciar_login(self, c1, c2, c3, c4, c5, c6, c7):
         """Recrea la interfaz de login"""
