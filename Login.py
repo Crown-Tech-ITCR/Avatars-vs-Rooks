@@ -693,6 +693,22 @@ class LoginAvatarsRooks:
                 self.day_combo.set(days_in_month)
         except:
             pass
+    def ValidarFecha(self):
+        try:
+            from datetime import datetime
+            day = int(self.day_combo.get())
+            month = self.meses.index(self.month_combo.get()) + 1
+            year = int(self.year_combo.get())
+
+            FechaSeleccionada = datetime(year, month, day)
+            today = datetime.now()
+
+            if FechaSeleccionada > today:
+                return False, "La fecha de nacimiento no puede ser futura"
+            
+            return True, ""
+        except ValueError:
+            return False, "Fecha Inválida"
 
     #Seleccionar la foto
     def selec_profile_photo(self):
@@ -1914,6 +1930,7 @@ class LoginAvatarsRooks:
         confirm_pass = self.confirm_pass_entry.get()
         security_question = self.security_question_combobox.get()
         security_answer = self.security_answer_entry.get()
+        is_valid, error_message = self.ValidarFecha()
 
         #Validaciones
         # Verifica que todos los campos esten llenos
@@ -1951,6 +1968,10 @@ class LoginAvatarsRooks:
         
         if not security_answer.strip():
             messagebox.showerror("Error",t("error_questionsecury"))
+            return
+
+        if not is_valid:
+            messagebox.showerror("Error", error_message)
             return
 
         # Verifica que cada uno de los campos tenga el formato correcto

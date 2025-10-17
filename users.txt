@@ -151,5 +151,27 @@
         "primerIngreso": true,
         "security_question_enc": "V3c2XNoCp00J4sw4LDsV9fN/QJ6j9f3LZ4HNae2howOEi2oWwbw3IDGfOoPuXV8UspWPSysBo1CZvw==",
         "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$b7mU9QvZTuxxQ2F4Sh+82w$wkWrJGFoil8Qf8Tm4bzPxw1g+X51Ivj6D8sgCLgjgQs"
+    },
+    "kAKDcWayuYQp2KjCT7tdsw8IELyCK4tbwwHYgfVeA8A=": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$ZchlbzsN/6Kej0eFsGcXzA$mY+MO+oUHhRIR+oPzVccLIulGNwgY/8nJvFLmAoV36M",
+        "nombre_enc": "X68XzlE/YUVcNG1VoL5hTULPLR0v/eay5+k1XweOxGA=",
+        "email_enc": "EKydBXeWPCWTo4NPSnFmr8xKErG4Sz+sV2jD0nOzGiU20AsPEB+DghgD",
+        "nacionalidad_enc": "qr1mIcXMWhxV/ASztc6E4ajjUR1XhG1UAAnDX938eaJJ",
+        "apellidos_enc": "Rr6iHHIPb1kd8WVyZ/a9lp7tXR6HHk9vQue09h7vihw=",
+        "telefono_enc": "6xOnmNz6aJmyDqyLvFLFlsssPegHRD6JRtIsyDQbmFymaJQb",
+        "primerIngreso": false,
+        "security_question_enc": "cZv+AXFtyM3MQ4jpEqruGvckHHKD64arhldg9kA2CF3eagPv9gcWy15i8IsWvBarVFfXrTXvIEGIsjJjTVSmyMVtyLKGiA==",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$Qsn6UUfIQY5db+9vo+sL4g$D8btcTE5Spht+7TlGjLD9uspb/fFhVjovNV50QKwQlQ"
+    },
+    "igEgfiCbz2nOpeE02pMVG1Nw9I2yNWWGNtSDGEeTt04=": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$qV+5yI3yYUrV01s01W6RLA$5K8MyRQCTpDAUw1Qa8aZSZBkuHiZ8sLc8U2ACIm4zGc",
+        "nombre_enc": "Nxbu6CebcebyFoISbLeUvlxe7eEevtXjsWwYhZTQQ78=",
+        "email_enc": "9m0kUm/2Fl3IGQpldk/8QyVtaHf9uEczAuORzz2jz8q93XBOqRmu8DtD",
+        "nacionalidad_enc": "KkpHpRCa/J6S52DGP47ggbUhDl3nyWvnO6EP/2vNzptN2f6NvVA=",
+        "apellidos_enc": "AHJtYOpqIIGoPzb1Sq0GHcQ1v5xmxu1LqQKD0wgsKQ==",
+        "telefono_enc": "tTKOXmCRC53nXeTf8HZmaOzKFWaLfH5RDDdcK9TeZvPKbqxj",
+        "primerIngreso": true,
+        "security_question_enc": "3KIqi1zWWK8fAPfILmi+SmY10VdR14CNbzdha0aK8FqD+ponF2mIthcY0+k4fJetjtBhDjY9OajSrgRuD0mr2/15xLrB7w==",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$XXH3KrvzHuI8t4+geXG7dQ$tXWyBQI95CTcmh/a6LU/LGUIipupk8BTK/TgXMadvw8"
     }
 }
