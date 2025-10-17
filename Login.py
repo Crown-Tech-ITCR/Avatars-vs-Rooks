@@ -69,7 +69,7 @@ class LoginAvatarsRooks:
     def load_users(self):
         """Carga todos los datos de usuarios"""
         try:
-            datos = encrip_aes.get_users_decrypted()
+            datos = encrip_aes.load_users_aes()  # Usa load_users_aes en lugar de get_users_decrypted
             self.users = {}
             
             for username, user_data in datos.items():
@@ -78,10 +78,15 @@ class LoginAvatarsRooks:
                     'nombre': encrip_aes.decrypt_data(user_data['nombre_enc'], self.master_key),
                     'apellidos': encrip_aes.decrypt_data(user_data['apellidos_enc'], self.master_key),
                     'nacionalidad': encrip_aes.decrypt_data(user_data['nacionalidad_enc'], self.master_key),
-                    'correo': encrip_aes.decrypt_data(user_data['email_enc'], self.master_key),
-                    'telefono': encrip_aes.decrypt_data(user_data['telefono_enc'], self.master_key) 
+                    'correo': encrip_aes.decrypt_data(user_data['email_enc'], self.master_key)
                 }
-            print(self.users)
+                
+                # Solo agregar teléfono si existe en los datos (ya que se agrego despues este dato para cada usuario)
+                if 'telefono_enc' in user_data:
+                    self.users[username]['telefono'] = encrip_aes.decrypt_data(user_data['telefono_enc'], self.master_key)
+                else:
+                    self.users[username]['telefono'] = "" 
+                    
         except Exception as e:
             print(f"Error al cargar usuarios: {e}")
             self.users = {}
@@ -723,7 +728,7 @@ class LoginAvatarsRooks:
 
                 self.photo_btn.image = self.profile_photo_display  # Mantener referencia
             
-                messagebox.showinfo("Error",t("succes_photo"))
+                messagebox.showinfo("Exito",t("succes_photo"))
             except Exception as e:
                 messagebox.showerror("Error",t("error_photo").format(error=e))
     
@@ -1990,9 +1995,26 @@ class LoginAvatarsRooks:
         try:
             encrip_aes.register_user_aes(username, password, nombre, correo, nacionalidad, apellidos, telefono)
             self.load_users()
+            users_aes = encrip_aes.load_users_aes()
+            username_enc = None
+            
+            # Buscar el username encriptado comparando los datos desencriptados
+            for enc_key in users_aes.keys():
+                try:
+                    # Intentar desencriptar y comparar
+                    if encrip_aes.decrypt_data(users_aes[enc_key]['nombre_enc'], self.master_key) == nombre and \
+                    encrip_aes.decrypt_data(users_aes[enc_key]['email_enc'], self.master_key) == correo:
+                        username_enc = enc_key
+                        break
+                except:
+                    continue
+            
+            if not username_enc:
+                messagebox.showerror("Error", "No se pudo obtener el identificador del usuario")
+                return
 
             success, message = self.password_recovery.add_security_question(
-                username,
+                username_enc,
                 security_question,
                 security_answer
             )
