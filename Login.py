@@ -712,41 +712,213 @@ class LoginAvatarsRooks:
 
     #Seleccionar la foto
     def selec_profile_photo(self):
+        """Mostrar opciones para seleccionar o tomar foto"""
+        # Crear ventana de diálogo personalizada
+        dialog = tk.Toplevel(self.root)
+        dialog.title(t("photo_perfil"))
+        dialog.geometry("300x200")
+        dialog.configure(bg=self.colors[0])
+        dialog.transient(self.root)
+        dialog.grab_set()
+    
+        # Centrar ventana
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (300 // 2)
+        y = (dialog.winfo_screenheight() // 2) - (200 // 2)
+        dialog.geometry(f'300x200+{x}+{y}')
+    
+        tk.Label(
+            dialog,
+            text="Selecciona una opción:",
+            font=("Arial", 12, "bold"),
+            bg=self.colors[0],
+            fg=self.colors[5]
+        ).pack(pady=20)
+    
+        # Botón para seleccionar archivo
+        tk.Button(
+            dialog,
+            text="📁 Seleccionar desde archivo",
+            command=lambda: [dialog.destroy(), self.select_from_file()],
+            font=("Arial", 11),
+            bg=self.colors[1],
+            fg=self.colors[5],
+            cursor="hand2",
+            relief=tk.FLAT,
+            padx=20,
+            pady=10
+        ).pack(pady=10)
+    
+        # Botón para tomar foto
+        tk.Button(
+            dialog,
+            text="📷 Tomar foto con cámara",
+            command=lambda: [dialog.destroy(), self.take_photo_with_camera()],
+            font=("Arial", 11),
+            bg=self.colors[1],
+            fg=self.colors[5],
+            cursor="hand2",
+            relief=tk.FLAT,
+            padx=20,
+            pady=10
+        ).pack(pady=10)
+
+    def select_from_file(self):
+        """Seleccionar foto desde archivo"""
         file_path = filedialog.askopenfilename(
-            title= t("photo_perfil"),
+            title=t("photo_perfil"),
             filetypes=[
-            ("Archivos de imagen", "*.jpg *.jpeg *.png"),
-            ("JPG", "*.jpg *.jpeg"),
-            ("PNG", "*.png"),
-            ("Todos los archivos", "*.*")
+                ("Archivos de imagen", "*.jpg *.jpeg *.png"),
+                ("JPG", "*.jpg *.jpeg"),
+                ("PNG", "*.png"),
+                ("Todos los archivos", "*.*")
             ]
         )
         if file_path:
-            try: 
-                with Image.open(file_path) as img:
+            self.process_image(file_path)
 
-                    if img.mode in ("RGBA", "LA", "P"):
-
-                        background = Image.new("RGB", img.size, (255, 255, 255))
-                        if img.mode == "P":
-                            img = img.convert("RGBA")
-                        background.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
-                        img = background
-                    elif img.mode != "RGB":
-                        img = img.convert("RGB")
-                    img.thumbnail((150,150), Image.Resampling.LANCZOS)
-                    self.profile_photo_display = ImageTk.PhotoImage(img)
+    def take_photo_with_camera(self):
+        """Tomar foto con la cámara"""
+        try:
+            import cv2
+        except ImportError:
+            messagebox.showerror(
+                "Error",
+                "La librería 'opencv-python' no está instalada.\n"
+                "Instálala con: pip install opencv-python"
+            )
+            return
+    
+        # Intentar abrir la cámara
+        cap = cv2.VideoCapture(0)
+    
+        if not cap.isOpened():
+            messagebox.showerror(
+                "Error",
+                "No se pudo detectar la cámara.\n"
+                "Verifica que esté conectada y no esté siendo usada por otra aplicación."
+            )
+            return
+    
+        # Crear ventana de captura
+        camera_window = tk.Toplevel(self.root)
+        camera_window.title("Tomar Foto")
+        camera_window.configure(bg=self.colors[0])
+        camera_window.transient(self.root)
+        camera_window.grab_set()
+    
+        # Label para mostrar el video
+        video_label = tk.Label(camera_window, bg=self.colors[0])
+        video_label.pack(padx=20, pady=20)
+        
+        # Frame para botones
+        button_frame = tk.Frame(camera_window, bg=self.colors[0])
+        button_frame.pack(pady=10)
+        
+        captured_image = [None]  # Lista para mantener la referencia
+    
+        def update_frame():
+            """Actualizar frame de video"""
+            ret, frame = cap.read()
+            if ret:
+                # Convertir de BGR a RGB
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                # Redimensionar para preview
+                frame_resized = cv2.resize(frame_rgb, (480, 360))
+                # Convertir a ImageTk
+                img = Image.fromarray(frame_resized)
+                imgtk = ImageTk.PhotoImage(image=img)
+                video_label.imgtk = imgtk
+                video_label.configure(image=imgtk)
+        
+            if camera_window.winfo_exists():
+                camera_window.after(10, update_frame)
+    
+        def capture():
+            """Capturar foto"""
+            ret, frame = cap.read()
+            if ret:
+                captured_image[0] = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                cap.release()
+                camera_window.destroy()
+            
+                # Procesar la imagen capturada
+                img = Image.fromarray(captured_image[0])
                 
+                # Guardar temporalmente
+                import tempfile
+                import os
+                temp_file = os.path.join(tempfile.gettempdir(), "temp_profile.jpg")
+                img.save(temp_file)
+                
+                # Procesar imagen
+                self.process_image(temp_file)
+    
+        def cancel():
+            """Cancelar captura"""
+            cap.release()
+            camera_window.destroy()
+    
+        # Botones
+        tk.Button(
+            button_frame,
+            text="📸 Capturar",
+            command=capture,
+            font=("Arial", 11, "bold"),
+            bg="#4CAF50",
+            fg="white",
+            cursor="hand2",
+            relief=tk.FLAT,
+            padx=30,
+            pady=10
+        ).pack(side="left", padx=10)
+    
+        tk.Button(
+            button_frame,
+            text="❌ Cancelar",
+            command=cancel,
+            font=("Arial", 11),
+            bg="#f44336",
+            fg="white",
+            cursor="hand2",
+            relief=tk.FLAT,
+            padx=30,
+            pady=10
+        ).pack(side="left", padx=10)
+    
+        # Iniciar actualización de frames
+        update_frame()
+    
+        # Manejar cierre de ventana
+        def on_closing():
+            cap.release()
+            camera_window.destroy()
+    
+        camera_window.protocol("WM_DELETE_WINDOW", on_closing)
+
+    def process_image(self, file_path):
+        """Procesar y mostrar imagen de perfil"""
+        try:
+            with Image.open(file_path) as img:
+                if img.mode in ("RGBA", "LA", "P"):
+                    background = Image.new("RGB", img.size, (255, 255, 255))
+                    if img.mode == "P":
+                        img = img.convert("RGBA")
+                    background.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+                    img = background
+                elif img.mode != "RGB":
+                    img = img.convert("RGB")
+            
+                img.thumbnail((150, 150), Image.Resampling.LANCZOS)
+                self.profile_photo_display = ImageTk.PhotoImage(img)
                 self.photo_btn.config(
                     image=self.profile_photo_display,
                     text=""
                 )
-
-                self.photo_btn.image = self.profile_photo_display  # Mantener referencia
-            
-                messagebox.showinfo("Exito",t("succes_photo"))
-            except Exception as e:
-                messagebox.showerror("Error",t("error_photo").format(error=e))
+                self.photo_btn.image = self.profile_photo_display
+                messagebox.showinfo("Éxito", t("succes_photo"))
+        except Exception as e:
+            messagebox.showerror("Error", t("error_photo").format(error=e))
     
     def forgot_password(self):
         self.login_frame.pack_forget()
