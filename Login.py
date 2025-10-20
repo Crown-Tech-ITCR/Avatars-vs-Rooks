@@ -4,6 +4,7 @@ import os
 from face_gui import Face_Recognition
 import encrip_aes
 from PersonalizaciónUI import MenuPersonalizacion
+from MainMenu import MainMenu
 import calendar
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
@@ -644,7 +645,7 @@ class LoginAvatarsRooks:
                 continue
 
         if not key:
-            messagebox.showerror(t("error_uc"))
+            messagebox.showerror("Error",t("error_uc"))
             return
 
         record = users_enc[key]
@@ -658,7 +659,9 @@ class LoginAvatarsRooks:
                 MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login,
                                 self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
             else:
-                messagebox.showinfo("Próximamente", "Aquí se abrirá el menú principal del juego")
+                self.destroy()
+                MainMenu(self.root, username, nombre, self.reiniciar_login,
+                                self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
         else:
             messagebox.showerror("Error",t("error_uc"))
 
@@ -2355,3 +2358,10 @@ class LoginAvatarsRooks:
             return False
         
         return True
+    
+    def destroy(self):
+        """Destruye todos los elementos del login para pasar a otras ventanas"""
+        if hasattr(self, 'login_frame') and self.login_frame:
+            self.login_frame.destroy()
+        if hasattr(self, 'flag_btn') and self.flag_btn:
+            self.flag_btn.destroy()

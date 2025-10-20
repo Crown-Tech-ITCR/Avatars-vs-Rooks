@@ -65,7 +65,7 @@ class MenuPersonalizacion:
             cursor="hand2",
             padx=20,
             pady=5,
-            command=self.volver_login
+            command=self.volver
         )
         self.btn_volver_top.pack(side=tk.RIGHT, padx=20, pady=10)
 
@@ -439,8 +439,8 @@ class MenuPersonalizacion:
             # Restaurar cursor
             self.root.config(cursor="")
             
-    def volver_login(self):
-        """Vuelve al login"""
+    def volver(self):
+        """Vuelve al lugar donde fue llemado inicialmente, ya sea login o menu personalizacion"""
         # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
