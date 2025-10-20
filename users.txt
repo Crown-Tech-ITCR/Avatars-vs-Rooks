@@ -184,5 +184,27 @@
         "primerIngreso": false,
         "security_question_enc": "JIHILu91G/0FsCqdNjmuuXZ+jy0zWoTUfBVlwNHy/0K5ucK96r0hchjL6ukpVhkyW3Wtn8uK0cjY/NqMlRNVIpE9dmeIHA==",
         "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$BJmDgw+mXB49skLvmNcR6A$x1ZsWubLOMPO6cElhunvs/IYBOSGK1VyRexEOB3ig+E"
+    },
+    "zrirv4mzmfLE2OBTZOp9jj8ojm0s+PYnsVCaUy8CHsb3ZDzkkTjmKg==": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$3CY11vDthXezaZdE2d3mXA$RKS/FOq7HQr64Kd3liQlQrrMWi30gQMIaMW+xs82Gno",
+        "nombre_enc": "nnrn/vk6zKdruv/8IZcv/wzXtjaPPhFVNRDXc8n7wbHB",
+        "email_enc": "Ven3Az7ALVtNveZWWSoJEdFz0lUiTlLC50bkN+7VdJs0nw5VrnlmBeuuMvx0CD6usw==",
+        "nacionalidad_enc": "8iZ4MDVj1abL3WXGyiVHul7KJY7xp03CCmwJdTCPVmigg0ny/1YL",
+        "apellidos_enc": "mkwTYRsPtE8tM6yFhybpLOMmLfZ6Dm2OBJSSRn4ZDtCK/5Y=",
+        "telefono_enc": "BKZjWIG8MYbmyCXsIBNoH9Cx3qPKfUX3WB18Xxncq7PXH7Lx",
+        "primerIngreso": true,
+        "security_question_enc": "hIruQe7iTlaPUfy74WTT5W3FojOPrvdrWW7jJEVu0aJX//c25TBPTzWOxi8R0cJKG6Wmy/LXYp3lW5loWc9JLcrPnJs/7w==",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$h2884hC6fsKpoza1iGnkeA$To9EBuL7UB6TI9l0t6K8jUnx3G0Avz9DBCU0j4c/Pgc"
+    },
+    "dG0sKNO4d+tNW9ke1Ld+MtmvTeAA6DnVoCuDW1BGBmjI": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$J/yQkIe9h/JypF2O+AmlIw$uqmGuJ/weo38gPxM+DvRot3epwEIyY9tAtdWF+JolTY",
+        "nombre_enc": "YSMETl1ptEDoQyrQY+4bouvIzqzoUxzxQjlpRq436QpS+Qlr",
+        "email_enc": "TYPijGuVgx3VzkrnL43DRDjQpaDAlffqBFzbLBipeI8cKX01eSL2jG4xWA==",
+        "nacionalidad_enc": "aGQO06r6NrO77HT0/CjshopvskJJhteqP6Q5giEOYoErIvR8qeQ=",
+        "apellidos_enc": "a2CDFn6vf94HZPEOcVjPWNYo+EBkgo1PSa0Q39MullfX",
+        "telefono_enc": "B5jbRQqdj0e8FiOtEcctf3karIpnN5fHU5jzgprZ+CxiVnAd",
+        "primerIngreso": false,
+        "security_question_enc": "kIV8jK7QWWdK7Aahk4yQX4FV6SeOfLac7cGtLI1uVdPDa4WziSbiW5yTkGh9c+/1aOCTpIYCLJJpOehuTQKVpZNGW7GIahFRyPjAVxS6vXxMXA==",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$STLJLGJxDKrJ8oRNUzNY/w$g4+W6IBJkxS55iA8oxf44q4B4Gxs8qMxVQPygPEca7w"
     }
 }
