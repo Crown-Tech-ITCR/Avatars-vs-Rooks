@@ -40,11 +40,13 @@ class Entidad:
 
 
 class Rook(Entidad):
-    """Rook: no se desplaza, puede disparar si su cooldown está a cero."""
-    def __init__(self, vida: int = 10, dano: int = 10, shot_cooldown_max: int = 0):
+    """Rook base: no se desplaza, puede disparar si su cooldown está a cero."""
+    def __init__(self, vida: int = 10, dano: int = 10, shot_cooldown_max: int = 0, costo: int = 0):
         super().__init__("rook", vida=vida, dano=dano, movil=False)
         self.shot_cooldown = 0
         self.shot_cooldown_max = shot_cooldown_max
+        self.costo = costo  # Para el sistema de monedas (no funcional aún)
+        self.color = "green"  # Color por defecto
 
     def can_shoot(self) -> bool:
         return self.shot_cooldown == 0
@@ -57,6 +59,38 @@ class Rook(Entidad):
     def tick(self):
         if self.shot_cooldown > 0:
             self.shot_cooldown -= 1
+
+
+#Tipo 1: Roca
+class RookRoca(Rook):
+    def __init__(self):
+        super().__init__(vida=12, dano=4, shot_cooldown_max=0, costo=100)
+        self.tipo = "rook_roca"
+        self.color = "gray"
+
+
+#Tipo 2: Fuego
+class RookFuego(Rook):
+    def __init__(self):
+        super().__init__(vida=12, dano=8, shot_cooldown_max=0, costo=150)
+        self.tipo = "rook_fuego"
+        self.color = "orange"
+
+
+#Tipo 3: Agua
+class RookAgua(Rook):
+    def __init__(self):
+        super().__init__(vida=15, dano=10, shot_cooldown_max=0, costo=150)
+        self.tipo = "rook_agua"
+        self.color = "cyan"
+
+
+#Tipo 4: Arena
+class RookArena(Rook):
+    def __init__(self):
+        super().__init__(vida=8, dano=2, shot_cooldown_max=0, costo=50)
+        self.tipo = "rook_arena"
+        self.color = "yellow"
 
 
 class Avatar(Entidad):
@@ -78,29 +112,28 @@ class AvatarFlechador(Avatar):
     def __init__(self):
         super().__init__(vida=8, dano=2, regeneracion=2)
         self.tipo = "avatar_flechador"
-        self.color = "orange"  # 🔸 flechador: naranja
+        self.color = "orange"
 
 
 class AvatarEscudero(Avatar):
     def __init__(self):
         super().__init__(vida=8, dano=3, regeneracion=1)
         self.tipo = "avatar_escudero"
-        self.color = "blue"  # 🔹 escudero: azul
+        self.color = "blue"
 
 
 class AvatarCanibal(Avatar):
     def __init__(self):
         super().__init__(vida=8, dano=12, regeneracion=4)
         self.tipo = "avatar_canibal"
-        self.color = "red"  # 🔴 caníbal: rojo
+        self.color = "red"
 
 
 class AvatarLenador(Avatar):
     def __init__(self):
         super().__init__(vida=8, dano=9, regeneracion=0)
         self.tipo = "avatar_lenador"
-        self.color = "sienna"  # 🪵 leñador: marrón
-
+        self.color = "sienna"
 
 
 class Rafaga:
@@ -112,8 +145,30 @@ class Rafaga:
 class Juego:
     def __init__(self, root):
         self.root = root
-        self.root.title("Rooks vs Avatars")
+        self.root.title("Rooks vs Avatars - 4 Tipos")
 
+        # ---- Sistema de monedas (no funcional aún) ----
+        self.monedas = 500  # Monedas iniciales (placeholder)
+        
+        # ---- Tipo de rook seleccionado ----
+        self.rook_seleccionado = RookArena  # Por defecto: Roca
+
+        # Frame superior para controles
+        self.frame_superior = tk.Frame(root, bg="lightgray")
+        self.frame_superior.pack(fill=tk.X)
+
+        # Label de monedas (placeholder)
+        self.label_monedas = tk.Label(
+            self.frame_superior, 
+            text=f"💰 Monedas: {self.monedas} (no funcional)",
+            font=("Arial", 12),
+            bg="lightgray"
+        )
+        self.label_monedas.pack(side=tk.LEFT, padx=10)
+
+        # Botones para seleccionar tipo de rook
+        self.crear_botones_seleccion()
+        # Canvas del juego
         self.canvas = tk.Canvas(
             root, width=COLUMNAS * TAM_CASILLA, height=FILAS * TAM_CASILLA, bg="lightgreen"
         )
@@ -133,25 +188,16 @@ class Juego:
 
         self.juego_terminado = False
 
-        # ---- nuevo: control de intervalo de disparo ----
-        self.shot_interval = 3    # disparar cada 6 actualizaciones (ajusta aquí)
-        self._shot_tick = 0
-
-        # ---- nuevo: control de intervalo de disparo ----
+        # Control de intervalo de disparo
         self.shot_interval = 3
         self._shot_tick = 0
 
-        # --- Eliminamos la antigua tasa Poisson ---
-        # (ya no se usará generación aleatoria por tick)
-        # self.lambda_per_tick = 0.3
-        # self._rng = np.random.default_rng() if hasattr(np, "random") else None
-
-        # --- Tiempos de generación por tipo (en milisegundos) ---
+        # Tiempos de generación por tipo (en milisegundos)
         self.tiempos_generacion = {
-            "flechador": 2000,  # 2 s
-            "escudero": 4000,   # 4 s
-            "canibal": 12000,   # 12 s
-            "lenador": 10000    # 10 s
+            "flechador": 2000,
+            "escudero": 4000,
+            "canibal": 12000,
+            "lenador": 10000
         }
 
         # Iniciar los generadores de cada tipo
@@ -162,19 +208,58 @@ class Juego:
 
         self.actualizar_juego()
 
+    def crear_botones_seleccion(self):
+        """Crea botones para seleccionar el tipo de rook a colocar."""
+        frame_botones = tk.Frame(self.frame_superior, bg="lightgray")
+        frame_botones.pack(side=tk.RIGHT, padx=10)
+
+        tipos_rook = [
+            ("🪨 Roca (100)", RookRoca, "gray"),
+            ("🔥 Fuego (150)", RookFuego, "orange"),
+            ("💧 Agua (150)", RookAgua, "cyan"),
+            ("🏖️ Arena (50)", RookArena, "yellow")
+        ]
+
+        for texto, clase, color in tipos_rook:
+            btn = tk.Button(
+                frame_botones,
+                text=texto,
+                bg=color,
+                command=lambda c=clase: self.seleccionar_rook(c),
+                width=12,
+                font=("Arial", 9)
+            )
+            btn.pack(side=tk.LEFT, padx=2)
+
+    def seleccionar_rook(self, clase_rook):
+        """Selecciona el tipo de rook a colocar."""
+        self.rook_seleccionado = clase_rook
+        print(f"Rook seleccionado: {clase_rook.__name__}")
 
     def colocar_rook(self, event):
         if self.juego_terminado:
             return
 
-        c = event.x // TAM_CASILLA  # columna
-        f = event.y // TAM_CASILLA  # fila
+        c = event.x // TAM_CASILLA
+        f = event.y // TAM_CASILLA
 
         # Solo colocar si la celda está vacía o no hay rook
         if not any(isinstance(e, Rook) for e in matriz_juego[f][c]):
-            rook = Rook()
+            # TODO: Cuando el sistema de monedas esté implementado:
+            # - Verificar si hay suficientes monedas
+            # - Restar el costo de la rook
+            # - Actualizar el label de monedas
+            
+            rook = self.rook_seleccionado()  # Crear instancia del tipo seleccionado
             rook.set_pos(f, c)
             matriz_juego[f][c].append(rook)
+            
+            # Placeholder para sistema de monedas:
+            # if self.monedas >= rook.costo:
+            #     self.monedas -= rook.costo
+            #     self.label_monedas.config(text=f"💰 Monedas: {self.monedas}")
+            # else:
+            #     print("No hay suficientes monedas!")
 
     def generar_avatar(self):
         """Genera un avatar aleatorio en la última fila (abajo)."""
@@ -183,7 +268,6 @@ class Juego:
         av = tipo()
         av.set_pos(FILAS - 1, columna)
         matriz_juego[FILAS - 1][columna].append(av)
-
 
     def mover_avatars(self):
         """Mueve los avatars hacia arriba y les permite atacar rooks si están frente a uno."""
@@ -208,7 +292,7 @@ class Juego:
 
                         destino_f = f - 1
 
-                        # --- ⚔️ COMBATE CON ROOK ---
+                        # Combate con Rook
                         rook_en_actual = [r for r in matriz_juego[f][c] if isinstance(r, Rook)]
                         rook_en_destino = [r for r in matriz_juego[destino_f][c] if isinstance(r, Rook)]
 
@@ -217,15 +301,10 @@ class Juego:
                             vida_inicial = objetivo.vida
                             e.attack(objetivo)
 
-                            # Si el rook muere, se elimina en su propio take_damage
-                            # pero el avatar NO se mueve en este mismo tick.
                             if vida_inicial > 0 and objetivo.vida <= 0:
-                                # rook murió justo ahora — avatar se queda quieto este ciclo
                                 continue
                             else:
-                                # rook sigue vivo — avatar sigue atacando, no se mueve
                                 continue
-
 
                         # Verificar si hay ráfagas en la casilla destino
                         rafagas_en_destino = [p for p in matriz_juego[destino_f][c] if isinstance(p, Rafaga)]
@@ -243,7 +322,6 @@ class Juego:
                         matriz_juego[destino_f][c].append(e)
                         e.set_pos(destino_f, c)
 
-    
     def programar_generacion(self, tipo):
         """Programa la generación periódica de un tipo de avatar."""
         self.root.after(self.tiempos_generacion[tipo], lambda: self.generar_avatar_tipo(tipo))
@@ -266,43 +344,31 @@ class Juego:
             av.set_pos(FILAS - 1, columna)
             matriz_juego[FILAS - 1][columna].append(av)
 
-        # volver a programar siguiente aparición de este tipo
         self.programar_generacion(tipo)
 
-
     def disparar(self):
-        """Cada rook genera una rafaga debajo de ella si puede disparar y no hay rafaga
-        en la casilla destino (evita recrear ráfagas sobre la misma casilla).
-        """
+        """Cada rook genera una rafaga debajo de ella si puede disparar."""
         for f in range(FILAS):
             for c in range(COLUMNAS):
                 for e in list(matriz_juego[f][c]):
                     if isinstance(e, Rook):
-                        e.tick()  # actualizar cooldown
+                        e.tick()
                         if not e.can_shoot():
                             continue
-                        # Solo dispara si la casilla de abajo está dentro del rango
                         if f + 1 < FILAS:
-                            # evitar crear ráfaga si ya hay una ráfaga en la casilla destino
                             if not any(isinstance(x, Rafaga) for x in matriz_juego[f + 1][c]):
                                 r = e.shoot()
                                 matriz_juego[f + 1][c].append(r)
 
     def mover_rafagas(self):
-        """Mueve las ráfagas hacia abajo con el mismo diseño base que mover_avatars.
-        NOTA: aquí NO se procesan colisiones; mover_avatars es el único método que
-        contempla el choque y elimina ráfagas/avatars cuando corresponda.
-        """
-        # iterar de abajo hacia arriba para mover sin reinvocar ráfagas ya movidas
+        """Mueve las ráfagas hacia abajo."""
         for f in range(FILAS - 1, -1, -1):
             for c in range(COLUMNAS):
                 for e in list(matriz_juego[f][c]):
                     if isinstance(e, Rafaga):
-                        # si está en la última fila, desaparece (se elimina de su celda)
                         if f == FILAS - 1:
                             matriz_juego[f][c].remove(e)
                             continue
-                        # mover: quitar de origen y añadir a la celda de abajo
                         matriz_juego[f][c].remove(e)
                         matriz_juego[f + 1][c].append(e)
 
@@ -315,12 +381,25 @@ class Juego:
                     cx = c * TAM_CASILLA + TAM_CASILLA // 2
                     cy = f * TAM_CASILLA + TAM_CASILLA // 2
                     if isinstance(e, Rook):
-                        self.canvas.create_oval(cx - 15, cy - 15, cx + 15, cy + 15, fill="green", tags="entidad")
+                        # Usar el color específico de cada tipo de rook
+                        self.canvas.create_oval(
+                            cx - 15, cy - 15, cx + 15, cy + 15, 
+                            fill=e.color, 
+                            tags="entidad"
+                        )
                     elif isinstance(e, Avatar):
                         color = getattr(e, "color", "brown")
-                        self.canvas.create_rectangle(cx - 15, cy - 15, cx + 15, cy + 15, fill=color, tags="entidad")
+                        self.canvas.create_rectangle(
+                            cx - 15, cy - 15, cx + 15, cy + 15, 
+                            fill=color, 
+                            tags="entidad"
+                        )
                     elif isinstance(e, Rafaga):
-                        self.canvas.create_oval(cx - 5, cy - 5, cx + 5, cy + 5, fill="yellow", tags="entidad")
+                        self.canvas.create_oval(
+                            cx - 5, cy - 5, cx + 5, cy + 5, 
+                            fill="yellow", 
+                            tags="entidad"
+                        )
 
     def game_over(self):
         """Finaliza el juego."""
@@ -336,22 +415,16 @@ class Juego:
         if self.juego_terminado:
             return
         
-        # Mover los avatars primero (para que detecten ráfagas en la celda destino),
-        # luego mover las ráfagas.
         self.mover_avatars()
         self.mover_rafagas()
 
-        # controlar frecuencia de disparo
         self._shot_tick += 1
         if self._shot_tick >= self.shot_interval:
             self.disparar()
             self._shot_tick = 0
 
         self.dibujar()
-
         self.root.after(VELOCIDAD, self.actualizar_juego)
-
-
 
 
 # Ejecutar el juego
