@@ -193,7 +193,7 @@ class MainMenu:
     
     def go_to_customization(self):
         """Navega a la personalización de usuario"""
-        MenuPersonalizacion(self.root, self.username, self.nombre, self.reset_MainMenu,
+        MenuPersonalizacion(self.root, self.username, self.nombre, self.callback_login, self.reset_MainMenu,
                             self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
     
     def go_to_hall_of_fame(self):

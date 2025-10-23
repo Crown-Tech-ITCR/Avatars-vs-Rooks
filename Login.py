@@ -504,39 +504,92 @@ class LoginAvatarsRooks:
 
 
     def login(self):
-        username = self.username_entry.get()
+        """Permite que el usuario pueda ingresar al colocar sus credenciales y la contraseña"""
+        identifier = self.username_entry.get()
         password = self.password_entry.get()
-        users_enc = encrip_aes.load_users_aes()  # Diccionario con claves encriptadas
+        
+        if not identifier or not password:
+            messagebox.showerror("Error", "Por favor complete todos los campos")
+            return
+        
+        # Determinar qué tipo de identificador es
+        id_type, id_value = self.validate_input(identifier)
+        
+        users_enc = encrip_aes.load_users_aes()
         key = None
-        for enc_username in users_enc:
+        record = None
+        
+        # Buscar el usuario
+        for enc_username, user_data in users_enc.items():
             try:
-                dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
-                if username == dec_username:
-                    key = enc_username
-                    break
+                # Si es email, buscar en email_enc
+                if id_type == 'email':
+                    dec_email = encrip_aes.decrypt_data(user_data['email_enc'], self.master_key)
+                    if id_value == dec_email.lower():
+                        key = enc_username
+                        record = user_data
+                        break
+                
+                # Si es teléfono, buscar en telefono_enc
+                elif id_type == 'phone':
+                    dec_phone = encrip_aes.decrypt_data(user_data['telefono_enc'], self.master_key)
+                    # Limpiar el teléfono guardado de espacios y guiones
+                    clean_stored = dec_phone.replace(' ', '').replace('-', '')
+                    if id_value == clean_stored:
+                        key = enc_username
+                        record = user_data
+                        break
+                
+                # Si es username, buscar en enc_username
+                else: 
+                    dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
+                    if id_value == dec_username:
+                        key = enc_username
+                        record = user_data
+                        break
+                        
             except Exception:
                 continue
-
-        if not key:
-            messagebox.showerror("Error",t("error_uc"))
+        
+        if not key or not record:
+            messagebox.showerror("Error", t("error_uc"))
             return
-
-        record = users_enc[key]
+        
+        # Verificar contraseña
         if encrip_aes.verify_password(record['password_hash'], password):
             nombre = encrip_aes.decrypt_data(record['nombre_enc'], self.master_key)
+            username = encrip_aes.decrypt_data(key, self.master_key)
             primerIngreso = record['primerIngreso']
+            
             if primerIngreso:
                 self.login_frame.pack_forget()
-                users_enc[key]['primerIngreso'] = False  # Actualiza en el diccionario cifrado
-                encrip_aes.save_users_aes(users_enc)     # Guarda el diccionario cifrado
-                MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login,
+                users_enc[key]['primerIngreso'] = False
+                encrip_aes.save_users_aes(users_enc)
+                MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login,self.crear_main_menu,
                                 self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
             else:
-                self.destroy()
+                self.login_frame.pack_forget()
                 MainMenu(self.root, username, nombre, self.reiniciar_login,
                                 self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
         else:
-            messagebox.showerror("Error",t("error_uc"))
+            messagebox.showerror("Error", t("error_uc"))
+
+    def validate_input(self,identifier):
+        """Validación para determinar el tipo de identificador"""
+
+        identifier = identifier.strip()
+        
+        # Si contiene @, es un email
+        if '@' in identifier:
+            return ('email', identifier.lower())
+        
+        # Si son solo números, es un teléfono
+        clean_identifier = identifier.replace(' ', '').replace('-', '')
+        if clean_identifier.isdigit():
+            return ('phone', clean_identifier)
+        
+        # Si no es un username
+        return ('username', identifier)
 
 
     def face_recognition(self):
@@ -545,10 +598,59 @@ class LoginAvatarsRooks:
             temp_root = tk.Toplevel(self.root)
             temp_root.grab_set()
             temp_root.focus_set()
-            Face_Recognition(temp_root).login_with_face_gui()
+            
+            # Crear instancia de Face_Recognition pasando el callback
+            fr = Face_Recognition(temp_root, callback_login=self.facial_login)
+            fr.login_with_face_gui()
+            
             temp_root.destroy()
         except Exception as e:
-            messagebox.showerror("Error",t("error_facial").format(error=e))
+            messagebox.showerror("Error", t("error_facial").format(error=e))
+
+
+    def facial_login(self, username):
+        """Login automático por reconocimiento facial"""
+        try:
+            users_enc = encrip_aes.load_users_aes()
+            key = None
+            record = None
+            
+            # Buscar el usuario por username
+            for enc_username, user_data in users_enc.items():
+                try:
+                    dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
+                    if username == dec_username:
+                        key = enc_username
+                        record = user_data
+                        break
+                except Exception:
+                    continue
+            
+            if not key or not record:
+                messagebox.showerror("Error", "Usuario no encontrado")
+                return
+            
+            # Procesar login exitoso
+            nombre = encrip_aes.decrypt_data(record['nombre_enc'], self.master_key)
+            primerIngreso = record['primerIngreso']
+            
+            if primerIngreso:
+                self.login_frame.pack_forget()
+                users_enc[key]['primerIngreso'] = False
+                encrip_aes.save_users_aes(users_enc)
+                MenuPersonalizacion(
+                    self.root, username, nombre, self.reiniciar_login,
+                    self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+                )
+            else:
+                self.destroy()
+                MainMenu(
+                    self.root, username, nombre, self.reiniciar_login,
+                    self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+                )
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Error en login facial: {e}")
 
 
     def update_days(self, event=None):
@@ -1927,7 +2029,7 @@ class LoginAvatarsRooks:
 
     def show_login_window(self):
         """Muestra la ventana de login y oculta la de registro"""
-        # IMPORTANTE: Recrear la interfaz de login con los colores actualizados
+        # Recrear la interfaz de login con los colores actualizados
         if hasattr(self, 'login_frame') and self.login_frame:
             self.login_frame.destroy()
         
@@ -1944,7 +2046,7 @@ class LoginAvatarsRooks:
     
     def show_register_window(self):
         """Muestra la ventana de registro y oculta la de login"""
-        # IMPORTANTE: Recrear la interfaz de registro con los colores actualizados
+        #Recrear la interfaz de registro con los colores actualizados
         if hasattr(self, 'register_frame') and self.register_frame:
             self.register_frame.destroy()
         
@@ -2045,7 +2147,7 @@ class LoginAvatarsRooks:
         
         # Validar formato de teléfono
         telefono_limpio = telefono.replace("-", "").replace(" ", "")
-        if not telefono_limpio.isdigit() or len(telefono_limpio) < 8:
+        if not telefono_limpio.isdigit() or len(telefono_limpio) < 8 or len(telefono_limpio) > 8 :
             messagebox.showerror("Error",t("error_phone_invalid"))
             return
         
@@ -2240,3 +2342,36 @@ class LoginAvatarsRooks:
             self.login_frame.destroy()
         if hasattr(self, 'flag_btn') and self.flag_btn:
             self.flag_btn.destroy()
+
+    #CALLBACKS
+
+    def crear_main_menu(self, username, nombre, c1, c2, c3, c4, c5, c6, c7):
+        """Crea el MainMenu desde personalización"""
+        # Limpiar ventana
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        # Crear MainMenu
+        MainMenu(
+            self.root, 
+            username, 
+            nombre, 
+            self.reiniciar_login,          
+            c1, c2, c3, c4, c5, c6, c7
+        )
+
+    def crear_personalizacion(self, username, nombre, callback_volver):
+        """Crea MenuPersonalizacion desde MainMenu"""
+        # Limpiar ventana
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        # Crear MenuPersonalizacion
+        MenuPersonalizacion(
+            self.root, 
+            username, 
+            nombre,
+            self.reiniciar_login,        
+            callback_volver,             
+            self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+        )

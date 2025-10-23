@@ -170,7 +170,6 @@ def register_user_aes(username: str, password: str, nombre: str, email: str, nac
 
     }
     save_users_aes(users)
-    print(f"✅ Usuario {username} registrado con éxito")
 
 def register_user_card(username: str, cvv: str, numero: str, expiry: str, titular: str):
     cards = load_cards_aes()

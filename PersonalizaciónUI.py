@@ -5,11 +5,12 @@ from MusicaSpotify import SpotifyManager
 from colores import ColorPicker
 
 class MenuPersonalizacion:
-    def __init__(self, root, username, nombre, callback_volver, c1, c2, c3, c4, c5, c6, c7):
+    def __init__(self, root, username, nombre, callback_login, callback_menu, c1, c2, c3, c4, c5, c6, c7):
         self.root = root
         self.username = username
         self.nombre = nombre
-        self.callback_volver = callback_volver
+        self.callback_login = callback_login
+        self.callback_menu = callback_menu
         self.resultados = []
         self.spotify_manager = SpotifyManager()
         
@@ -439,17 +440,33 @@ class MenuPersonalizacion:
             # Restaurar cursor
             self.root.config(cursor="")
             
-    def volver(self):
-        """Vuelve al lugar donde fue llemado inicialmente, ya sea login o menu personalizacion"""
+    def volver_login(self):
+        """Vuelve específicamente al login"""
         # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
-        # Llamar callback
-        self.callback_volver(self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
+        # Llamar callback de login si existe
+        if self.callback_login:
+            self.callback_login(self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
+    
+    def volver_mainmenu(self):
+        """Vuelve específicamente al main menu"""
+        # Limpiar ventana
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        # Llamar callback de main menu si existe
+        if self.callback_menu:
+            self.callback_menu(self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
+    
+    def volver(self):
+        """ Por defecto va al login"""
+        self.volver_login()
     
     def continuar_juego(self):
         """Continúa al menú principal del juego"""
-        messagebox.showinfo("Próximamente", "Aquí se abrirá el menú principal del juego")
+        # Usar el callback de main menu para ir al menú principal
+        if self.callback_menu:
+            self.volver_mainmenu()
 
     def aplicar_color(self):
         """Aplica el color seleccionado y actualiza el label"""
@@ -669,3 +686,21 @@ class MenuPersonalizacion:
             pass  # Ignorar errores al detener música
         
         self.root.destroy()  # Cierra la aplicación
+
+    def reset_PersonalizacionMenu(self, c1=None, c2=None, c3=None, c4=None, c5=None, c6=None, c7=None):
+        """Resetea y vuelve a mostrar el menú de personalización con colores actualizados"""
+        # Actualizar colores si se proporcionan
+        if c1: self.c1 = c1
+        if c2: self.c2 = c2
+        if c3: self.c3 = c3
+        if c4: self.c4 = c4
+        if c5: self.c5 = c5
+        if c6: self.c6 = c6
+        if c7: self.c7 = c7
+        
+        # Limpiar ventana
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        # Recrear la interfaz con los nuevos colores
+        self.crear_interfaz()
