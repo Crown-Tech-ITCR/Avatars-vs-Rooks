@@ -252,6 +252,12 @@ def show_help(parent, colors):
 
     # Permitir desplazamiento con la rueda del mouse
     def on_mousewheel(event):
-        canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        try:
+            # Verificar si el canvas aún existe y está válido
+            if canvas.winfo_exists():
+                canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        except tk.TclError:
+            # Si el widget ya no existe, no hacer nada
+            pass
 
     ventana_ayuda.bind_all("<MouseWheel>", on_mousewheel)

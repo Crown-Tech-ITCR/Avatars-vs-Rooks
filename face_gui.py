@@ -8,11 +8,12 @@ import pygame
 import time as time
 
 class Face_Recognition:
-    def __init__(self, root, show_main_gui=True):
+    def __init__(self, root,callback_login=None, show_main_gui=True):
         self.USERS_DIR = "users_lbph"
         if not os.path.exists(self.USERS_DIR):
             os.makedirs(self.USERS_DIR)
         self.root = root
+        self.callback_login = callback_login
         self.login_thread_active = False
         if show_main_gui:
             self.setup_gui()
@@ -173,7 +174,7 @@ class Face_Recognition:
             if not nombre:
                 messagebox.showerror("Error", "Por favor ingresa un nombre")
                 return
-            self.nombre_resultado = nombre.lower()
+            self.nombre_resultado = nombre
             self.nombre_confirmado = True
             nombre_window.destroy()
         
@@ -229,7 +230,7 @@ class Face_Recognition:
             messagebox.showerror("Error", "Nombre inválido.")
             return 
         
-        name = name.strip().lower()
+        name = name.strip()
         if not os.path.exists(self.USERS_DIR):
             os.makedirs(self.USERS_DIR)
         
@@ -415,5 +416,9 @@ class Face_Recognition:
         self.root.mainloop()
 
     def MostrarExito(self, username):
-        """Muestra un mensaje de exito"""
-        messagebox.showinfo("Bienvenido", "Se ha logeado exitosamente")
+        """Ejecuta el login automático después de reconocimiento facial exitoso"""
+        if self.callback_login:
+            # Llamar al callback de login pasando el username
+            self.callback_login(username)
+        else:
+            messagebox.showinfo("Bienvenido", f"Usuario {username} autenticado correctamente")
