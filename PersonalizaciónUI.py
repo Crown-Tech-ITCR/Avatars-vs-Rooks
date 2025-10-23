@@ -456,7 +456,7 @@ class MenuPersonalizacion:
             widget.destroy()
         # Llamar callback de main menu si existe
         if self.callback_menu:
-            self.callback_menu(self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
+            self.callback_menu(self.username, self.nombre,self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
     
     def volver(self):
         """ Por defecto va al login"""

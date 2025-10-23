@@ -216,9 +216,10 @@ class MainMenu:
         """Destruye el frame del menú"""
         self.frame.destroy()
 
-    def reset_MainMenu(self, c1=None, c2=None, c3=None, c4=None, c5=None, c6=None, c7=None):
-        """Reinicia y muestra el menú principal con colores actualizados"""
+    def reset_MainMenu(self, username, name, c1=None, c2=None, c3=None, c4=None, c5=None, c6=None, c7=None):
+        """Reinicia y muestra el menú principal con los datos actualizados"""
         # Actualizar colores si se proporcionan nuevos valores
+
         if c1 is not None:
             self.c1 = c1
         if c2 is not None:

@@ -638,10 +638,8 @@ class LoginAvatarsRooks:
                 self.login_frame.pack_forget()
                 users_enc[key]['primerIngreso'] = False
                 encrip_aes.save_users_aes(users_enc)
-                MenuPersonalizacion(
-                    self.root, username, nombre, self.reiniciar_login,
-                    self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
-                )
+                MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login,self.crear_main_menu,
+                                self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
             else:
                 self.destroy()
                 MainMenu(
