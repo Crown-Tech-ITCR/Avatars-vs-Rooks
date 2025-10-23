@@ -12,6 +12,7 @@ from password_recovery import PasswordRecovery
 from Traducciones import t, set_language
 from PIL import Image, ImageTk
 from Modos import apply_dark_mode, apply_light_mode
+from creditos_ayuda import show_credits, show_help
 
 
 class LoginAvatarsRooks:
@@ -140,14 +141,14 @@ class LoginAvatarsRooks:
         self.help_btn = self.create_round_button(
             left_buttons_frame,
             t("help_button"),
-            self.show_help
+            lambda: show_help(self.root, self.colors)
         )
         self.help_btn.pack(side=tk.LEFT, padx=5)
 
         self.credits_btn = self.create_round_button(
             left_buttons_frame,
             t("credits_button"),
-            lambda: self.show_credits()
+            lambda: show_credits(self.root, self.colors)
         )
         self.credits_btn.pack(side=tk.LEFT, padx=5)
         
@@ -482,153 +483,25 @@ class LoginAvatarsRooks:
             apply_light_mode(self)
 
          
-
     def forgot_password(self):
         """Recuperación de contraseña"""
         messagebox.showinfo("Recuperar contraseña", "Se enviará un correo de recuperación")
 
+
     def change_language(self):
         """Cambia el idioma"""
         messagebox.showinfo("Idioma", "Selector de idioma")
-
-    def show_credits(self):
-        ventana_creditos = Toplevel()
-        ventana_creditos.title(t("credits_title"))
-        ventana_creditos.geometry("850x650")
-        ventana_creditos.config(bg=self.colors[0])
-
-        # --- Título ---
-        titulo = Label(
-            ventana_creditos,
-            text=t("credits_title"),
-            font=("Arial Black", 16),
-            fg=self.colors[6],
-            bg=self.colors[0]
-        )
-        titulo.pack(pady=20)
-
-        # --- Frame principal---
-        frame_equipo = Frame(ventana_creditos, bg=self.colors[0])
-        frame_equipo.pack(expand=True)
-
-        # --- Lista de integrantes ---
-        integrantes = [
-            {"nombre": "Alanna Mendoza", "rol": t("credits_leader"), "descripcion": t("credits_leader"), "foto": "./images/Alanna.png"},
-            {"nombre": "Fabricio Coto", "rol": t("credits_admin"), "descripcion": t("credits_member"), "foto": "./images/Fabricio.png"},
-            {"nombre": "Ariel Rodriguez", "rol": t("credits_ux"), "descripcion": t("credits_member"), "foto": "./images/Ariel.png"},
-            {"nombre": "Mauricio Lopez", "rol": t("credits_tester"), "descripcion": t("credits_member"), "foto": "./images/Mau.png"},
-        ]
-
-        # --- Cargar imágenes---
-        columnas = 2
-        for i, miembro in enumerate(integrantes):
-            fila = i // columnas
-            columna = i % columnas
-
-            # Marco individual
-            card = Frame(frame_equipo, bg=self.colors[1], bd=2, relief="ridge", padx=10, pady=10, width=320, height=300)
-            card.grid(row=fila, column=columna, padx=25, pady=25, sticky="nsew")
-
-            # Imagen
-            try:
-                imagen = Image.open(miembro["foto"]).resize((100, 100))
-                imagen = ImageTk.PhotoImage(imagen)
-                img_label = Label(card, image=imagen, bg=self.colors[1])
-                img_label.image = imagen
-                img_label.pack(pady=5)
-            except:
-                Label(card, text="[Foto]", fg=self.colors[6], bg=self.colors[1]).pack(pady=5)
-
-            # Nombre
-            Label(card, text=miembro["nombre"], font=("Arial", 12, "bold"), fg=self.colors[6], bg=self.colors[1]).pack(pady=2)
-            # Rol
-            Label(card, text=miembro["rol"], font=("Arial", 10, "italic"), fg=self.colors[3], bg=self.colors[1]).pack()
-            # Descripción
-            Label(card, text=miembro["descripcion"], font=("Arial", 9), fg=self.colors[6], bg=self.colors[1], wraplength=200, justify="center").pack(pady=5)
-
-        # --- Botón para cerrar ---
-        boton_cerrar = Button(
-            ventana_creditos,
-            text=t("credits_back"),
-            font=("Arial Black", 11),
-            bg=self.colors[4],
-            fg=self.colors[6],
-            activebackground=self.colors[3],
-            activeforeground=self.colors[6],
-            command=ventana_creditos.destroy
-        )
-        boton_cerrar.pack(pady=10)
     
-    
-    def show_help(self):
-        ventana_ayuda = Toplevel()
-        ventana_ayuda.title(t("help_title"))
-        ventana_ayuda.geometry("700x500")
-        ventana_ayuda.config(bg=self.colors[0])
-
-        # --- Título ---
-        titulo = Label(
-            ventana_ayuda,
-            text=t("help_title"),
-            font=("Arial Black", 16),
-            fg=self.colors[6],
-            bg=self.colors[0]
-        )
-        titulo.pack(pady=20)
-
-        # --- Contenedor principal ---
-        frame_texto = Frame(ventana_ayuda, bg=self.colors[0])
-        frame_texto.pack(padx=40, pady=10, fill="both", expand=True)
-
-        # --- Secciones de ayuda ---
-        secciones = [
-            {"titulo": t("help_section_login"), "texto": t("help_section_login_text")},
-            {"titulo": t("help_section_register"), "texto": t("help_section_register_text")},
-            {"titulo": t("help_section_forgot"), "texto": t("help_section_forgot_text")},
-        ]
-
-        # --- Mostrar texto en pantalla ---
-        for sec in secciones:
-            Label(
-                frame_texto,
-                text=sec["titulo"],
-                font=("Arial Black", 12),
-                fg=self.colors[3],
-                bg=self.colors[0],
-                anchor="w",
-                justify="left"
-            ).pack(anchor="w", pady=(10, 0))
-            Label(
-                frame_texto,
-                text=sec["texto"],
-                font=("Arial", 10),
-                fg=self.colors[6],
-                bg=self.colors[0],
-                wraplength=600,
-                justify="left"
-            ).pack(anchor="w", pady=(0, 10))
-
-        # --- Botón Volver ---
-        boton_cerrar = Button(
-            ventana_ayuda,
-            text=t("help_back"),
-            font=("Arial Black", 11),
-            bg=self.colors[4],
-            fg=self.colors[6],
-            activebackground=self.colors[3],
-            activeforeground=self.colors[6],
-            command=ventana_ayuda.destroy
-        )
-        boton_cerrar.pack(pady=10)
-
 
     def google_login(self):
         """Login con Google (simulado)"""
         messagebox.showinfo("Google Login", "Funcionalidad de Google OAuth en desarrollo")
 
+
     def show_register_message(self):
         """Muestra la ventana de registro"""
         self.show_register_window()
+
 
     def login(self):
         username = self.username_entry.get()
@@ -665,6 +538,7 @@ class LoginAvatarsRooks:
         else:
             messagebox.showerror("Error",t("error_uc"))
 
+
     def face_recognition(self):
         """Login con reconocimiento facial"""
         try:
@@ -675,6 +549,7 @@ class LoginAvatarsRooks:
             temp_root.destroy()
         except Exception as e:
             messagebox.showerror("Error",t("error_facial").format(error=e))
+
 
     def update_days(self, event=None):
         "Actualizar los dias segun el mes y año seleccionados"
