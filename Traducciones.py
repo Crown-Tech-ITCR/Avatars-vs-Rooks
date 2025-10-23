@@ -110,6 +110,7 @@ LANGUAGES = {
         "error_email2": "Error, por favor ingresa un correo electrónico válido",
         "error_password3":"Error, por favor ingresa una contraseña",
         "user_exist":"Error, el usuario ya existe",
+        "error_phone_invalid" : "Error, el telefono no es valido",
 
         #Preguntas
         "error_guardar_pregunta":"Error, al guardar la pregunta: {message}",
@@ -213,13 +214,13 @@ LANGUAGES = {
         "selec_nationality":"Select your nationality:",
         "account_security":"Account and Security",
         "insert_username":"Enter your username",
-        "restriccion1":"❌ Between 4 and 256 characters",
-        "restriccion2":"❌ Only letters and numbers (no spaces or special characters)",
+        "restriccion1":"Between 4 and 256 characters",
+        "restriccion2":"Only letters and numbers (no spaces or special characters)",
         "email":"Mail:",
         "insert_email":"Enter your email",
         "restriccion3":"Between 8 and 23 characters",
-        "restriccion4":" Only letters and numbers",
-        "restriccion5":" ❌ No spaces or special characters",
+        "restriccion4":"Only letters and numbers",
+        "restriccion5":"No spaces or special characters",
         "facial_identification":"Facial recognition (Optional)",
         "enable_facial":"Enable",
         "capture_face":"Capture face",
@@ -228,6 +229,8 @@ LANGUAGES = {
         "expiry_date":"Expiry date",
         "name_holder":"Name of the holder",
         "error_register_facial": "Error when registering face: {error}",
+        "error_phone_invalid": "Error, the phone number is not valid",
+
 
         #Guardar datos registro
         "error_restr_password":"Error, passwords do not meet requirements",
@@ -340,13 +343,13 @@ LANGUAGES = {
         "selec_nationality":"Válassza ki nemzetiségét:",
         "account_security":"Fiók és biztonság",
         "insert_username":"Adja meg felhasználónevét",
-        "restriccion1":"❌ 4 és 256 karakter között",
-        "restriccion2":"❌ Csak betűk és számok (nincs szóköz vagy speciális karakter)",
+        "restriccion1":"4 és 256 karakter között",
+        "restriccion2":"Csak betűk és számok (nincs szóköz vagy speciális karakter)",
         "email":"Felad:",
         "insert_email":"Adja meg e-mail címét:",
         "restriccion3":"8 és 23 karakter között",
-        "restriccion4":" Csak betűk és számok",
-        "restriccion5":" ❌ Nincs szóköz vagy speciális karakter",
+        "restriccion4":"Csak betűk és számok",
+        "restriccion5":"Nincs szóköz vagy speciális karakter",
         "facial_identification":"Arcfelismerés (opcionális)",
         "enable_facial":"Engedélyezés",
         "capture_face":"Arc rögzítése",
@@ -355,6 +358,7 @@ LANGUAGES = {
         "expiry_date":"Lejárati dátum",
         "name_holder":"A tulajdonos neve",
         "error_register_facial": "Hiba az arc regisztrálásakor: {error}",
+        "error_phone_invalid": "Hiba, a telefonszám nem érvényes",
 
         #Guardar datos registro
         "error_restr_password":"Hiba, a jelszavak nem felelnek meg a követelményeknek",
