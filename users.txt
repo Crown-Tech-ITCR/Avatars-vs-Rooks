@@ -31,7 +31,9 @@
         "nacionalidad_enc": "BgGoRHmDHLJDmp2KD6PuGLA5gP9oxVkUYE04RFhOGlhvxl4=",
         "apellidos_enc": "v72BZVe8FBhu6exzdBOQpaFyfJBdcpkC9DaThb+WlJ6y9uD2Gg==",
         "telefono_enc": "EFhw31Qd9Niq2JkydzYg6Gr2IlPK7DlQg4Xb4iJ6pOl9WpRNcA==",
-        "primerIngreso": true
+        "primerIngreso": true,
+        "security_question_enc": "OT6bsq5/pu8cy6UyZQoUUzyRfTb47pJYcpRRT1pEfCRGf4YKA3/uX64jxcDrexcrM4J2Z+OGAwW7dXJtUm9lOr/zDCblS4jUo47Q0qXBM8Ve6A==",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$lefKNQ4VlBdSEi9J0U0d4g$/KlixD/qBnCIpCJWM43M7LbQ8cIY2ECxPcmu7zDqml0"
     },
     "OoxCQUh8rvbIfEK/wD277OuuiRz4OUVeBSe56ZJqip7F": {
         "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$MxgyJQqq9MTfpgCYJBVTCg$RDhvWJXKpHpuzpZPpQDtDdRjh98az99fQqWhXKizqno",
