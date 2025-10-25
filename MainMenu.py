@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from PersonalizaciónUI import MenuPersonalizacion
+import juego_base
 
 class MainMenu:
     def __init__(self, root, username, nombre, callback_login, c1, c2, c3, c4, c5, c6, c7):
@@ -200,21 +201,39 @@ class MainMenu:
         """Navega al salón de la fama"""
         messagebox.showinfo("Boton", "Salon de la fama")
     
+
     def start_level1(self):
-        """Inicia el nivel 1"""
-        messagebox.showinfo("Boton", "Nivel facil")
-    
+        juego_base.NIVEL_ACTUAL = 1
+        self.root.withdraw()
+        root_nivel1 = tk.Toplevel(self.root)
+        root_nivel1.title("Avatars vs Rooks - Nivel 1 (Fácil)")
+        juego_base.Juego(root_nivel1, callback_volver_menu=lambda: self.regresar_menu(root_nivel1))
+
+
     def start_level2(self):
-        """Inicia el nivel 2"""
-        messagebox.showinfo("Boton", "Nivel medio")
-    
+        juego_base.NIVEL_ACTUAL = 2
+        self.root.withdraw()
+        root_nivel2 = tk.Toplevel(self.root)
+        root_nivel2.title("Avatars vs Rooks - Nivel 2 (Medio)")
+        juego_base.Juego(root_nivel2, callback_volver_menu=lambda: self.regresar_menu(root_nivel2))
+
+
     def start_level3(self):
-        """Inicia el nivel 3"""
-        messagebox.showinfo("Boton", "Nivel dificil")
-    
-    def destroy(self):
-        """Destruye el frame del menú"""
-        self.frame.destroy()
+        juego_base.NIVEL_ACTUAL = 3
+        self.root.withdraw()
+        root_nivel3 = tk.Toplevel(self.root)
+        root_nivel3.title("Avatars vs Rooks - Nivel 3 (Difícil)")
+        juego_base.Juego(root_nivel3, callback_volver_menu=lambda: self.regresar_menu(root_nivel3))
+
+
+
+    def regresar_menu(self, ventana_juego):
+        """Destruye la ventana del juego y regresa al menú principal."""
+        ventana_juego.destroy()
+        self.root.deiconify()
+
+
+
 
     def reset_MainMenu(self, username, name, c1=None, c2=None, c3=None, c4=None, c5=None, c6=None, c7=None):
         """Reinicia y muestra el menú principal con los datos actualizados"""
