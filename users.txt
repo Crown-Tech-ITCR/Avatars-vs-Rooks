@@ -470,5 +470,27 @@
         "primerIngreso": false,
         "security_question_enc": "N901cqlaab0dqNsvo/zQVaqhbTHSEy4B3UNvyRNlaHarF3IED4seDFwLtm9F1tac1SKArxuN1rNe/mYBP4A+YzacQSoJ8PH23eUAMmhx3fNT5Q==",
         "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$lZ60oDf+Wg1JJAzGp9YgPQ$H4oh32c9OVc3nvliCxAd+5vwDF6GTtI0Lwqaju0Q6m4"
+    },
+    "l9KF0B7dMIr5UFVyL/LNwkkjZSyi3MkP4KcMlDljxKwaqaDB+o4=": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$feLbV1ZcoGu4PSZRMz4rCw$UsvFOYWrXi9ue3r91TZhQH26kV/1iAVFS8qjiXk47bA",
+        "nombre_enc": "yFIQ7PjeJoF4/FfiI8qBhOctCJ7D0GK8Lh3pciHc/g==",
+        "email_enc": "3selLg9c2pCByx7ShdYJ8Oxi0zb44UL+wygUy2qXPMOV3G5nEZGX+I9OYw==",
+        "nacionalidad_enc": "9HIO4+8YKH2Oje0McekcSgIPc/SvWf8xSH/CtMpqCRvAUiki+sCO",
+        "apellidos_enc": "v/UWwsXyxIHxOa4Zz+g3TXgMUTMjDsDuImll7hiZn2FtkLM=",
+        "telefono_enc": "yND18bX36MJns/VebRiqT/DxKYmAgTHOTnml5AGoKLWvCKvq",
+        "primerIngreso": false,
+        "security_question_enc": "u57lpWBbnAVmohv3tgrG1bhWlapLItuClOeTIhH9wPwE0OOYPjVourswOIquvqf9l1upby7C/4ICbtUyNOhakVoile/MRQ==",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$QGXq7cJsDdse8XXQ1CDqrQ$FICpA8mX4oGy9CXOD6hB4bE47689q4jhgXxEeavZDmM"
+    },
+    "HNRI1nuTCcSVTb60ert47ypJLLobn3L7M9l2/+3IsH2L1KC1SvzF": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$Bh/+ZXBc0MlFw/goN06btw$G9uIesMlQ7YxBDcP312tP29zq+FuuCmaRDQAUHnW82I",
+        "nombre_enc": "8uy6t5KoXLlnwi0tCVLtue7SKa9C1dIfcUR0F4t46wusqBE=",
+        "email_enc": "nwJbXzApiS6WlhUlsrW2OHm0CpmWrcsr7iAEfpSFe/qEUYG6p2S5pgyTuj0=",
+        "nacionalidad_enc": "u+CZpMUkyewkbas+Hzf5ZF0TQMmBhOLHfH08qd1dgYL4sLUJKNs=",
+        "apellidos_enc": "x2QMdooC7FTsWIi20TRPKc2rekteVPkQY2mGviXO4ZHgvGzp9FFm",
+        "telefono_enc": "e7SGFSkbknfX4GBGaE/OHqeHeJWxROU3+GmWo22+leLsVSlw",
+        "primerIngreso": false,
+        "security_question_enc": "sFhctR7wn8/YzlitWRjKjDgrmrLbEVLAWqzV4rsIFWL/xzdk+RyrYwdHuAsK2MjAVmcPynEjFH52uNCY0AwDj6jHwpBEog8=",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$R9Cg+hdfNjrP8avFe9W6fw$pD5dS2YjPi12VzSN4trDwn3vIu14PCx3MLWrtSwEjVE"
     }
 }

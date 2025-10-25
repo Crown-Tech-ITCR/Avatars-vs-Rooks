@@ -94,10 +94,14 @@ class RookArena(Rook):
 
 
 class Avatar(Entidad):
-    """Avatar base: se desplaza (movil=True) y puede regenerarse/atacar."""
-    def __init__(self, vida: int = 10, dano: int = 10, regeneracion: int = 0):
+    """Avatar base: se desplaza (movil=True) y puede regenerarse/atacar.
+       move_cooldown_max = ticks a esperar después de moverse (0 = se mueve cada tick)."""
+    def __init__(self, vida: int = 10, dano: int = 10, regeneracion: int = 0, move_cooldown_max: int = 1):
         super().__init__("avatar", vida=vida, dano=dano, movil=True)
         self.regeneracion = regeneracion
+        self.move_cooldown_max = move_cooldown_max
+        # Iniciar el cooldown igual al máximo para evitar que el avatar se mueva inmediatamente tras generarlo
+        self.move_cooldown = self.move_cooldown_max
 
     def attack(self, objetivo):
         if hasattr(objetivo, "take_damage"):
@@ -106,32 +110,37 @@ class Avatar(Entidad):
     def tick(self):
         if self.regeneracion and self.vida > 0:
             self.vida += self.regeneracion
+        # movimiento controlado en mover_avatars mediante move_cooldown
 
 
 class AvatarFlechador(Avatar):
     def __init__(self):
-        super().__init__(vida=8, dano=2, regeneracion=2)
+        # Flechador = ligeramente más lento
+        super().__init__(vida=5, dano=2, regeneracion=2, move_cooldown_max=3)
         self.tipo = "avatar_flechador"
         self.color = "orange"
 
 
 class AvatarEscudero(Avatar):
     def __init__(self):
-        super().__init__(vida=8, dano=3, regeneracion=1)
+        # Escudero = intermedio
+        super().__init__(vida=10, dano=3, regeneracion=1, move_cooldown_max=2)
         self.tipo = "avatar_escudero"
         self.color = "blue"
 
 
 class AvatarCanibal(Avatar):
     def __init__(self):
-        super().__init__(vida=8, dano=12, regeneracion=4)
+        # Caníbal = más rápido
+        super().__init__(vida=25, dano=12, regeneracion=4, move_cooldown_max=0)
         self.tipo = "avatar_canibal"
         self.color = "red"
 
 
 class AvatarLenador(Avatar):
     def __init__(self):
-        super().__init__(vida=8, dano=9, regeneracion=0)
+        # Leñador = rápido pero no el más rápido
+        super().__init__(vida=20, dano=9, regeneracion=0, move_cooldown_max=1)
         self.tipo = "avatar_lenador"
         self.color = "sienna"
 
@@ -234,7 +243,6 @@ class Juego:
     def seleccionar_rook(self, clase_rook):
         """Selecciona el tipo de rook a colocar."""
         self.rook_seleccionado = clase_rook
-        print(f"Rook seleccionado: {clase_rook.__name__}")
 
     def colocar_rook(self, event):
         if self.juego_terminado:
@@ -243,34 +251,35 @@ class Juego:
         c = event.x // TAM_CASILLA
         f = event.y // TAM_CASILLA
 
-        # Solo colocar si la celda está vacía o no hay rook
-        if not any(isinstance(e, Rook) for e in matriz_juego[f][c]):
-            # TODO: Cuando el sistema de monedas esté implementado:
-            # - Verificar si hay suficientes monedas
-            # - Restar el costo de la rook
-            # - Actualizar el label de monedas
-            
-            rook = self.rook_seleccionado()  # Crear instancia del tipo seleccionado
-            rook.set_pos(f, c)
-            matriz_juego[f][c].append(rook)
-            
-            # Placeholder para sistema de monedas:
-            # if self.monedas >= rook.costo:
-            #     self.monedas -= rook.costo
-            #     self.label_monedas.config(text=f"💰 Monedas: {self.monedas}")
-            # else:
-            #     print("No hay suficientes monedas!")
+        # No permitir colocar rook si ya hay un Avatar o un Rook en la celda
+        if any(isinstance(e, (Rook, Avatar)) for e in matriz_juego[f][c]):
+            # opcional: mostrar mensaje o efecto de error
+            return
+
+        rook = self.rook_seleccionado()  # Crear instancia del tipo seleccionado
+        rook.set_pos(f, c)
+        matriz_juego[f][c].append(rook)
 
     def generar_avatar(self):
-        """Genera un avatar aleatorio en la última fila (abajo)."""
-        columna = random.randint(0, COLUMNAS - 1)
-        tipo = random.choice([AvatarFlechador, AvatarEscudero, AvatarCanibal, AvatarLenador])
-        av = tipo()
-        av.set_pos(FILAS - 1, columna)
-        matriz_juego[FILAS - 1][columna].append(av)
+        """Genera un avatar aleatorio en la última fila (abajo) en una celda libre."""
+        # Intentar colocar en una columna aleatoria que esté libre de Rook/Avatar
+        cols = list(range(COLUMNAS))
+        random.shuffle(cols)
+        for columna in cols:
+            if not any(isinstance(e, (Rook, Avatar)) for e in matriz_juego[FILAS - 1][columna]):
+                tipo = random.choice([AvatarFlechador, AvatarEscudero, AvatarCanibal, AvatarLenador])
+                av = tipo()
+                av.set_pos(FILAS - 1, columna)
+                # evitar movimiento inmediato en el mismo tick
+                av.move_cooldown = av.move_cooldown_max
+                matriz_juego[FILAS - 1][columna].append(av)
+                return
+        # si no hay columna libre, no generar
 
     def mover_avatars(self):
-        """Mueve los avatars hacia arriba y les permite atacar rooks si están frente a uno."""
+        """Mueve los avatars hacia arriba y les permite atacar rooks si están frente a uno.
+           No permiten moverse a una celda que ya contenga un Rook/Avatar.
+           Movimiento fijo por cooldown (move_cooldown_max)."""
         for f in range(FILAS):
             for c in range(COLUMNAS):
                 for e in list(matriz_juego[f][c]):
@@ -292,21 +301,25 @@ class Juego:
 
                         destino_f = f - 1
 
-                        # Combate con Rook
+                        # Detectar rooks en actual y destino (atacar si hay)
                         rook_en_actual = [r for r in matriz_juego[f][c] if isinstance(r, Rook)]
                         rook_en_destino = [r for r in matriz_juego[destino_f][c] if isinstance(r, Rook)]
 
-                        if rook_en_actual or rook_en_destino:
-                            objetivo = rook_en_actual[0] if rook_en_actual else rook_en_destino[0]
-                            vida_inicial = objetivo.vida
+                        if rook_en_actual:
+                            # si hay un rook en la misma casilla (estado indeseado), atacar y no moverse
+                            objetivo = rook_en_actual[0]
                             e.attack(objetivo)
+                            if objetivo.vida <= 0:
+                                pass
+                            continue
 
-                            if vida_inicial > 0 and objetivo.vida <= 0:
-                                continue
-                            else:
-                                continue
+                        if rook_en_destino:
+                            # atacar el rook en destino pero NO moverse dentro de su casilla
+                            objetivo = rook_en_destino[0]
+                            e.attack(objetivo)
+                            continue
 
-                        # Verificar si hay ráfagas en la casilla destino
+                        # Verificar ráfagas en la casilla destino
                         rafagas_en_destino = [p for p in matriz_juego[destino_f][c] if isinstance(p, Rafaga)]
                         if rafagas_en_destino:
                             total_dano = sum(r.dano for r in rafagas_en_destino)
@@ -316,11 +329,23 @@ class Juego:
                                 e.posicion = None
                                 continue
 
-                        # Mover avatar normalmente
+                        # Si hay entidades en destino, no mover
+                        if any(isinstance(x, (Rook, Avatar)) for x in matriz_juego[destino_f][c]):
+                            continue
+
+                        # Control fijo de velocidad: si move_cooldown > 0 -> decrementar y no mover
+                        if getattr(e, "move_cooldown", 0) > 0:
+                            e.move_cooldown -= 1
+                            continue
+
+                        # Mover avatar
                         if e in matriz_juego[f][c]:
                             matriz_juego[f][c].remove(e)
                         matriz_juego[destino_f][c].append(e)
                         e.set_pos(destino_f, c)
+
+                        # Después de moverse, fijar cooldown (0 = se mueve cada tick)
+                        e.move_cooldown = getattr(e, "move_cooldown_max", 0)
 
     def programar_generacion(self, tipo):
         """Programa la generación periódica de un tipo de avatar."""
@@ -331,7 +356,9 @@ class Juego:
         if self.juego_terminado:
             return
 
-        columna = random.randint(0, COLUMNAS - 1)
+        # Intentar colocar en una columna aleatoria que esté libre de Rook/Avatar
+        cols = list(range(COLUMNAS))
+        random.shuffle(cols)
         clase = {
             "flechador": AvatarFlechador,
             "escudero": AvatarEscudero,
@@ -340,9 +367,14 @@ class Juego:
         }.get(tipo)
 
         if clase is not None:
-            av = clase()
-            av.set_pos(FILAS - 1, columna)
-            matriz_juego[FILAS - 1][columna].append(av)
+            for columna in cols:
+                if not any(isinstance(e, (Rook, Avatar)) for e in matriz_juego[FILAS - 1][columna]):
+                    av = clase()
+                    av.set_pos(FILAS - 1, columna)
+                    # evitar movimiento inmediato en el mismo tick
+                    av.move_cooldown = av.move_cooldown_max
+                    matriz_juego[FILAS - 1][columna].append(av)
+                    break
 
         self.programar_generacion(tipo)
 
