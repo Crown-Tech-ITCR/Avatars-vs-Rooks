@@ -13,6 +13,9 @@ class MenuPersonalizacion:
         self.callback_menu = callback_menu
         self.resultados = []
         self.spotify_manager = SpotifyManager()
+
+        self.tempo_seleccionado = 120 
+        self.popularidad_seleccionada = 20 
         
         # Colores recibidos
         self.c1 = c1
@@ -432,6 +435,15 @@ class MenuPersonalizacion:
             self.label_titulo.config(text=track_info['nombre'])
             self.label_artista.config(text=track_info['artista'])
 
+            #Guardar variables importantes para sistema de puntos (tempo y popularidad)
+            track_uri = track_info["uri"]
+            tempo = self.spotify_manager.obtener_tempo(track_uri)
+            popularidad = self.spotify_manager.obtener_popularidad(track_uri)
+            
+            # Guardar datos en una variable
+            self.tempo_seleccionado = tempo if tempo is not None else 120
+            self.popularidad_seleccionada = popularidad if popularidad is not None else 20 
+
             # Reproducir canción
             if not self.spotify_manager.reproducir_cancion(track_info["uri"]):
                 messagebox.showwarning("Atención", "No hay dispositivo Spotify Premium activo")
@@ -456,7 +468,10 @@ class MenuPersonalizacion:
             widget.destroy()
         # Llamar callback de main menu si existe
         if self.callback_menu:
-            self.callback_menu(self.username, self.nombre,self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
+            self.callback_menu(self.username, self.nombre, self.tempo_seleccionado,
+                self.popularidad_seleccionada, self.c1, 
+                self.c2, self.c3, self.c4, self.c5,
+                self.c6, self.c7)
     
     def volver(self):
         """ Por defecto va al login"""
