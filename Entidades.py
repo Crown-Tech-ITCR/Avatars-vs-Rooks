@@ -91,23 +91,15 @@ class RookArena(Rook):
 # CLASES DE AVATARS
 class Avatar(Entidad):
     """Avatar base: se mueve y puede atacar rooks."""
-    def __init__(self, vida: int = 10, dano: int = 10, regeneracion: int = 0, move_cooldown_max: int = 3, rango_ataque: int = 1, ataque_a_distancia: bool = False):
+    def __init__(self, vida: int = 10, dano: int = 10, regeneracion: int = 0, move_cooldown_max: int = 3):
         super().__init__("avatar", vida=vida, dano=dano, movil=True)
         self.regeneracion = regeneracion
         self.move_cooldown_max = move_cooldown_max
         self.move_cooldown = 0  # Cooldown actual para movimiento
-        self.rango_ataque = rango_ataque  # Nuevo: rango de ataque
-        self.ataque_a_distancia = ataque_a_distancia  # Nuevo: si ataca a distancia
-        self.shot_cooldown = 0  # Nuevo: cooldown de disparo
-        self.shot_cooldown_max = 3  # Nuevo: cooldown máximo de disparo
 
     def can_move(self) -> bool:
         """Verifica si el avatar puede moverse."""
         return self.move_cooldown == 0
-
-    def can_shoot(self) -> bool:
-        """Verifica si el avatar puede disparar."""
-        return self.shot_cooldown == 0 and self.ataque_a_distancia
 
     def move_tick(self):
         """Actualiza el cooldown de movimiento."""
@@ -118,52 +110,14 @@ class Avatar(Entidad):
         """Reinicia el cooldown de movimiento después de moverse."""
         self.move_cooldown = self.move_cooldown_max
 
-    def shoot(self):
-        """Dispara una ráfaga si puede atacar a distancia."""
-        if self.can_shoot():
-            self.shot_cooldown = self.shot_cooldown_max
-            from Entidades import Rafaga  # Importación local para evitar problemas
-            rafaga = Rafaga(self.dano)
-            rafaga.tipo = f"rafaga_{self.tipo}"  # Identificar origen
-            return rafaga
-        return None
-
-    def buscar_objetivo_en_rango(self, matriz_juego, mi_fila, mi_columna):
-        """Busca rooks en el rango de ataque del avatar."""
-        objetivos = []
-        
-        # Buscar rooks hacia arriba (dirección de avance del avatar)
-        for f in range(mi_fila - 1, max(-1, mi_fila - self.rango_ataque - 1), -1):
-            if f >= 0:
-                rooks_en_fila = [r for r in matriz_juego[f][mi_columna] if isinstance(r, Rook)]
-                if rooks_en_fila:
-                    objetivos.extend(rooks_en_fila)
-                    break  # Solo atacar al primer rook encontrado en línea recta
-        
-        return objetivos
-
-    def puede_avanzar_sin_rooks(self, matriz_juego, mi_fila, mi_columna):
-        """Verifica si hay rooks en toda la columna por delante."""
-        if not self.ataque_a_distancia:
-            return True  # Los avatars normales siempre pueden avanzar
-        
-        # Para avatars a distancia, verificar si hay rooks en toda la columna hacia arriba
-        for f in range(mi_fila - 1, -1, -1):
-            rooks_en_fila = [r for r in matriz_juego[f][mi_columna] if isinstance(r, Rook)]
-            if rooks_en_fila:
-                return False  # Hay al menos un rook en la columna
-        
-        return True  # No hay rooks en toda la columna
-
     def attack(self, objetivo):
         """Ataca a un objetivo si puede recibir daño."""
         if hasattr(objetivo, "take_damage"):
             objetivo.take_damage(self.dano)
 
     def tick(self):
-        # Actualizar cooldown de disparo
-        if self.shot_cooldown > 0:
-            self.shot_cooldown -= 1
+        """Regenera vida si tiene regeneración activa y actualiza cooldown."""
+        self.move_tick()
 
 
 
@@ -171,35 +125,33 @@ class Avatar(Entidad):
 # Velocidades: Flechador (más lento) -> Escudero -> Leñador -> Caníbal (más rápido)
 
 class AvatarFlechador(Avatar):
-    """Avatar Flechador: Ataca a distancia, más lento, poco daño pero se regenera."""
+    """Avatar Flechador: Más lento, poco daño pero se regenera."""
     def __init__(self):
-        super().__init__(vida=5, dano=3, regeneracion=2, move_cooldown_max=5, rango_ataque=3, ataque_a_distancia=True)
+        super().__init__(vida=5, dano=2, regeneracion=2, move_cooldown_max=5)  # Más lento
         self.tipo = "avatar_flechador"
         self.color = "orange"
-        self.shot_cooldown_max = 4  # Más lento para disparar
 
 
 class AvatarEscudero(Avatar):
-    """Avatar Escudero: Ataca a distancia, velocidad media-lenta con regeneración moderada."""
+    """Avatar Escudero: Velocidad media-lenta con regeneración moderada."""
     def __init__(self):
-        super().__init__(vida=8, dano=4, regeneracion=1, move_cooldown_max=4, rango_ataque=2, ataque_a_distancia=True)
+        super().__init__(vida=10, dano=3, regeneracion=1, move_cooldown_max=5)  # Medio-lento
         self.tipo = "avatar_escudero"
         self.color = "blue"
-        self.shot_cooldown_max = 3  # Más rápido que el flechador
 
 
 class AvatarLenador(Avatar):
-    """Avatar Leñador: Ataque cuerpo a cuerpo, velocidad media-rápida, alto daño sin regeneración."""
+    """Avatar Leñador: Velocidad media-rápida, alto daño sin regeneración."""
     def __init__(self):
-        super().__init__(vida=20, dano=9, regeneracion=0, move_cooldown_max=3, rango_ataque=1, ataque_a_distancia=False)
+        super().__init__(vida=20, dano=9, regeneracion=0, move_cooldown_max=4)  # Medio-rápido
         self.tipo = "avatar_lenador"
         self.color = "sienna"
 
 
 class AvatarCanibal(Avatar):
-    """Avatar Caníbal: Ataque cuerpo a cuerpo, más rápido, alto daño y regeneración alta."""
+    """Avatar Caníbal: Más rápido, alto daño y regeneración alta."""
     def __init__(self):
-        super().__init__(vida=25, dano=12, regeneracion=4, move_cooldown_max=2, rango_ataque=1, ataque_a_distancia=False)
+        super().__init__(vida=25, dano=12, regeneracion=4, move_cooldown_max=4)  # Más rápido
         self.tipo = "avatar_canibal"
         self.color = "red"
 

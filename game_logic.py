@@ -21,7 +21,7 @@ class GameLogic:
                 
                 for e in entidades_en_celda:
                     if isinstance(e, Avatar):
-                        # Actualizar cooldown de movimiento y disparo
+                        # Actualizar cooldown de movimiento
                         e.tick()
                         
                         # 1. VERIFICAR colisiones con rafagas en la posición ACTUAL
@@ -45,42 +45,17 @@ class GameLogic:
                                 on_game_over_callback()
                             return
                         
-                        # 2. ATAQUE A DISTANCIA (para Flechador y Escudero)
-                        if e.ataque_a_distancia and e.can_shoot():
-                            objetivos = e.buscar_objetivo_en_rango(matriz_juego, f, c)
-                            if objetivos:
-                                # Disparar ráfaga hacia el objetivo
-                                rafaga = e.shoot()
-                                if rafaga:
-                                    # Calcular posición donde debe aparecer la ráfaga
-                                    objetivo_fila = objetivos[0].posicion[0] if objetivos[0].posicion else f - 1
-                                    
-                                    # Colocar ráfaga en la fila anterior al avatar (hacia el objetivo)
-                                    rafaga_fila = min(f - 1, objetivo_fila + 1)
-                                    
-                                    if rafaga_fila >= 0:
-                                        rafaga.set_pos(rafaga_fila, c)
-                                        rafaga.reset_move_cooldown()
-                                        matriz_juego[rafaga_fila][c].append(rafaga)
-                        
-                        # 3. MOVIMIENTO
                         # Verificar si puede moverse (cooldown)
                         if not e.can_move():
                             continue
                         
-                        # Para avatars a distancia: solo avanzar si no hay rooks en la columna
-                        if e.ataque_a_distancia:
-                            if not e.puede_avanzar_sin_rooks(matriz_juego, f, c):
-                                continue  # No avanzar si hay rooks en la columna
-                        
                         destino = f - 1
                         
-                        # Verificar colisión con rook en la fila de destino (para avatars cuerpo a cuerpo)
+                        # Verificar colisión con rook en la fila de destino
                         rook_dest = [r for r in matriz_juego[destino][c] if isinstance(r, Rook)]
                         if rook_dest:
-                            if not e.ataque_a_distancia:
-                                # Avatar cuerpo a cuerpo ataca al rook pero NO se mueve
-                                e.attack(rook_dest[0])
+                            # Avatar ataca al rook pero NO se mueve
+                            e.attack(rook_dest[0])
                             continue
                         
                         # Verificar si hay otro avatar en la casilla destino
@@ -89,7 +64,7 @@ class GameLogic:
                             # No puede moverse, casilla ocupada por otro avatar
                             continue
                         
-                        # 4. VERIFICAR colisiones con rafagas en la posición DESTINO
+                        # 2. VERIFICAR colisiones con rafagas en la posición DESTINO
                         rafagas_destino = [r for r in matriz_juego[destino][c] if isinstance(r, Rafaga)]
                         if rafagas_destino:
                             total_dano_destino = sum(r.dano for r in rafagas_destino)
@@ -107,7 +82,7 @@ class GameLogic:
                                     matriz_juego[f][c].remove(e)
                                 continue
                         
-                        # 5. MOVER avatar si no murió
+                        # 3. MOVER avatar si no murió
                         if e in matriz_juego[f][c]:
                             matriz_juego[f][c].remove(e)
                             matriz_juego[destino][c].append(e)
@@ -127,26 +102,16 @@ class GameLogic:
                         # Actualizar cooldown de movimiento
                         e.tick()
                         
-                        # Determinar dirección de movimiento según el tipo de ráfaga
-                        es_rafaga_avatar = hasattr(e, 'tipo') and 'avatar_' in e.tipo
-                        direccion = -1 if es_rafaga_avatar else 1  # Avatars disparan hacia arriba (-1), Rooks hacia abajo (+1)
+                        # VERIFICAR COLISIÓN CON AVATARS EN LA MISMA CELDA
+                        avatars_en_celda = [avatar for avatar in matriz_juego[f][c] if isinstance(avatar, Avatar)]
                         
-                        # VERIFICAR COLISIÓN CON OBJETIVOS EN LA MISMA CELDA
-                        if es_rafaga_avatar:
-                            # Ráfagas de avatars atacan rooks
-                            objetivos_en_celda = [obj for obj in matriz_juego[f][c] if isinstance(obj, Rook)]
-                        else:
-                            # Ráfagas de rooks atacan avatars
-                            objetivos_en_celda = [obj for obj in matriz_juego[f][c] if isinstance(obj, Avatar)]
-                        
-                        if objetivos_en_celda:
+                        if avatars_en_celda:
                             # COLISIÓN DETECTADA: Aplicar daño y eliminar ráfaga
-                            for objetivo in objetivos_en_celda:
-                                objetivo.take_damage(e.dano)
+                            for avatar in avatars_en_celda:
+                                avatar.take_damage(e.dano)
                                 self.puntos_vida_acumulados += e.dano
-                                if objetivo.vida <= 0:
-                                    if isinstance(objetivo, Avatar):
-                                        self.avatars_eliminados += 1
+                                if avatar.vida <= 0:
+                                    self.avatars_eliminados += 1
                             
                             # ELIMINAR LA RÁFAGA tras el impacto
                             if e in matriz_juego[f][c]:
@@ -157,34 +122,29 @@ class GameLogic:
                         if not e.can_move():
                             continue
                         
-                        # Si no hay colisión, mover la ráfaga
+                        # Si no hay colisión, mover la ráfaga hacia abajo
                         if e in matriz_juego[f][c]:
                             matriz_juego[f][c].remove(e)
-                            destino_f = f + direccion
+                            destino_f = f + 1
                             
-                            # Verificar límites del tablero
-                            if 0 <= destino_f < FILAS:
+                            if destino_f < FILAS:
                                 # Verificar colisión en destino ANTES de mover
-                                if es_rafaga_avatar:
-                                    objetivos_en_destino = [obj for obj in matriz_juego[destino_f][c] if isinstance(obj, Rook)]
-                                else:
-                                    objetivos_en_destino = [obj for obj in matriz_juego[destino_f][c] if isinstance(obj, Avatar)]
+                                avatars_en_destino = [avatar for avatar in matriz_juego[destino_f][c] if isinstance(avatar, Avatar)]
                                 
-                                if objetivos_en_destino:
+                                if avatars_en_destino:
                                     # COLISIÓN EN DESTINO: Aplicar daño y destruir ráfaga
-                                    for objetivo in objetivos_en_destino:
-                                        objetivo.take_damage(e.dano)
+                                    for avatar in avatars_en_destino:
+                                        avatar.take_damage(e.dano)
                                         self.puntos_vida_acumulados += e.dano
-                                        if objetivo.vida <= 0:
-                                            if isinstance(objetivo, Avatar):
-                                                self.avatars_eliminados += 1
+                                        if avatar.vida <= 0:
+                                            self.avatars_eliminados += 1
                                     # La ráfaga se destruye al impactar, NO se mueve
                                 else:
                                     # NO hay colisión: mover ráfaga normalmente
                                     matriz_juego[destino_f][c].append(e)
                                     e.set_pos(destino_f, c)
                                     e.reset_move_cooldown()  # Reiniciar cooldown después de moverse
-                            # Si destino_f está fuera de límites, la ráfaga sale del tablero y se elimina
+                            # Si destino_f >= FILAS, la ráfaga sale del tablero y se elimina
 
     def disparar_rooks(self):
         """Hace que todos los rooks disparen si pueden."""

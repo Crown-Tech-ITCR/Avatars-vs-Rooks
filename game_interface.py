@@ -155,11 +155,19 @@ class GameInterface:
         
         matriz = get_matriz_juego()
         
-        # Verificar que no haya ya un rook en esa posición
-        if not any(isinstance(e, Rook) for e in matriz[f][c]):
-            rook = self.rook_seleccionado()
-            rook.set_pos(f, c)
-            matriz[f][c].append(rook)
+        entidades_en_casilla = matriz[f][c]
+        
+        # Verificar si hay rooks o avatars en la casilla
+        hay_rook = any(isinstance(e, Rook) for e in entidades_en_casilla)
+        hay_avatar = any(isinstance(e, Avatar) for e in entidades_en_casilla)
+        
+        if hay_rook or hay_avatar:
+            return
+        
+        # Crear y colocar el rook
+        rook = self.rook_seleccionado()
+        rook.set_pos(f, c)
+        matriz[f][c].append(rook)
 
     def inicializar_nivel(self):
         """Inicializa la configuración específica del nivel actual."""
