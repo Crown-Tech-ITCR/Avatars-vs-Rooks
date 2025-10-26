@@ -1,4 +1,4 @@
-from Entidades import Avatar, Rafaga, Rook
+from Entidades import Avatar, Rafaga, Rook, ProyectilAvatar
 import numpy as np
 
 class GameLogic:
@@ -10,84 +10,148 @@ class GameLogic:
         self.juego_terminado = False
         self.avatars_eliminados = 0
         self.puntos_vida_acumulados = 0
-        
+            
     def mover_avatars(self, on_game_over_callback=None):
-        """Mueve todos los avatars y maneja colisiones con rooks y rafagas."""
+        """Mueve todos los avatars y maneja ataques a distancia."""
         
         for f in range(FILAS):
             for c in range(COLUMNAS):
-                # Crear copia para evitar problemas de iteración
                 entidades_en_celda = list(matriz_juego[f][c])
                 
                 for e in entidades_en_celda:
                     if isinstance(e, Avatar):
-                        # Actualizar cooldown de movimiento
                         e.tick()
                         
-                        # 1. VERIFICAR colisiones con rafagas en la posición ACTUAL
+                        # 1. Verificar colisiones con ráfagas
                         rafagas_actual = [r for r in matriz_juego[f][c] if isinstance(r, Rafaga)]
                         if rafagas_actual:
                             total_dano = sum(r.dano for r in rafagas_actual)
-                            # Eliminar todas las ráfagas que impactaron
                             for rafaga in rafagas_actual:
                                 if rafaga in matriz_juego[f][c]:
                                     matriz_juego[f][c].remove(rafaga)
-                        
+                            
                             e.take_damage(total_dano)
                             self.puntos_vida_acumulados += total_dano
                             if e.vida <= 0:
                                 self.avatars_eliminados += 1
                                 continue
                         
-                        # Verificar si el avatar llegó al borde superior (game over)
+                        # 2. Game over si llega arriba
                         if f == 0:
                             if on_game_over_callback:
                                 on_game_over_callback()
                             return
                         
-                        # Verificar si puede moverse (cooldown)
+                        # 3. ATAQUE A DISTANCIA (Flechador y Escudero)
+                        if e.ataque_a_distancia and e.can_shoot():
+                            # Solo disparar si hay rooks adelante
+                            if e.hay_rooks_adelante(matriz_juego, f, c):
+                                proyectil = e.shoot()
+                                if proyectil:
+                                    # Colocar proyectil en la fila anterior (hacia arriba)
+                                    if f - 1 >= 0:
+                                        proyectil.set_pos(f - 1, c)
+                                        proyectil.reset_move_cooldown()
+                                        matriz_juego[f - 1][c].append(proyectil)
+                        
+                        # 4. MOVIMIENTO
                         if not e.can_move():
                             continue
-                        
+
                         destino = f - 1
-                        
+
+                        # NUEVA LÓGICA: Para avatars a distancia (Flechador y Escudero)
+                        if e.ataque_a_distancia:
+                            # Verificar si hay rooks adelante usando el método que agregaste
+                            if e.hay_rooks_adelante(matriz_juego, f, c):
+                                # HAY ROOKS: No avanzar, seguir disparando desde la posición actual
+                                continue
+                            # NO HAY ROOKS: Puede avanzar normalmente
+                        else:
+                            # Para avatars cuerpo a cuerpo (Leñador y Caníbal): comportamiento normal
+                            pass
+
                         # Verificar colisión con rook en la fila de destino
                         rook_dest = [r for r in matriz_juego[destino][c] if isinstance(r, Rook)]
                         if rook_dest:
-                            # Avatar ataca al rook pero NO se mueve
-                            e.attack(rook_dest[0])
-                            continue
-                        
-                        # Verificar si hay otro avatar en la casilla destino
+                            if not e.ataque_a_distancia:
+                                # Solo avatars cuerpo a cuerpo atacan directamente
+                                e.attack(rook_dest[0])
+                            continue  # No moverse si hay rook en destino
+
+                        # RESTRICCIÓN: NO MÁS DE UN AVATAR POR CASILLA
                         avatar_dest = [a for a in matriz_juego[destino][c] if isinstance(a, Avatar)]
                         if avatar_dest:
-                            # No puede moverse, casilla ocupada por otro avatar
-                            continue
+                            continue  # No puede moverse, casilla ocupada por otro avatar
+                        # NUEVA LÓGICA: Avatars a distancia solo se detienen si NO hay espacio libre adelante
+                        # Eliminamos completamente la verificación de rooks en toda la columna
+                        # Los avatars a distancia ahora se mueven libremente cuando hay espacio
                         
-                        # 2. VERIFICAR colisiones con rafagas en la posición DESTINO
+                        # Verificar ráfagas en destino
                         rafagas_destino = [r for r in matriz_juego[destino][c] if isinstance(r, Rafaga)]
                         if rafagas_destino:
                             total_dano_destino = sum(r.dano for r in rafagas_destino)
-                            # Eliminar ráfagas del destino
                             for rafaga in rafagas_destino:
                                 if rafaga in matriz_juego[destino][c]:
                                     matriz_juego[destino][c].remove(rafaga)
-                        
+                            
                             e.take_damage(total_dano_destino)
                             self.puntos_vida_acumulados += total_dano_destino
                             if e.vida <= 0:
                                 self.avatars_eliminados += 1
-                                # Remover avatar de posición actual si murió
                                 if e in matriz_juego[f][c]:
                                     matriz_juego[f][c].remove(e)
                                 continue
                         
-                        # 3. MOVER avatar si no murió
+                        # 5. MOVER avatar si no murió
                         if e in matriz_juego[f][c]:
                             matriz_juego[f][c].remove(e)
                             matriz_juego[destino][c].append(e)
                             e.set_pos(destino, c)
-                            e.reset_move_cooldown()  # Reiniciar cooldown después de moverse
+                            e.reset_move_cooldown()
+
+    def mover_proyectiles_avatars(self):
+        """Mueve los proyectiles de avatars y maneja colisiones."""
+        for f in range(FILAS):
+            for c in range(COLUMNAS):
+                entidades_en_celda = list(matriz_juego[f][c])
+                
+                for e in entidades_en_celda:
+                    if isinstance(e, ProyectilAvatar):
+                        e.tick()
+                        
+                        # Verificar colisiones con rooks en la misma celda
+                        rooks_en_celda = [r for r in matriz_juego[f][c] if isinstance(r, Rook)]
+                        if rooks_en_celda:
+                            # Aplicar daño y eliminar proyectil
+                            for rook in rooks_en_celda:
+                                rook.take_damage(e.dano)
+                            if e in matriz_juego[f][c]:
+                                matriz_juego[f][c].remove(e)
+                            continue
+                        
+                        # Verificar si puede moverse
+                        if not e.can_move():
+                            continue
+                        
+                        # Mover hacia arriba
+                        if e in matriz_juego[f][c]:
+                            matriz_juego[f][c].remove(e)
+                            destino_f = f - 1
+                            
+                            if destino_f >= 0:
+                                # Verificar colisiones en destino
+                                rooks_en_destino = [r for r in matriz_juego[destino_f][c] if isinstance(r, Rook)]
+                                if rooks_en_destino:
+                                    # Aplicar daño y eliminar proyectil
+                                    for rook in rooks_en_destino:
+                                        rook.take_damage(e.dano)
+                                else:
+                                    # Mover normalmente
+                                    matriz_juego[destino_f][c].append(e)
+                                    e.set_pos(destino_f, c)
+                                    e.reset_move_cooldown()
+                            # Si destino_f < 0, el proyectil sale del tablero
 
     def mover_rafagas(self):
         """Mueve todas las rafagas hacia abajo y verifica colisiones."""
@@ -191,17 +255,19 @@ class GameLogic:
         if self.juego_terminado:
             return
         
-        # ORDEN CRÍTICO PARA GARANTIZAR DETECCIÓN DE COLISIONES:
-        # 1. Disparar rooks (con detección inmediata para avatars adyacentes)
+        # 1. Disparar rooks
         self.shot_tick += 1
         if self.shot_tick >= self.shot_interval:
             self.disparar_rooks()
             self.shot_tick = 0
         
-        # 2. Mover avatars (verificando colisiones con rafagas)
+        # 2. Mover avatars (incluye disparos)
         self.mover_avatars(on_game_over_callback)
         
-        # 3. Mover ráfagas (con detección de colisiones durante el movimiento)
+        # 3. Mover proyectiles de avatars
+        self.mover_proyectiles_avatars()
+        
+        # 4. Mover ráfagas de rooks
         self.mover_rafagas()
 
     def finalizar_juego(self):

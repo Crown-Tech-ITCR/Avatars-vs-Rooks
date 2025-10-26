@@ -1,7 +1,7 @@
 import tkinter as tk
 import random
 from game_logic import GameLogic, FILAS, COLUMNAS, TAM_CASILLA, get_matriz_juego, NIVEL_ACTUAL,reset_matriz_juego
-from Entidades import RookRoca, RookFuego, RookAgua, RookArena, crear_avatar, Rook, Avatar, Rafaga
+from Entidades import RookRoca, RookFuego, RookAgua, RookArena, crear_avatar, Rook, Avatar, Rafaga, ProyectilAvatar
 from sistema_puntos import SistemaPuntos
 
 # Configuración de la interfaz de rooks (solo información visual)
@@ -202,16 +202,30 @@ class GameInterface:
         """Genera un avatar del tipo especificado en una columna aleatoria."""
         if self.juego_terminado:
             return
-            
-        # Seleccionar columna aleatoria
-        columna = random.randint(0, COLUMNAS - 1)
+        
+        # Buscar columnas libres (última fila sin avatars)
+        columnas_libres = []
+        matriz = get_matriz_juego()
+        
+        for c in range(COLUMNAS):
+            # Verificar si la última fila de esta columna NO tiene avatars
+            avatars_en_ultima_fila = [e for e in matriz[FILAS - 1][c] if isinstance(e, Avatar)]
+            if not avatars_en_ultima_fila:
+                columnas_libres.append(c)
+        
+        # Si no hay columnas libres, no generar avatar
+        if not columnas_libres:
+            # Programar reintento en poco tiempo
+            self.root.after(500, lambda: self.programar_generacion(tipo))
+            return
+        
+        # Seleccionar columna aleatoria de las libres
+        columna = random.choice(columnas_libres)
         
         # Crear avatar
         avatar = crear_avatar(tipo)
         if avatar:
             avatar.set_pos(FILAS - 1, columna)  # Aparece en la fila inferior
-            
-            matriz = get_matriz_juego()
             matriz[FILAS - 1][columna].append(avatar)
         
         # Programar la siguiente generación
@@ -256,7 +270,6 @@ class GameInterface:
 
     def dibujar_entidades(self):
         """Dibuja todas las entidades en el canvas."""
-        # Limpiar entidades anteriores
         self.canvas.delete("entidad")
         
         matriz = get_matriz_juego()
@@ -264,7 +277,6 @@ class GameInterface:
         for f in range(FILAS):
             for c in range(COLUMNAS):
                 for e in matriz[f][c]:
-                    # Calcular posición central de la celda
                     cx = c * TAM_CASILLA + TAM_CASILLA // 2
                     cy = f * TAM_CASILLA + TAM_CASILLA // 2
                     
@@ -272,41 +284,37 @@ class GameInterface:
                         # Dibujar rooks como círculos
                         self.canvas.create_oval(
                             cx - 15, cy - 15, cx + 15, cy + 15,
-                            fill=e.color,
-                            tags="entidad"
+                            fill=e.color, tags="entidad"
                         )
-                        # Mostrar vida si es menor que la máxima
                         if hasattr(e, 'vida') and e.vida < 15:
                             self.canvas.create_text(
-                                cx, cy,
-                                text=str(e.vida),
-                                font=("Arial", 8, "bold"),
-                                fill="white",
-                                tags="entidad"
+                                cx, cy, text=str(e.vida),
+                                font=("Arial", 8, "bold"), fill="white", tags="entidad"
                             )
                     
                     elif isinstance(e, Avatar):
                         # Dibujar avatars como rectángulos
                         self.canvas.create_rectangle(
                             cx - 15, cy - 15, cx + 15, cy + 15,
-                            fill=e.color,
-                            tags="entidad"
+                            fill=e.color, tags="entidad"
                         )
-                        # Mostrar vida
                         self.canvas.create_text(
-                            cx, cy,
-                            text=str(e.vida),
-                            font=("Arial", 8, "bold"),
-                            fill="white",
-                            tags="entidad"
+                            cx, cy, text=str(e.vida),
+                            font=("Arial", 8, "bold"), fill="white", tags="entidad"
                         )
                     
                     elif isinstance(e, Rafaga):
-                        # Dibujar rafagas como círculos pequeños amarillos
+                        # Ráfagas de rooks (amarillas, hacia abajo)
                         self.canvas.create_oval(
                             cx - 5, cy - 5, cx + 5, cy + 5,
-                            fill="yellow",
-                            tags="entidad"
+                            fill="yellow", tags="entidad"
+                        )
+                    
+                    elif isinstance(e, ProyectilAvatar):
+                        # Proyectiles de avatars (verdes, hacia arriba)
+                        self.canvas.create_oval(
+                            cx - 4, cy - 4, cx + 4, cy + 4,
+                            fill="green", tags="entidad"
                         )
 
     def game_over(self):
