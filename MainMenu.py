@@ -1,16 +1,19 @@
 import tkinter as tk
 from tkinter import messagebox
 from PersonalizaciónUI import MenuPersonalizacion
-import juego_base
+from game_interface import GameInterface
+from game_logic import set_nivel_actual
 
 class MainMenu:
-    def __init__(self, root, username, nombre, callback_login, c1, c2, c3, c4, c5, c6, c7):
-        
+    def __init__(self, root, username, nombre, tempo, popularidad, callback_login, c1, 
+                 c2, c3, c4, c5, c6, c7):
         """ Menú Principal del juego Avatars vs Rooks"""
         self.root = root
         self.username = username
         self.nombre = nombre
         self.callback_login = callback_login
+        self.tempo = tempo
+        self.popularidad = popularidad
         
         # Colores recibidos
         self.c1 = c1  # Color principal/fondo
@@ -203,27 +206,36 @@ class MainMenu:
     
 
     def start_level1(self):
-        juego_base.NIVEL_ACTUAL = 1
+        set_nivel_actual(1)
         self.root.withdraw()
         root_nivel1 = tk.Toplevel(self.root)
         root_nivel1.title("Avatars vs Rooks - Nivel 1 (Fácil)")
-        juego_base.Juego(root_nivel1, callback_volver_menu=lambda: self.regresar_menu(root_nivel1))
+        GameInterface(root_nivel1, 
+              callback_volver_menu=lambda: self.regresar_menu(root_nivel1),
+              tempo=self.tempo, 
+              popularidad=self.popularidad)
 
 
     def start_level2(self):
-        juego_base.NIVEL_ACTUAL = 2
+        set_nivel_actual(2)
         self.root.withdraw()
         root_nivel2 = tk.Toplevel(self.root)
         root_nivel2.title("Avatars vs Rooks - Nivel 2 (Medio)")
-        juego_base.Juego(root_nivel2, callback_volver_menu=lambda: self.regresar_menu(root_nivel2))
+        GameInterface(root_nivel2, 
+              callback_volver_menu=lambda: self.regresar_menu(root_nivel2),
+              tempo=self.tempo, 
+              popularidad=self.popularidad)
 
 
     def start_level3(self):
-        juego_base.NIVEL_ACTUAL = 3
+        set_nivel_actual(3)
         self.root.withdraw()
         root_nivel3 = tk.Toplevel(self.root)
         root_nivel3.title("Avatars vs Rooks - Nivel 3 (Difícil)")
-        juego_base.Juego(root_nivel3, callback_volver_menu=lambda: self.regresar_menu(root_nivel3))
+        GameInterface(root_nivel3, 
+              callback_volver_menu=lambda: self.regresar_menu(root_nivel3),
+              tempo=self.tempo, 
+              popularidad=self.popularidad)
 
 
 
@@ -234,10 +246,13 @@ class MainMenu:
 
 
 
-
-    def reset_MainMenu(self, username, name, c1=None, c2=None, c3=None, c4=None, c5=None, c6=None, c7=None):
+    def reset_MainMenu(self, username, name,tempo, popularidad, c1=None, c2=None, c3=None, 
+                       c4=None, c5=None, c6=None, c7=None):
         """Reinicia y muestra el menú principal con los datos actualizados"""
         # Actualizar colores si se proporcionan nuevos valores
+
+        self.tempo = tempo
+        self.popularidad = popularidad
 
         if c1 is not None:
             self.c1 = c1

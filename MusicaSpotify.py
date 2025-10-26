@@ -11,7 +11,7 @@ class SpotifyManager:
             client_id="2de5ecec2cb946d09781ac83e97947cf",
             client_secret="90700ec3fc7c482ebf80914786e84abe",
             redirect_uri="http://127.0.0.1:8888/callback",
-            scope="user-modify-playback-state user-read-playback-state",
+            scope="user-modify-playback-state user-read-playback-state user-read-recently-played",
             cache_path=".cache"
         ))
         self.dispositivo_pc = None
@@ -76,6 +76,74 @@ class SpotifyManager:
         response = requests.get(imagen_url)
         img = Image.open(BytesIO(response.content))
         return img
+    
+    def obtener_tempo(self, track_id):
+        """Obtiene el tempo usando análisis del track completo"""
+        try:
+            if track_id.startswith('spotify:track:'):
+                track_id = track_id.split(':')[2]
+            
+            # Método de estimación basado en género y características
+            track_info = self.sp.track(track_id)
+            popularidad = track_info['popularity']
+            duracion_ms = track_info['duration_ms']
+            duracion_min = duracion_ms / 60000
+            
+            # Obtener género del artista
+            artist_id = track_info['artists'][0]['id']
+            artist_info = self.sp.artist(artist_id)
+            genres = artist_info.get('genres', [])
+            
+            # Tempo base según género
+            tempo_base = 120
+            genre_str = ' '.join(genres).lower()
+            
+            if any(g in genre_str for g in ['edm', 'electronic', 'dance', 'house']):
+                tempo_base = 128
+            elif any(g in genre_str for g in ['hip hop', 'rap', 'trap']):
+                tempo_base = 140
+            elif any(g in genre_str for g in ['pop', 'latin']):
+                tempo_base = 120
+            elif any(g in genre_str for g in ['rock', 'metal']):
+                tempo_base = 130
+            elif any(g in genre_str for g in ['reggaeton', 'dembow']):
+                tempo_base = 95
+            
+            # Ajustes por duración
+            if duracion_min < 2.5:
+                tempo_base += 10
+            elif duracion_min > 5:
+                tempo_base -= 10
+            
+            # Ajuste por popularidad (hits comerciales)
+            if popularidad > 70:
+                tempo_base = (tempo_base + 125) / 2
+            
+            tempo_estimado = round(tempo_base, 2)
+            return max(70, min(170, tempo_estimado))
+            
+        except Exception as e:
+            return 120.0
+        
+    def obtener_popularidad(self, track_id):
+        """Obtiene la popularidad de una canción (0-100). Retorna 20 como valor por defecto."""
+        try: 
+            if track_id.startswith('spotify:track:'):
+                track_id = track_id.split(':')[2]
+            
+            track_info = self.sp.track(track_id)
+            
+            if track_info and 'popularity' in track_info:
+                popularidad = track_info['popularity']
+                # Validar que sea un número válido
+                if isinstance(popularidad, (int, float)) and 0 <= popularidad <= 100:
+                    return popularidad
+            
+            # Si no hay datos válidos, retornar valor por defecto
+            return 20
+            
+        except Exception as e:
+            return 20
     
     def info_cancion(self, track):
         """Devuelve diccionario con info de la canción"""

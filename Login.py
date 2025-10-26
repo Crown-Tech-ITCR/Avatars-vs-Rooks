@@ -569,7 +569,7 @@ class LoginAvatarsRooks:
                                 self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
             else:
                 self.login_frame.pack_forget()
-                MainMenu(self.root, username, nombre, self.reiniciar_login,
+                MainMenu(self.root, username, nombre, 120,20, self.reiniciar_login,
                                 self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
         else:
             messagebox.showerror("Error", t("error_uc"))
@@ -643,7 +643,7 @@ class LoginAvatarsRooks:
             else:
                 self.destroy()
                 MainMenu(
-                    self.root, username, nombre, self.reiniciar_login,
+                    self.root, username, nombre, self.reiniciar_login, 120, 20,
                     self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
                 )
                 
@@ -2343,7 +2343,7 @@ class LoginAvatarsRooks:
 
     #CALLBACKS
 
-    def crear_main_menu(self, username, nombre, c1, c2, c3, c4, c5, c6, c7):
+    def crear_main_menu(self, username, nombre, tempo, popularidad, c1, c2, c3, c4, c5, c6, c7):
         """Crea el MainMenu desde personalización"""
         # Limpiar ventana
         for widget in self.root.winfo_children():
@@ -2354,6 +2354,8 @@ class LoginAvatarsRooks:
             self.root, 
             username, 
             nombre, 
+            tempo,
+            popularidad,
             self.reiniciar_login,          
             c1, c2, c3, c4, c5, c6, c7
         )
