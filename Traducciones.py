@@ -124,10 +124,9 @@ LANGUAGES = {
         "condicion_user2":"El nombre de usuario solo puede contener letras y números\n(sin caracteres especiales ni espacios).",
         "user_ind":"Usuario no disponible",
         "user_ocupado":"Este nombre de usuario ya está en uso.\n\nPor favor, elige otro.",
-        "pregunta1":"¿Cuál es el nombre de tu primera mascota?",
-        "pregunta2":"¿Cuál es el nombre de tu mejor amigo de la infancia?",
-        "pregunta3":"¿En qué año conociste a tu mejor amigo?",
-        "pregunta4":"¿Cuál fue tu primer trabajo?",
+        "pregunta1":"¿Cuál es la mejor carrera para estudiar en Costa Rica?",
+        "pregunta2":"¿Cuál es su profesor favorito?",
+        "pregunta3":"¿Cuál es el mejor equipo de futbol de Costa Rica",
         "correos_permit":"Solo se permiten correos de Gmail, Hotmail u Outlook."
 
 

@@ -9,7 +9,6 @@ class PasswordRecovery:
         t("pregunta1"),
         t("pregunta2"),
         t("pregunta3"),
-        t("pregunta4")
     ]
     
     def __init__(self, master_key):
