@@ -298,7 +298,7 @@ class GameLogic:
 # Dimensiones del tablero
 FILAS = 9
 COLUMNAS = 5
-TAM_CASILLA = 70
+TAM_CASILLA = 58
 
 # Nivel actual (modificado desde MainMenu)
 NIVEL_ACTUAL = 1
