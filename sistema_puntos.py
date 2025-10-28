@@ -29,7 +29,3 @@ class SistemaPuntos:
             puntaje_ajustado = limite_maximo
         
         return puntaje_ajustado
-        
-    
-
-

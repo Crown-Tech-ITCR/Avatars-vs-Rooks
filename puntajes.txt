@@ -1,0 +1,27 @@
+{
+    "fabi1": [
+        {
+            "nivel": 1,
+            "puntaje": 75.59,
+            "fecha": "2025-10-27 19:02:10",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 2,
+            "puntaje": 90.6,
+            "fecha": "2025-10-27 19:04:18",
+            "tempo": 120,
+            "popularidad": 20
+        }
+    ],
+    "fabi2": [
+        {
+            "nivel": 1,
+            "puntaje": 79.28,
+            "fecha": "2025-10-27 19:06:57",
+            "tempo": 120,
+            "popularidad": 20
+        }
+    ]
+}
