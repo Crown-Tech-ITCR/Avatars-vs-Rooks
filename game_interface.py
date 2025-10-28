@@ -2,6 +2,7 @@ import tkinter as tk
 from game_logic import GameLogic, FILAS, COLUMNAS, TAM_CASILLA, get_matriz_juego, NIVEL_ACTUAL, reset_matriz_juego
 from Entidades import RookRoca, RookFuego, RookAgua, RookArena, crear_avatar, Rook, Avatar, Rafaga, ProyectilAvatar
 from sistema_puntos import SistemaPuntos
+from gestion_puntajes import agregar_puntaje
 
 # Configuración de colores
 COLOR_FONDO = "black" 
@@ -58,7 +59,7 @@ ROOK_UI_CONFIG = [
 class GameInterface:
     """Clase que maneja toda la interfaz gráfica del juego."""
     
-    def __init__(self, root, callback_volver_menu, tempo, popularidad):
+    def __init__(self, root, callback_volver_menu, tempo, popularidad, username_enc):
         """Inicializa la interfaz del juego."""
         self.root = root
         self.root.title("Avatars vs Rooks - Desktop game")
@@ -71,6 +72,9 @@ class GameInterface:
         # Variables de música para sistema de puntos
         self.tempo = tempo
         self.popularidad = popularidad
+
+        #Username encriptado para guardar puntaje
+        self.username_enc = username_enc
         
         # Reiniciar la matriz del juego para el nuevo nivel
         reset_matriz_juego()
@@ -656,27 +660,37 @@ class GameInterface:
     def calcular_puntaje_final(self):
         """Calcula el puntaje final usando el sistema de puntos."""
         try:
-            avatrs_eliminados = self.game_logic.get_avatars_eliminados()
+            from game_logic import NIVEL_ACTUAL
+        
+            avatars_eliminados = self.game_logic.get_avatars_eliminados()
             puntos_vida_acumulados = self.game_logic.get_puntos_vida_acumulados()
             sistema = SistemaPuntos()
             puntaje = sistema.calcular_puntaje(
                 self.tempo,
                 self.popularidad,
-                avatrs_eliminados,
+                avatars_eliminados,
                 puntos_vida_acumulados
             )
-            
-            print(f"🏆 Puntaje final: {puntaje}")
-            print(f" Tempo: {self.tempo}")
-            print(f" Popularidad: {self.popularidad}")
-            print(f" Avatars eliminados: {avatrs_eliminados}")
-            print(f" Puntos de vida de avatars acumulados: {puntos_vida_acumulados}")
-            
+        
+            # GUARDAR PUNTAJE
+            agregar_puntaje(
+                self.username_enc,
+                NIVEL_ACTUAL,
+                puntaje,
+                self.tempo,
+                self.popularidad
+            )
+        
+            print(f"🏆 Puntaje final: {puntaje:.2f}")
+            print(f"Tempo: {self.tempo}")
+            print(f"Popularidad: {self.popularidad}")
+            print(f"Avatars eliminados: {avatars_eliminados}")
+            print(f"Puntos de vida de avatars acumulados: {puntos_vida_acumulados}")
+            print(f"Puntaje guardado para nivel {NIVEL_ACTUAL}")
+        
         except Exception as e:
-            print(f"Error calculando puntaje: {e}")
+            print(f"❌ Error calculando/guardando puntaje: {e}")
 
-    def volver_al_menu(self):
-        """Vuelve al menú principal."""
         try:
             if self.callback_volver_menu:
                 self.root.destroy()

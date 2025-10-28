@@ -3,6 +3,7 @@ from tkinter import messagebox
 from PersonalizaciónUI import MenuPersonalizacion
 from game_interface import GameInterface
 from game_logic import set_nivel_actual
+from SalonDeLaFama import SalonDeLaFama
 
 class MainMenu:
     def __init__(self, root, username, nombre, tempo, popularidad, callback_login, c1, 
@@ -201,8 +202,19 @@ class MainMenu:
                             self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
     
     def go_to_hall_of_fame(self):
-        """Navega al salón de la fama"""
-        messagebox.showinfo("Boton", "Salon de la fama")
+        "Navega al salón de la fama"
+        SalonDeLaFama(
+            self.root,
+            self.username,  
+            self.volver_desde_salon_fama,
+            self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+        )
+
+    def volver_desde_salon_fama(self):
+        "Vuelve del salon de la fama al menu principal"
+        if self.frame:
+            self.frame.destroy()
+        self.create_interface()
     
 
     def start_level1(self):
@@ -213,7 +225,9 @@ class MainMenu:
         GameInterface(root_nivel1, 
               callback_volver_menu=lambda: self.regresar_menu(root_nivel1),
               tempo=self.tempo, 
-              popularidad=self.popularidad)
+              popularidad=self.popularidad,
+              username_enc=self.username
+              )
 
 
     def start_level2(self):
@@ -224,7 +238,9 @@ class MainMenu:
         GameInterface(root_nivel2, 
               callback_volver_menu=lambda: self.regresar_menu(root_nivel2),
               tempo=self.tempo, 
-              popularidad=self.popularidad)
+              popularidad=self.popularidad,
+              username_enc=self.username
+              )
 
 
     def start_level3(self):
@@ -235,7 +251,9 @@ class MainMenu:
         GameInterface(root_nivel3, 
               callback_volver_menu=lambda: self.regresar_menu(root_nivel3),
               tempo=self.tempo, 
-              popularidad=self.popularidad)
+              popularidad=self.popularidad,
+              username_enc=self.username
+              )
 
 
 
