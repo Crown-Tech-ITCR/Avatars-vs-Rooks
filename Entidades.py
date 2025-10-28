@@ -99,10 +99,15 @@ class Avatar(Entidad):
         self.move_cooldown_max = move_cooldown_max
         self.move_cooldown = 0  # Cooldown actual para movimiento
         
-        # Nuevo: Sistema de ataque a distancia
+        # Sistema de ataque a distancia
         self.ataque_a_distancia = ataque_a_distancia
         self.shot_cooldown = 0
         self.shot_cooldown_max = shot_cooldown_max
+
+        # Sistema de animación
+        self.frame_actual = 1
+        self.contador_frames = 0
+        self.frames_por_cambio = 2
 
     def can_move(self) -> bool:
         """Verifica si el avatar puede moverse."""
@@ -155,6 +160,24 @@ class Avatar(Entidad):
         if self.shot_cooldown > 0:
             self.shot_cooldown -= 1
 
+    def actualizar_animacion(self):
+        """Actualiza el frame de animación del avatar de forma recursiva"""
+        self.contador_frames += 1
+        
+        # Solo cambiar frame cada tantas updates
+        if self.contador_frames >= self.frames_por_cambio:
+            self.contador_frames = 0
+            
+            # Cambiar al siguiente frame
+            self.frame_actual += 1
+            if self.frame_actual > 3:
+                self.frame_actual = 1
+        
+        return self.frame_actual
+
+    def get_imagen_path(self):
+        """Retorna el path de la imagen actual según el frame de animación"""
+        return f"./images/avatars/{self.tipo}_{self.frame_actual}.png"
 
 # TIPOS ESPECÍFICOS DE AVATARS
 # Velocidades: Flechador (más lento) -> Escudero -> Leñador -> Caníbal (más rápido)
