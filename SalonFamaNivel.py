@@ -1,6 +1,8 @@
 import tkinter as tk
 from gestion_puntajes import obtener_top_nivel
 import encrip_aes
+from PIL import Image, ImageTk
+import os
 
 class SalonFamaNivel:
     def __init__(self, root, nivel, username_enc, callback_volver, c1, c2, c3, c4, c5, c6, c7):
@@ -21,7 +23,153 @@ class SalonFamaNivel:
         
         self.frame = None
         self.master_key = encrip_aes.master_key
+        
+        # Variables para la animación de fondo
+        self.background_images = []
+        self.current_frame = 0
+        self.animation_speed = 200  # milisegundos entre frames
+        self.is_playing = False
+        self.animation_job = None
+        self.background_label = None
+        
+        # Variables para control de intro y loop
+        self.intro_frames = 4  # Primeras 4 imágenes son intro
+        self.loop_start_frame = 4  # El loop empieza desde la imagen 5
+        self.intro_played = False  # Si ya se reprodujo la intro
+        
+        # Nuevas variables para Canvas
+        self.canvas = None
+        self.bg_image_id = None
+        self.podium_items = []  # ids de canvas para eliminar cuando se reconstruya la pantalla
+        
+        self.cargar_animacion_fondo()
         self.crear_interfaz()
+    
+    def obtener_carpeta_imagenes(self):
+        """Retorna la carpeta de imágenes según el nivel"""
+        carpetas = {
+            1: "flechador",   # Nivel Fácil
+            2: "escudero",    # Nivel Medio
+            3: "canibal"      # Nivel Difícil
+        }
+        return carpetas.get(self.nivel, "canibal")
+    
+    def cargar_animacion_fondo(self):
+        """Carga las imágenes para la animación de fondo según el nivel"""
+        try:
+            # Obtener la carpeta correspondiente al nivel
+            carpeta_nivel = self.obtener_carpeta_imagenes()
+            
+            # Buscar la carpeta de imágenes
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            images_path = os.path.join(current_dir, "images", carpeta_nivel)
+            
+            if not os.path.exists(images_path):
+                # Intentar ruta alternativa
+                images_path = os.path.join(os.getcwd(), "images", carpeta_nivel)
+                if not os.path.exists(images_path):
+                    return
+            
+            # Extensiones de imagen válidas
+            valid_extensions = ('.png', '.jpg', '.jpeg', '.gif', '.bmp')
+            
+            # Obtener y ordenar archivos
+            files = []
+            for file in os.listdir(images_path):
+                if file.lower().endswith(valid_extensions):
+                    files.append(file)
+            
+            if not files:
+                return
+                
+            files.sort()
+            
+            # Cargar imágenes
+            self.background_images = []
+            for file in files:
+                try:
+                    file_path = os.path.join(images_path, file)
+                    img = Image.open(file_path)
+                    
+                    # Obtener dimensiones de la ventana
+                    self.root.update_idletasks()
+                    window_width = self.root.winfo_width() or 800
+                    window_height = self.root.winfo_height() or 600
+                    
+                    # Redimensionar imagen para cubrir toda la ventana
+                    img = img.resize((window_width, window_height), Image.Resampling.LANCZOS)
+                    
+                    # Convertir a PhotoImage
+                    photo = ImageTk.PhotoImage(img)
+                    self.background_images.append(photo)
+                    
+                except Exception as e:
+                    print(f"Error cargando {file}: {e}")
+            
+            # Verificar que tenemos suficientes imágenes para intro + loop
+            if len(self.background_images) >= 8:
+                pass
+            else:
+                # Ajustar parámetros si hay menos imágenes
+                total_images = len(self.background_images)
+                if total_images > 4:
+                    self.intro_frames = 4
+                    self.loop_start_frame = 4
+                else:
+                    self.intro_frames = total_images // 2
+                    self.loop_start_frame = self.intro_frames
+            
+        except Exception as e:
+            print(f"Error al cargar animación de fondo: {e}")
+    
+    def iniciar_animacion_fondo(self):
+        """Inicia la animación de fondo (actualiza la imagen dibujada en el canvas)"""
+        if self.background_images and not self.is_playing and self.canvas:
+            self.is_playing = True
+            self.current_frame = 0
+            self.intro_played = False
+            # Si no existe bg_image_id (por ejemplo si se cargó tarde), crear uno
+            if not self.bg_image_id:
+                self.bg_image_id = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.background_images[0])
+                self.canvas.tag_lower(self.bg_image_id)
+            self._animar_frame_fondo()
+    
+    def detener_animacion_fondo(self):
+        """Detiene la animación de fondo"""
+        self.is_playing = False
+        if self.animation_job:
+            self.root.after_cancel(self.animation_job)
+            self.animation_job = None
+    
+    def _animar_frame_fondo(self):
+        """Actualiza la imagen de fondo en el canvas respetando intro + loop"""
+        if not self.is_playing or not self.background_images or not self.canvas:
+            return
+        try:
+            # Actualizar la imagen del canvas (itemconfig con PhotoImage)
+            # Asegurar que bg_image_id existe
+            if not self.bg_image_id:
+                self.bg_image_id = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.background_images[self.current_frame])
+                self.canvas.tag_lower(self.bg_image_id)
+            else:
+                self.canvas.itemconfig(self.bg_image_id, image=self.background_images[self.current_frame])
+
+            # Avanzar al siguiente frame
+            self.current_frame += 1
+
+            # Intro / loop logic
+            if not self.intro_played and self.current_frame >= self.intro_frames:
+                self.intro_played = True
+                self.current_frame = self.loop_start_frame
+            elif self.intro_played and self.current_frame >= len(self.background_images):
+                self.current_frame = self.loop_start_frame
+
+            # Programar siguiente frame
+            if self.is_playing:
+                self.animation_job = self.root.after(self.animation_speed, self._animar_frame_fondo)
+
+        except Exception as e:
+            print(f"Error en animación: {e}")
     
     def obtener_nombre_nivel(self):
         """Retorna el nombre del nivel"""
@@ -29,36 +177,41 @@ class SalonFamaNivel:
         return nombres.get(self.nivel, "Desconocido")
     
     def crear_interfaz(self):
-        """Crea la interfaz del ranking"""
+        """Crea la interfaz del ranking con fondo animado en un Canvas"""
         # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
-        
-        # Frame principal
-        self.frame = tk.Frame(self.root, bg=self.c1)
-        self.frame.pack(fill="both", expand=True)
-        
-        # BARRA SUPERIOR (HEADER)
-        top_bar = tk.Frame(self.frame, bg=self.c4, height=40)
-        top_bar.pack(fill=tk.X)
-        top_bar.pack_propagate(False)
-        
-        # Título en la barra
+
+        # Detener cualquier animación anterior
+        self.detener_animacion_fondo()
+
+        # Crear Canvas como fondo (éste se dibuja primero, los widgets creados después estarán encima)
+        self.canvas = tk.Canvas(self.root, highlightthickness=0)
+        self.canvas.place(x=0, y=0, relwidth=1, relheight=1)
+
+        # Mostrar primera imagen de inmediato si hay imágenes
+        if self.background_images:
+            # Crear imagen en el canvas (guardar id)
+            self.bg_image_id = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.background_images[0])
+            # enviar al fondo por si hubiera más elementos en el canvas
+            self.canvas.tag_lower(self.bg_image_id)
+
+        # BARRA SUPERIOR (HEADER) - crear encima del canvas
+        top_bar = tk.Frame(self.root, bg=self.c4, height=40)
+        top_bar.place(x=0, y=0, relwidth=1)
+
         tk.Label(
             top_bar,
             text=f"Salón de la Fama - Nivel {self.obtener_nombre_nivel()}",
             font=("Arial", 12, "bold"),
             bg=self.c4,
-            fg=self.c6
+            fg=self.c6,
+            relief="flat"
         ).pack(side=tk.LEFT, padx=15, pady=8)
-        
-        # Botón volver
-        frame_superior = tk.Frame(self.frame, bg=self.c1, height=60)
-        frame_superior.pack(fill="x", padx=30, pady=15)
-        frame_superior.pack_propagate(False)
-        
+
+        # Botón volver - sin borde
         btn_volver = tk.Button(
-            frame_superior,
+            self.root,
             text="← Volver",
             font=("Arial", 10, "bold"),
             bg=self.c4,
@@ -66,118 +219,160 @@ class SalonFamaNivel:
             activebackground=self.c5,
             activeforeground=self.c6,
             relief="flat",
+            bd=0,
             cursor="hand2",
             command=self.volver,
             padx=12,
             pady=8
         )
-        btn_volver.pack(side="left")
-        
-        # Frame central para contenido
-        frame_central = tk.Frame(self.frame, bg=self.c1)
-        frame_central.pack(expand=True, fill="both", padx=40)
-        
-        # Título
+        btn_volver.place(x=30, y=55)
+
+        # Título principal - más arriba
+        titulo_container = tk.Frame(self.root, bg=self.c4, relief="flat")
+        titulo_container.place(relx=0.5, y=60, anchor="n")
+
         label_titulo = tk.Label(
-            frame_central,
+            titulo_container,
             text=f"🏆 TOP 3 - NIVEL {self.obtener_nombre_nivel().upper()} 🏆",
-            font=("Arial", 26, "bold"),
-            bg=self.c1,
-            fg=self.c6
+            font=("Arial", 24, "bold"),
+            bg=self.c4,
+            fg=self.c6,
+            padx=20,
+            pady=15,
+            relief="flat"
         )
-        label_titulo.pack(pady=(10, 20))
-        
+        label_titulo.pack()
+
         # Obtener top 3
         top3 = obtener_top_nivel(self.nivel, limit=3)
-        
+
         if not top3:
-            # No hay puntajes registrados
+            vacio_container = tk.Frame(self.root, bg=self.c4, relief="flat")
+            vacio_container.place(relx=0.5, y=150, anchor="n")
+
             label_vacio = tk.Label(
-                frame_central,
+                vacio_container,
                 text="Aún no hay puntajes registrados en este nivel",
                 font=("Arial", 14),
-                bg=self.c1,
-                fg=self.c6
+                bg=self.c4,
+                fg=self.c6,
+                padx=30,
+                pady=20,
+                relief="flat"
             )
-            label_vacio.pack(pady=50)
+            label_vacio.pack()
         else:
-            # Mostrar top 3
-            self.mostrar_ranking(frame_central, top3)
+            # Dibujar en el canvas (podio)
+            # Limpiar elementos previos por si acaso
+            for item in getattr(self, "podium_items", []):
+                try:
+                    self.canvas.delete(item)
+                except:
+                    pass
+            self.podium_items = []
+            self.mostrar_ranking_podio(top3)
+
+        # Iniciar animación
+        self.root.after(100, self.iniciar_animacion_fondo)
     
-    def mostrar_ranking(self, parent, top3):
-        """Muestra el ranking de jugadores"""
+    def _draw_outlined_text(self, x, y, text, font, fill="white", outline="black", anchor="center"):
+        """Dibuja texto con outline en el canvas (múltiples textos en offsets) y devuelve id del texto principal y de los outlines"""
+        ids = []
+        # offsets para el contorno
+        offsets = [(-1,0),(1,0),(0,-1),(0,1)]
+        for dx, dy in offsets:
+            id_outline = self.canvas.create_text(x+dx, y+dy, text=text, font=font, fill=outline, anchor=anchor)
+            ids.append(id_outline)
+        id_main = self.canvas.create_text(x, y, text=text, font=font, fill=fill, anchor=anchor)
+        ids.append(id_main)
+        return ids
+    
+    def mostrar_ranking_podio(self, top3):
+        """Dibuja el podio y la info de jugadores directamente en el canvas (transparente respecto al fondo)"""
         emojis = ["🥇", "🥈", "🥉"]
-        
+        colores_medalla = [self.c5, "#C0C0C0", "#CD7F32"]
+
+        window_width = self.root.winfo_width() or 800
+
+        # Posiciones ajustadas para que coincidan mejor con el podio de la imagen
+        posiciones_podio = [
+            {"x": window_width // 2, "y": 320},          # 1er lugar - centro (podio más alto)
+            {"x": window_width // 2 - 180, "y": 380},    # 2do lugar - izquierda (podio medio)
+            {"x": window_width // 2 + 180, "y": 420},    # 3er lugar - derecha (podio más bajo)
+        ]
+
+        # Tamaños de fuente más grandes y legibles
+        font_medalla = ("Arial", 24, "bold")      # Aumentado de 18 a 24
+        font_pos = ("Arial", 16, "bold")          # Aumentado de 12 a 16
+        font_nombre = ("Arial", 12, "bold")       # Aumentado de 9 a 12
+        font_puntaje = ("Arial", 11, "bold")      # Aumentado de 8 a 11
+        font_extra = ("Arial", 9)                # Aumentado de 7 a 9
+        font_fecha = ("Arial", 8)                # Aumentado de 6 a 8
+
+        # borrar cualquier elemento previo del podio
+        for item in getattr(self, "podium_items", []):
+            try:
+                self.canvas.delete(item)
+            except:
+                pass
+        self.podium_items = []
+
         for idx, (username_enc, puntaje, fecha, tempo, popularidad) in enumerate(top3):
-            # Desencriptar username para mostrar
             try:
                 username_display = encrip_aes.decrypt_data(username_enc, self.master_key)
             except:
                 username_display = "Usuario desconocido"
-            
-            # Frame para cada posición
-            frame_pos = tk.Frame(parent, bg=self.c4, relief="solid", bd=2)
-            frame_pos.pack(fill="x", pady=10, padx=20)
-            
-            # Frame interno con padding
-            frame_interno = tk.Frame(frame_pos, bg=self.c4)
-            frame_interno.pack(fill="x", padx=15, pady=12)
-            
-            # Emoji de medalla + Posición
-            label_medalla = tk.Label(
-                frame_interno,
-                text=f"{emojis[idx]} #{idx + 1}",
-                font=("Arial", 20, "bold"),
-                bg=self.c4,
-                fg=self.c6
-            )
-            label_medalla.pack(side="left", padx=(0, 15))
-            
-            # Frame para info del jugador
-            frame_info = tk.Frame(frame_interno, bg=self.c4)
-            frame_info.pack(side="left", fill="x", expand=True)
-            
-            # Nombre del jugador
-            label_nombre = tk.Label(
-                frame_info,
-                text=username_display,
-                font=("Arial", 16, "bold"),
-                bg=self.c4,
-                fg=self.c6,
-                anchor="w"
-            )
-            label_nombre.pack(fill="x")
-            
-            # Puntaje
-            label_puntaje = tk.Label(
-                frame_info,
-                text=f"Puntaje: {puntaje:.2f} puntos",
-                font=("Arial", 12),
-                bg=self.c4,
-                fg=self.c6,
-                anchor="w"
-            )
-            label_puntaje.pack(fill="x")
-            
-            # Info adicional (tempo, popularidad, fecha)
-            label_extra = tk.Label(
-                frame_info,
-                text=f"Tempo: {tempo} | Popularidad: {popularidad} | {fecha}",
-                font=("Arial", 9),
-                bg=self.c4,
-                fg=self.c6,
-                anchor="w"
-            )
-            label_extra.pack(fill="x")
-            
-            # Destacar si es el usuario actual
+
+            pos = posiciones_podio[idx]
+            x = pos["x"]
+            y = pos["y"]
+
+            # Medalla (dibujar como texto grande con outline)
+            ids = self._draw_outlined_text(x, y, emojis[idx], font_medalla, fill="gold", outline="black", anchor="n")
+            self.podium_items.extend(ids)
+
+            # Número de posición (abajo de la medalla)
+            ids = self._draw_outlined_text(x, y+35, f"#{idx+1}", font_pos, fill="white", outline="black", anchor="n")
+            self.podium_items.extend(ids)
+
+            # Nombre (centro) - con más espaciado
+            ids = self._draw_outlined_text(x, y+60, username_display, font_nombre, fill="white", outline="black", anchor="n")
+            self.podium_items.extend(ids)
+
+            # Puntaje - con más espaciado
+            ids = self._draw_outlined_text(x, y+80, f"{puntaje:.1f} pts", font_puntaje, fill="yellow", outline="black", anchor="n")
+            self.podium_items.extend(ids)
+
+            # Extra (tempo y popularidad) - con más espaciado
+            ids = self._draw_outlined_text(x, y+98, f"T:{tempo} P:{popularidad}", font_extra, fill="lightblue", outline="black", anchor="n")
+            self.podium_items.extend(ids)
+
+            # Fecha - con más espaciado
+            ids = self._draw_outlined_text(x, y+115, fecha, font_fecha, fill="lightgray", outline="black", anchor="n")
+            self.podium_items.extend(ids)
+
+            # Si es el usuario actual, destacar con color especial
             if username_enc == self.username_enc:
-                frame_pos.config(bg=self.c5, highlightbackground=self.c5, highlightthickness=3)
-                frame_interno.config(bg=self.c5)
-                for widget in [label_medalla, label_nombre, label_puntaje, label_extra, frame_info]:
-                    widget.config(bg=self.c5)
+                # Cambiar color del texto principal (último id de cada grupo) a dorado brillante
+                highlight_color = "#FFD700"  # Dorado brillante
+                # Recorrer todos los ids de este jugador y cambiar el color del texto principal
+                start_idx = len(self.podium_items) - 30  # Últimos 30 elementos (6 grupos × 5 ids cada uno)
+                for i in range(start_idx, len(self.podium_items), 5):
+                    if i + 4 < len(self.podium_items):
+                        try:
+                            # Cambiar color del texto principal (último de cada grupo de 5)
+                            self.canvas.itemconfig(self.podium_items[i + 4], fill=highlight_color)
+                        except:
+                            pass
     
     def volver(self):
         """Vuelve a la selección de nivel"""
+        # Detener animación antes de volver
+        self.detener_animacion_fondo()
+        
         if self.callback_volver:
             self.callback_volver()
+    
+    def __del__(self):
+        """Destructor para asegurar que se detiene la animación"""
+        self.detener_animacion_fondo()

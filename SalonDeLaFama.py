@@ -165,5 +165,6 @@ class SalonDeLaFama:
     
     def volver_menu(self):
         """Vuelve al menú principal"""
+        
         if self.callback_volver:
             self.callback_volver()
