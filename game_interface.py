@@ -508,26 +508,26 @@ class GameInterface:
         columnas_libres = []
         matriz = get_matriz_juego()
         
+        # Verificar SOLO la última fila (FILAS - 1)
         for c in range(COLUMNAS):
-            # Verificar si la última fila de esta columna NO tiene avatars
             avatars_en_ultima_fila = [e for e in matriz[FILAS - 1][c] if isinstance(e, Avatar)]
             if not avatars_en_ultima_fila:
                 columnas_libres.append(c)
         
-        # Si no hay columnas libres, no generar avatar
+        # Si no hay columnas libres, esperar más tiempo antes del reintento
         if not columnas_libres:
-            # Programar reintento en poco tiempo
-            self.root.after(500, lambda: self.programar_generacion(tipo))
+            self.root.after(1000, lambda: self.programar_generacion(tipo))  # Esperar 1 segundo
             return
         
         # Seleccionar columna aleatoria de las libres
         columna = random.choice(columnas_libres)
         
-        # Crear avatar
+        # Crear avatar SIEMPRE en la última fila
         avatar = crear_avatar(tipo)
         if avatar:
-            avatar.set_pos(FILAS - 1, columna)  # Aparece en la fila inferior
+            avatar.set_pos(FILAS - 1, columna)  # Forzar última fila
             matriz[FILAS - 1][columna].append(avatar)
+            self.dibujar_entidades()
         
         # Programar la siguiente generación
         self.programar_generacion(tipo)
