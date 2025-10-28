@@ -93,6 +93,10 @@ class GameInterface:
         self.monedas = 350
         self.rook_seleccionado = RookArena
         self.boton_seleccionado = None
+
+        # Cargar imagenes de los rooks
+        self.imagenes_rooks = {}
+        self.cargar_imagenes_rooks()
         
         # Crear interfaz
         self.crear_interfaz()
@@ -102,6 +106,20 @@ class GameInterface:
         
         # Iniciar bucles del juego
         self.iniciar_juego()
+
+    def cargar_imagenes_rooks(self):
+        """Carga las imágenes de las rooks desde la carpeta images/rooks"""
+        from PIL import Image, ImageTk
+        
+        for config in ROOK_UI_CONFIG:
+            try:
+                # Cargar imagen desde el path
+                img = Image.open(config["imagen"])
+                img = img.resize((50, 50), Image.Resampling.LANCZOS)
+                self.imagenes_rooks[config["clase"]] = ImageTk.PhotoImage(img)
+            except Exception as e:
+                print(f"Error cargando imagen {config['imagen']}: {e}")
+                self.imagenes_rooks[config["clase"]] = None
 
     def crear_interfaz(self):
         """Crea todos los elementos de la interfaz gráfica."""
@@ -573,16 +591,8 @@ class GameInterface:
                     cy = f * TAM_CASILLA + TAM_CASILLA // 2
                     
                     if isinstance(e, Rook):
-                        # Dibujar rooks como círculos
-                        self.canvas.create_oval(
-                            cx - 15, cy - 15, cx + 15, cy + 15,
-                            fill=e.color, tags="entidad"
-                        )
-                        if hasattr(e, 'vida') and e.vida < 15:
-                            self.canvas.create_text(
-                                cx, cy, text=str(e.vida),
-                                font=("Arial", 8, "bold"), fill="white", tags="entidad"
-                            )
+
+                        self.DibujarRook(cx,cy,e)
                     
                     elif isinstance(e, Avatar):
                         # Dibujar avatars como rectángulos
@@ -608,6 +618,32 @@ class GameInterface:
                             cx - 4, cy - 4, cx + 4, cy + 4,
                             fill="green", tags="entidad"
                         )
+    
+    def DibujarRook(self, cx, cy, e):
+        # Obtener la imagen correspondiente al tipo de rook
+        imagen = self.imagenes_rooks.get(type(e))
+        
+        if imagen:
+            # Dibujar la imagen de la rook
+            self.canvas.create_image(
+                cx, cy, 
+                image=imagen, 
+                tags="entidad"
+            )
+        else:
+            # Si no hay imagen, usar círculo
+            self.canvas.create_oval(
+                cx - 15, cy - 15, cx + 15, cy + 15,
+                fill=e.color, tags="entidad"
+            )
+        
+        # Mostrar vida si está baja
+        if hasattr(e, 'vida'):
+            self.canvas.create_text(
+                cx, cy + 20, text=str(e.vida),
+                font=("Arial", 8, "bold"), fill="white", tags="entidad"
+            )
+        
 
     def game_over(self):
         """Maneja el game over cuando un avatar llega arriba."""

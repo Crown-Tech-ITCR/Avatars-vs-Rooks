@@ -23,5 +23,42 @@
             "tempo": 120,
             "popularidad": 20
         }
+    ],
+    "Alannita": [
+        {
+            "nivel": 1,
+            "puntaje": 34.8,
+            "fecha": "2025-10-27 23:52:40",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 37.4,
+            "fecha": "2025-10-27 23:55:08",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 40.0,
+            "fecha": "2025-10-28 00:02:57",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 31.4,
+            "fecha": "2025-10-28 00:03:17",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 41.4,
+            "fecha": "2025-10-28 00:03:39",
+            "tempo": 120,
+            "popularidad": 20
+        }
     ]
 }
