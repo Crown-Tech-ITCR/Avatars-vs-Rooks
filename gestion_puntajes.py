@@ -16,7 +16,7 @@ def load_puntajes():
         with open(PUNTAJES_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except json.JSONDecodeError:
-        print("⚠️ Archivo puntajes.txt corrupto, creando uno nuevo...")
+        print(" Archivo puntajes.txt corrupto, creando uno nuevo...")
         return {}
 
 def save_puntajes(puntajes):
@@ -45,7 +45,7 @@ def agregar_puntaje(username_enc, nivel, puntaje, tempo, popularidad):
     
     # Guardar cambios
     save_puntajes(puntajes)
-    print(f"✅ Puntaje guardado: Nivel {nivel}, Puntos {puntaje:.2f}")
+    print(f"Puntaje guardado: Nivel {nivel}, Puntos {puntaje:.2f}")
 
 def obtener_top_nivel(nivel, limit=3):
     """Obtiene el top N de jugadores para un nivel específico

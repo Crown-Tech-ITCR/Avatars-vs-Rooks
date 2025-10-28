@@ -1,4 +1,5 @@
 import tkinter as tk
+from PIL import Image, ImageTk
 from game_logic import GameLogic, FILAS, COLUMNAS, TAM_CASILLA, get_matriz_juego, NIVEL_ACTUAL, reset_matriz_juego
 from Entidades import RookRoca, RookFuego, RookAgua, RookArena, crear_avatar, Rook, Avatar, Rafaga, ProyectilAvatar
 from sistema_puntos import SistemaPuntos
@@ -97,6 +98,10 @@ class GameInterface:
         # Cargar imagenes de los rooks
         self.imagenes_rooks = {}
         self.cargar_imagenes_rooks()
+
+        # Almacenar las imágenes de avatares
+        self.imagenes_avatares = {}
+        self.cargar_imagenes_avatares()
         
         # Crear interfaz
         self.crear_interfaz()
@@ -109,7 +114,6 @@ class GameInterface:
 
     def cargar_imagenes_rooks(self):
         """Carga las imágenes de las rooks desde la carpeta images/rooks"""
-        from PIL import Image, ImageTk
         
         for config in ROOK_UI_CONFIG:
             try:
@@ -120,6 +124,30 @@ class GameInterface:
             except Exception as e:
                 print(f"Error cargando imagen {config['imagen']}: {e}")
                 self.imagenes_rooks[config["clase"]] = None
+
+    def cargar_imagenes_avatares(self):
+        """Carga todas las imágenes de los avatares (3 frames por tipo)"""
+        from PIL import Image, ImageTk
+        
+        # Tipos de avatares que tienes
+        tipos_avatares = ["avatar_flechador", "avatar_escudero", "avatar_canibal", "avatar_lenador"]
+        
+        for tipo in tipos_avatares:
+            # Cargar los 3 frames de cada tipo
+            for frame in [1, 2, 3]:
+                key = f"{tipo}_{frame}"
+                path = f"./images/avatars/{tipo}_{frame}.png"
+                
+                try:
+                    img = Image.open(path)
+                    # Redimensionar según tamaño de casilla
+                    img = img.resize((35, 50), Image.Resampling.LANCZOS)
+                    self.imagenes_avatares[key] = ImageTk.PhotoImage(img)
+                except Exception as e:
+                    print(f"Error cargando {path}: {e}")
+                    self.imagenes_avatares[key] = None
+
+
 
     def crear_interfaz(self):
         """Crea todos los elementos de la interfaz gráfica."""
@@ -265,7 +293,6 @@ class GameInterface:
         
         # Cargar y mostrar imagen
         try:
-            from PIL import Image, ImageTk
             # Cargar imagen desde la ruta en config
             imagen = Image.open(config["imagen"]) 
             imagen = imagen.resize((90, 90)) 
@@ -595,15 +622,8 @@ class GameInterface:
                         self.DibujarRook(cx,cy,e)
                     
                     elif isinstance(e, Avatar):
-                        # Dibujar avatars como rectángulos
-                        self.canvas.create_rectangle(
-                            cx - 15, cy - 15, cx + 15, cy + 15,
-                            fill=e.color, tags="entidad"
-                        )
-                        self.canvas.create_text(
-                            cx, cy, text=str(e.vida),
-                            font=("Arial", 8, "bold"), fill="white", tags="entidad"
-                        )
+
+                        self.DibujarAvatar(cx,cy,e)
                     
                     elif isinstance(e, Rafaga):
                         # Ráfagas de rooks (amarillas, hacia abajo)
@@ -637,13 +657,48 @@ class GameInterface:
                 fill=e.color, tags="entidad"
             )
         
-        # Mostrar vida si está baja
+        # Mostrar vida
         if hasattr(e, 'vida'):
             self.canvas.create_text(
                 cx, cy + 20, text=str(e.vida),
                 font=("Arial", 8, "bold"), fill="white", tags="entidad"
             )
+
+    def DibujarAvatar(self,cx,cy,e):
+        # Actualizar animación del avatar
+        e.actualizar_animacion()
         
+        # Obtener la imagen correspondiente al tipo y frame actual
+        key = f"{e.tipo}_{e.frame_actual}"
+        imagen = self.imagenes_avatares.get(key)
+        
+        if imagen:
+            # Dibujar la imagen animada del avatar
+            self.canvas.create_image(
+                cx, cy, 
+                image=imagen, 
+                tags="entidad"
+            )
+            
+            # Mostrar vida
+            self.canvas.create_text(
+                cx, cy - 22, 
+                text=str(e.vida),
+                font=("Arial", 8, "bold"), 
+                fill="white", 
+                tags="entidad"
+            )
+        else:
+            # Dibujar rectángulo si no hay imagen
+            self.canvas.create_rectangle(
+                cx - 15, cy - 15, cx + 15, cy + 15,
+                fill=e.color, tags="entidad"
+            )
+            self.canvas.create_text(
+                cx, cy, text=str(e.vida),
+                font=("Arial", 8, "bold"), fill="white", tags="entidad"
+            )
+            
 
     def game_over(self):
         """Maneja el game over cuando un avatar llega arriba."""
