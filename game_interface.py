@@ -1,9 +1,11 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-from game_logic import GameLogic, FILAS, COLUMNAS, TAM_CASILLA, get_matriz_juego, NIVEL_ACTUAL, reset_matriz_juego, set_nivel_actual
+from game_logic import GameLogic, FILAS, COLUMNAS, TAM_CASILLA, get_matriz_juego, reset_matriz_juego, set_nivel_actual
 from Entidades import RookRoca, RookFuego, RookAgua, RookArena, crear_avatar, Rook, Avatar, Rafaga, ProyectilAvatar
 from sistema_puntos import SistemaPuntos
 from gestion_puntajes import agregar_puntaje
+from ModificaciónDatos import mostrar_modificar_datos
+import encrip_aes
 
 # Configuración de colores
 COLOR_FONDO = "black" 
@@ -60,24 +62,39 @@ ROOK_UI_CONFIG = [
 class GameInterface:
     """Clase que maneja toda la interfaz gráfica del juego."""
     
-    def __init__(self, root, callback_volver_menu, tempo, popularidad, username_enc):
+    def __init__(self, root, callback_volver_menu, tempo, popularidad, username_enc, c1=None, c2=None, c3=None, c4=None, c5=None, c6=None, c7=None):
         """Inicializa la interfaz del juego."""
         self.root = root
         self.root.title("Avatars vs Rooks - Desktop game")
         self.callback_volver_menu = callback_volver_menu
 
-        
-        # Configurar tamaño de ventana
-        self.root.geometry("1000x600")
-        self.root.resizable(False, False)
-        self.center_window()
-        
         # Variables de música para sistema de puntos
         self.tempo = tempo
         self.popularidad = popularidad
 
         #Username encriptado para guardar puntaje
         self.username_enc = username_enc
+
+        # Para la modificación de datos
+        self.username = None
+        self.master_key = encrip_aes.master_key
+        
+        # AGREGAR: Colores personalizados del usuario
+        self.c1 = c1 if c1 else COLOR_FONDO
+        self.c2 = c2 if c2 else COLOR_PANEL
+        self.c3 = c3 if c3 else COLOR_VERDE_CLARO
+        self.c4 = c4 if c4 else COLOR_BOTON
+        self.c5 = c5 if c5 else COLOR_BOTON_HOVER
+        self.c6 = c6 if c6 else COLOR_TEXTO
+        self.c7 = c7 if c7 else COLOR_TEXTO
+
+        # Configurar tamaño de ventana
+        self.root.geometry("1000x600")
+        self.root.resizable(False, False)
+        self.center_window()
+        
+        # Cargar username desencriptado
+        self.cargar_username_desencriptado()
         
         # Reiniciar la matriz del juego para el nuevo nivel
         reset_matriz_juego()
@@ -88,6 +105,9 @@ class GameInterface:
         # Variables de estado del juego
         self.juego_terminado = False
         self.tiempo_restante = 0
+
+        # Variable para pausar
+        self.interfaz_pausada = False
         
         # Variables de generación de avatars
         self.tiempos_generacion = {}
@@ -121,6 +141,37 @@ class GameInterface:
         
         # Iniciar bucles del juego
         self.iniciar_juego()
+    
+    def cargar_username_desencriptado(self):
+        """Carga el username desencriptado desde el username_enc"""
+        try:
+            users_enc = encrip_aes.load_users_aes()
+            
+            # BUSCAR POR EL username_enc ACTUAL
+            if self.username_enc in users_enc:
+                self.username = encrip_aes.decrypt_data(self.username_enc, self.master_key)
+                print(f"Username cargado correctamente: {self.username}")
+            else:
+                # Si no se encuentra, buscar en todos los usuarios encriptados
+                # (por si cambió el username_enc)
+                username_encontrado = False
+                for enc_username, user_data in users_enc.items():
+                    try:
+                        dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
+                        if dec_username == self.username:  # Comparar con username actual
+                            self.username_enc = enc_username
+                            username_encontrado = True
+                            print(f"Username_enc actualizado: {enc_username}")
+                            break
+                    except Exception:
+                        continue
+                
+                if not username_encontrado:
+                    print(f"Username encriptado no encontrado: {self.username_enc}")
+                    self.username = "unknown_user"
+        except Exception as e:
+            print(f"Error al desencriptar username: {e}")
+            self.username = "unknown_user"
 
     def cargar_imagenes_rooks(self):
         """Carga las imágenes de las rooks desde la carpeta images/rooks"""
@@ -211,35 +262,35 @@ class GameInterface:
 
     def crear_interfaz(self):
         """Crea todos los elementos de la interfaz gráfica."""
-        # Frame principal con fondo oscuro
-        self.frame_principal = tk.Frame(self.root, bg=COLOR_FONDO)
+        # Frame principal con colores personalizados
+        self.frame_principal = tk.Frame(self.root, bg=self.c1)
         self.frame_principal.pack(fill=tk.BOTH, expand=True)
         
         # Frame superior para título (header sin botones)
         self.crear_header()
         
         # Frame contenedor para el juego
-        frame_juego = tk.Frame(self.frame_principal, bg=COLOR_FONDO)
+        frame_juego = tk.Frame(self.frame_principal, bg=self.c1)
         frame_juego.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 20))
         
         # Frame izquierdo (tablero)
-        frame_izquierdo = tk.Frame(frame_juego, bg=COLOR_FONDO)
+        frame_izquierdo = tk.Frame(frame_juego, bg=self.c1)
         frame_izquierdo.pack(side=tk.LEFT, padx=(0, 20))
 
         # Espaciador superior de la matriz
-        tk.Frame(frame_izquierdo, bg=COLOR_FONDO, height=20).pack()
+        tk.Frame(frame_izquierdo, bg=self.c1, height=20).pack()
         
-        # Canvas principal del juego
+        # Canvas principal del juego con colores personalizados
         self.canvas = tk.Canvas(
             frame_izquierdo,
             width=COLUMNAS * TAM_CASILLA,
             height=FILAS * TAM_CASILLA,
-            bg=COLOR_VERDE_CLARO,
+            bg=self.c3,  # Usar color personalizado
             highlightthickness=0
         )
         self.canvas.pack()
 
-        tk.Frame(frame_izquierdo, bg=COLOR_FONDO, height=20).pack()
+        tk.Frame(frame_izquierdo, bg=self.c1, height=20).pack()
         
         # Dibujar cuadrícula del tablero
         self.dibujar_cuadricula()
@@ -255,8 +306,8 @@ class GameInterface:
 
     def crear_header(self):
         """Crea el header con solo el título"""
-        # BARRA SUPERIOR 
-        frame_header = tk.Frame(self.frame_principal, bg=COLOR_HEADER, height=40)
+        # BARRA SUPERIOR con colores personalizados
+        frame_header = tk.Frame(self.frame_principal, bg=self.c4, height=40)
         frame_header.pack(fill=tk.X)
         frame_header.pack_propagate(False)
         
@@ -264,19 +315,19 @@ class GameInterface:
             frame_header,
             text="Avatars vs Rooks - Desktop game",
             font=("Arial", 12, "bold"),
-            bg=COLOR_HEADER,
-            fg=COLOR_TEXTO
+            bg=self.c4,
+            fg=self.c6
         )
         label_titulo.pack(side=tk.LEFT, padx=15, pady=8)
 
     def crear_panel_central(self, parent):
         """Crea el panel central con los botones de rooks."""
-        frame_central = tk.Frame(parent, bg=COLOR_FONDO, width=280)
+        frame_central = tk.Frame(parent, bg=self.c1, width=280)
         frame_central.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 10))
         frame_central.pack_propagate(False)
         
         # Espaciador superior para bajar los botones
-        tk.Frame(frame_central, bg=COLOR_FONDO, height=20).pack()
+        tk.Frame(frame_central, bg=self.c1, height=20).pack()
         
         # Crear botones de selección de rooks
         self.botones_rooks = []
@@ -285,56 +336,160 @@ class GameInterface:
 
     def crear_panel_controles(self, parent):
         """Crea el panel derecho con los controles (pausa, usuario, monedas, tiempo)"""
-        frame_controles = tk.Frame(parent, bg=COLOR_FONDO, width=400)
+        frame_controles = tk.Frame(parent, bg=self.c1, width=400)
         frame_controles.pack(side=tk.LEFT, fill=tk.Y)
         frame_controles.pack_propagate(False)
         
         # Espaciador superior
-        tk.Frame(frame_controles, bg=COLOR_FONDO, height=20).pack()
+        tk.Frame(frame_controles, bg=self.c1, height=20).pack()
         
         # Frame para botones de pausa y usuario
-        frame_botones_top = tk.Frame(frame_controles, bg=COLOR_FONDO)
+        frame_botones_top = tk.Frame(frame_controles, bg=self.c1)
         frame_botones_top.pack(anchor="e", pady=(0, 15), padx=10)
         
-        # Botón de pausa
-        btn_pausa = tk.Button(
+        # Botón de pausa con colores personalizados
+        self.btn_pausa = tk.Button(
             frame_botones_top,
             text="l l",
             font=("Arial", 12, "bold"),
-            bg=COLOR_BOTON,
-            fg=COLOR_TEXTO,
+            bg=self.c4,
+            fg=self.c6,
             width=4,
             height=2,
             relief="flat",
-            cursor="hand2"
+            cursor="hand2",
+            command=self.toggle_pausa
         )
-        btn_pausa.pack(side=tk.LEFT, padx=5)
+        self.btn_pausa.pack(side=tk.LEFT, padx=5)
         
-        # Botón de usuario
+        # Botón de usuario con colores personalizados
         btn_usuario = tk.Button(
             frame_botones_top,
             text="👤",
             font=("Arial", 12),
-            bg=COLOR_BOTON,
-            fg=COLOR_TEXTO,
+            bg=self.c4,
+            fg=self.c6,
             width=4,
             height=2,
             relief="flat",
-            cursor="hand2"
+            cursor="hand2",
+            command=self.mostrar_modificar_datos
         )
         btn_usuario.pack(side=tk.LEFT, padx=5)
         
         # Espaciador
-        tk.Frame(frame_controles, bg=COLOR_FONDO, height=30).pack()
+        tk.Frame(frame_controles, bg=self.c1, height=30).pack()
         
         # Panel de tiempo
         self.crear_panel_tiempo(frame_controles)
         
         # Espaciador
-        tk.Frame(frame_controles, bg=COLOR_FONDO, height=20).pack()
+        tk.Frame(frame_controles, bg=self.c1, height=20).pack()
 
         # Panel de monedas
         self.crear_panel_monedas(frame_controles)
+
+    def toggle_pausa(self):
+        """Alterna entre pausar y reanudar el juego."""
+        # Cambiar estado en game_logic
+        esta_pausado = self.game_logic.toggle_pausa()
+        
+        # Actualizar estado de interfaz
+        self.interfaz_pausada = esta_pausado
+        
+        # Actualizar texto del botón
+        if esta_pausado:
+            self.btn_pausa.config(text="▶")
+        else:
+            self.btn_pausa.config(text="l l")
+            # Reanudar bucles si estaban pausados
+            if not self.juego_terminado:
+                self.reanudar_bucles()
+    
+    def reanudar_bucles(self):
+        """Reanuda los bucles del juego después de una pausa."""
+        if not self.juego_terminado and not self.interfaz_pausada:
+            # Reanudar actualización de tiempo si no está corriendo
+            self.root.after(1000, self.actualizar_tiempo)
+            # Reanudar bucle de juego
+            self.actualizar_juego()
+
+    def mostrar_modificar_datos(self):
+        """Muestra la interfaz de modificación de datos del usuario."""
+        # Pausar el juego automáticamente
+        if not self.game_logic.esta_pausado():
+            self.toggle_pausa()
+        
+        # Crear ventana emergente para modificación de datos
+        ventana_modificar = tk.Toplevel(self.root)
+        ventana_modificar.title("Modificar Datos de Usuario")
+        ventana_modificar.geometry("600x500")  # Ventana más pequeña
+        ventana_modificar.resizable(False, False)
+        
+        # Centrar la ventana
+        ventana_modificar.transient(self.root)
+        ventana_modificar.grab_set()
+        
+        # Centrar en pantalla
+        x = (ventana_modificar.winfo_screenwidth() // 2) - (600 // 2)
+        y = (ventana_modificar.winfo_screenheight() // 2) - (500 // 2)
+        ventana_modificar.geometry(f'600x500+{x}+{y}')
+        
+        # Función para volver (cerrar ventana)
+        def callback_volver():
+            ventana_modificar.destroy()
+            # RECARGAR USERNAME Y USERNAME_ENC DESPUÉS DE LOS CAMBIOS
+            old_username = self.username
+            old_username_enc = self.username_enc
+            
+            # Buscar el username_enc actualizado
+            try:
+                users_enc = encrip_aes.load_users_aes()
+                username_encontrado = False
+                
+                for enc_username, user_data in users_enc.items():
+                    try:
+                        dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
+                        if dec_username == self.username:
+                            self.username_enc = enc_username
+                            username_encontrado = True
+                            print(f"Username_enc actualizado: {enc_username}")
+                            break
+                    except Exception:
+                        continue
+                
+                if not username_encontrado:
+                    print(f"No se pudo encontrar username_enc para: {self.username}")
+                    
+            except Exception as e:
+                print(f"Error actualizando username_enc: {e}")
+            
+            # Reanudar el juego si estaba pausado
+            if self.game_logic.esta_pausado():
+                self.toggle_pausa()
+        
+        # Mostrar interfaz de modificación con colores personalizados
+        modificador = mostrar_modificar_datos(
+            ventana_modificar,
+            self.username,
+            self.username_enc,
+            callback_volver,
+            self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+        )
+        
+        # Función especial para actualizar datos después del guardado
+        original_volver = modificador.volver
+        def nuevo_volver():
+            # Obtener datos actualizados antes de cerrar
+            datos_actualizados = modificador.get_updated_data()
+            if datos_actualizados:
+                self.username = datos_actualizados['username']
+                self.username_enc = datos_actualizados['username_enc']
+                print(f"Datos actualizados en GameInterface: {self.username}")
+            original_volver()
+        
+        modificador.volver = nuevo_volver
+
 
     def crear_boton_rook(self, parent, config):
         """Crea un botón estilizado para seleccionar un rook."""
@@ -546,7 +701,7 @@ class GameInterface:
 
     def colocar_rook(self, event):
         """Maneja el evento de clic para colocar un rook."""
-        if self.juego_terminado:
+        if self.juego_terminado or self.interfaz_pausada:
             return
             
         # Calcular posición en la matriz
@@ -598,14 +753,24 @@ class GameInterface:
         if self.juego_terminado:
             return
             
+        # Calcular tiempo de espera - si está pausado, esperar menos
+        tiempo_espera = self.tiempos_generacion[tipo]
+        if self.interfaz_pausada:
+            tiempo_espera = 1000  # Revisar cada segundo si sigue pausado
+            
         self.root.after(
-            self.tiempos_generacion[tipo], 
+            tiempo_espera, 
             lambda: self.generar_avatar_tipo(tipo)
         )
 
     def generar_avatar_tipo(self, tipo):
         """Genera un avatar del tipo especificado en una columna aleatoria."""
         if self.juego_terminado:
+            return
+        
+        # Si está pausado, reprogramar para más tarde
+        if self.interfaz_pausada:
+            self.root.after(1000, lambda: self.generar_avatar_tipo(tipo))
             return
         
         import random
@@ -640,7 +805,7 @@ class GameInterface:
 
     def actualizar_tiempo(self):
         """Actualiza el contador de tiempo."""
-        if self.juego_terminado:
+        if self.juego_terminado or self.interfaz_pausada:
             return
             
         if self.tiempo_restante > 0:
@@ -654,7 +819,7 @@ class GameInterface:
 
     def actualizar_juego(self):
         """Bucle principal de actualización del juego."""
-        if self.juego_terminado:
+        if self.juego_terminado or self.interfaz_pausada:
             return
         
         # Actualizar lógica del juego
@@ -669,17 +834,52 @@ class GameInterface:
             return
         
         # Actualizar animaciones (movimiento suave)
-        self.actualizar_animaciones()
+        if not self.interfaz_pausada:
+            self.actualizar_animaciones()
         
         # Dibujar estado actual
         self.dibujar_entidades()
+
+        #Indicador de pausa
+        if self.interfaz_pausada:
+            self.mostrar_indicador_pausa()
         
         # Programar siguiente frame visual
         self.root.after(16, self.bucle_visual)
+    
+    def mostrar_indicador_pausa(self):
+        """Muestra un indicador visual de que el juego está pausado."""
+        # Crear un overlay semitransparente
+        canvas_width = COLUMNAS * TAM_CASILLA
+        canvas_height = FILAS * TAM_CASILLA
+        
+        # Crear rectángulo semitransparente
+        self.canvas.create_rectangle(
+            0, 0, canvas_width, canvas_height,
+            fill="black", stipple="gray50", tags="pausa_overlay"
+        )
+        
+        # Texto de pausa
+        self.canvas.create_text(
+            canvas_width // 2, canvas_height // 2,
+            text="PAUSADO",
+            font=("Arial", 24, "bold"),
+            fill="white",
+            tags="pausa_overlay"
+        )
+        
+        self.canvas.create_text(
+            canvas_width // 2, (canvas_height // 2) + 30,
+            text="Presiona ▶ para continuar",
+            font=("Arial", 12),
+            fill="white",
+            tags="pausa_overlay"
+        )
 
     def dibujar_entidades(self):
         """Dibuja todas las entidades del juego (rooks, avatars, ráfagas, proyectiles) en el canvas."""
         self.canvas.delete("entidad")
+        self.canvas.delete("pausa_overlay")
         
         matriz = get_matriz_juego()
         
@@ -1099,6 +1299,7 @@ class GameInterface:
     def calcular_puntaje_final(self):
             """Calcula el puntaje final usando el sistema de puntos y retorna los datos."""
             try:
+                from game_logic import NIVEL_ACTUAL
             
                 avatars_eliminados = self.game_logic.get_avatars_eliminados()
                 puntos_vida_acumulados = self.game_logic.get_puntos_vida_acumulados()

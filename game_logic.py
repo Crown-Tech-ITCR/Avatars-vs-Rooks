@@ -13,6 +13,7 @@ class GameLogic:
         self.juego_terminado = False
         self.avatars_eliminados = 0
         self.puntos_vida_acumulados = 0
+        self.juego_pausado = False
         
         # Inicializar pygame mixer para sonidos
         try:
@@ -39,6 +40,28 @@ class GameLogic:
             self.sonido_disparo = None
             print(f"Error inicializando sonidos: {e}")
     
+    def pausar_juego(self):
+        """Pausa el juego."""
+        self.juego_pausado = True
+        print("Juego pausado")
+
+    def reanudar_juego(self):
+        """Reanuda el juego."""
+        self.juego_pausado = False
+        print("Juego reanudado")
+
+    def esta_pausado(self):
+        """Retorna True si el juego está pausado."""
+        return self.juego_pausado
+
+    def toggle_pausa(self):
+        """Alterna entre pausar y reanudar el juego."""
+        if self.juego_pausado:
+            self.reanudar_juego()
+        else:
+            self.pausar_juego()
+        return self.juego_pausado
+
     def eliminar_avatar_con_sonido(self, avatar, fila, columna):
         """Elimina un avatar de la matriz y reproduce sonido de muerte."""
         # Reproducir sonido de muerte
@@ -345,7 +368,7 @@ class GameLogic:
                                             
     def actualizar_logica_juego(self, on_game_over_callback=None):
         """Actualiza toda la lógica del juego en un tick."""
-        if self.juego_terminado:
+        if self.juego_terminado or self.juego_pausado:
             return
         
         # 1. Disparar rooks
@@ -368,6 +391,7 @@ class GameLogic:
         """Reinicia la lógica del juego."""
         self.shot_tick = 0
         self.juego_terminado = False
+        self.juego_pausado = False
         reset_matriz_juego()
 
     def get_avatars_eliminados(self):
