@@ -222,6 +222,17 @@ class GameLogic:
                         e.tick()  # Actualizar cooldown
                         
                         if e.can_shoot():
+                            hay_avatares = False
+                            for fila_check in range(f + 1, FILAS):
+                                avatares_en_columna = [a for a in matriz_juego[fila_check][c] if isinstance(a, Avatar)]
+                                if avatares_en_columna:
+                                    hay_avatares = True
+                                    break
+                            
+                            # Solo disparar si hay avatares en la columna
+                            if not hay_avatares:
+                                continue 
+                            
                             # La ráfaga aparece en la fila siguiente hacia abajo
                             destino_f = f + 1
                             

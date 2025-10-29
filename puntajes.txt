@@ -30,5 +30,161 @@
             "tempo": 120,
             "popularidad": 20
         }
+    ],
+    "d1YyOTkAYDwjLW3WaEgY/y/ZjPTwHp3//TD3io9LSxlxI3aA": [
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-10-29 01:10:41",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 74.87,
+            "fecha": "2025-10-29 01:11:48",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 78.37,
+            "fecha": "2025-10-29 01:14:00",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 2,
+            "puntaje": 88.0,
+            "fecha": "2025-10-29 01:15:45",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 2,
+            "puntaje": 89.27,
+            "fecha": "2025-10-29 01:18:34",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 3,
+            "puntaje": 105.01,
+            "fecha": "2025-10-29 01:20:28",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 2,
+            "puntaje": 88.53,
+            "fecha": "2025-10-29 01:22:01",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 3,
+            "puntaje": 104.55,
+            "fecha": "2025-10-29 01:25:20",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-10-29 01:30:43",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 33.4,
+            "fecha": "2025-10-29 02:01:14",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 30.8,
+            "fecha": "2025-10-29 02:01:31",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-10-29 02:01:55",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 32.2,
+            "fecha": "2025-10-29 02:03:50",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-10-29 02:08:03",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 31.8,
+            "fecha": "2025-10-29 02:08:22",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 71.44,
+            "fecha": "2025-10-29 02:09:18",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 30.4,
+            "fecha": "2025-10-29 02:09:38",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 40.2,
+            "fecha": "2025-10-29 02:13:33",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 36.6,
+            "fecha": "2025-10-29 02:19:37",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 38.4,
+            "fecha": "2025-10-29 02:20:00",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 37.0,
+            "fecha": "2025-10-29 02:20:21",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 40.4,
+            "fecha": "2025-10-29 02:20:42",
+            "tempo": 120,
+            "popularidad": 20
+        }
     ]
 }

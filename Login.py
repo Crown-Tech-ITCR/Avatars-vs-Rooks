@@ -642,10 +642,11 @@ class LoginAvatarsRooks:
                 MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login,self.crear_main_menu,
                                 self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
             else:
-                self.destroy()
+                self.login_frame.pack_forget()
+                username_enc = key
                 MainMenu(
                     self.root, username, nombre, 120, 20, self.reiniciar_login,
-                    self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+                    self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7, username_enc
                 )
                 
         except Exception as e:
@@ -2344,11 +2345,23 @@ class LoginAvatarsRooks:
 
     #CALLBACKS
 
-    def crear_main_menu(self, username, nombre, tempo, popularidad, c1, c2, c3, c4, c5, c6, c7):
+    def crear_main_menu(self, username, nombre, tempo, popularidad, c1, c2, c3, c4, c5, c6, c7, username_enc=None):
         """Crea el MainMenu desde personalización"""
         # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
+        
+        # Si no se proporciona username_enc, buscarlo
+        if username_enc is None:
+            users_enc = encrip_aes.load_users_aes()
+            for enc_username, user_data in users_enc.items():
+                try:
+                    dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
+                    if username == dec_username:
+                        username_enc = enc_username
+                        break
+                except Exception:
+                    continue
         
         # Crear MainMenu
         MainMenu(
@@ -2358,7 +2371,7 @@ class LoginAvatarsRooks:
             tempo,
             popularidad,
             self.reiniciar_login,          
-            c1, c2, c3, c4, c5, c6, c7
+            c1, c2, c3, c4, c5, c6, c7, username_enc
         )
 
     def crear_personalizacion(self, username, nombre, callback_volver):
