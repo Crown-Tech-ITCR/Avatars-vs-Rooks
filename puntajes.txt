@@ -402,6 +402,20 @@
             "fecha": "2025-10-29 03:53:50",
             "tempo": 122.5,
             "popularidad": 97
+        },
+        {
+            "nivel": 1,
+            "puntaje": 36.6,
+            "fecha": "2025-10-29 13:28:46",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 40.0,
+            "fecha": "2025-10-29 13:29:25",
+            "tempo": 120,
+            "popularidad": 20
         }
     ],
     "4/stOcA24eAMuZ/6A/JHewPqXCqod0xuZVN5mUTDfbM=": [

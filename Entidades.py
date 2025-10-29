@@ -7,9 +7,46 @@ class Entidad:
         self.posicion = None  # (fila, col)
         self.movil = movil
 
+        #Atributos de animacion suave
+        self.x_visual = 0  # Posición X en píxeles para dibujo
+        self.y_visual = 0  # Posición Y en píxeles para dibujo
+        self.animando = False  # ¿Está en medio de una animación?
+        self.origen_x = 0  # Punto de inicio de la animación
+        self.origen_y = 0
+        self.destino_x = 0  # Punto final de la animación
+        self.destino_y = 0
+        self.progreso_animacion = 0.0  # Progreso de 0.0 a 1.0
+        self.duracion_animacion = 900  # Duración en milisegundos 
+
+
     def set_pos(self, fila, col):
-        """Establece la posición de la entidad."""
-        self.posicion = (fila, col)
+        """Establece la posición de la entidad e inicia animación suave."""
+        from game_logic import TAM_CASILLA
+        
+        # Si es la primera vez que se posiciona (spawn/creación)
+        if self.posicion is None:
+            self.posicion = (fila, col)
+            # Calcular posición visual inicial (centro de la casilla)
+            self.x_visual = col * TAM_CASILLA + TAM_CASILLA // 2
+            self.y_visual = fila * TAM_CASILLA + TAM_CASILLA // 2
+            self.animando = False
+        else:
+            # Ya tiene una posición previa, entonces iniciar animación
+            
+            # Guardar origen (posición visual ACTUAL)
+            self.origen_x = self.x_visual
+            self.origen_y = self.y_visual
+            
+            # Calcular destino (nueva posición en píxeles)
+            self.destino_x = col * TAM_CASILLA + TAM_CASILLA // 2
+            self.destino_y = fila * TAM_CASILLA + TAM_CASILLA // 2
+            
+            # Iniciar animación
+            self.animando = True
+            self.progreso_animacion = 0.0
+            
+            #Actualizar posicion logica
+            self.posicion = (fila, col)
 
     def take_damage(self, cantidad: int):
         """Aplica daño a la entidad y la elimina de la matriz si muere."""
@@ -27,6 +64,30 @@ class Entidad:
     def tick(self):
         """Método llamado en cada actualización del juego."""
         pass
+
+    def actualizar_animacion_movimiento(self, delta_ms):
+        """Actualiza la animación de movimiento suave."""
+        if not self.animando:
+            return
+        
+        # Calcular cuánto avanzar en la animación
+        incremento = delta_ms / self.duracion_animacion
+        self.progreso_animacion += incremento
+        
+        if self.progreso_animacion >= 1.0:
+            # Animación completada
+            self.progreso_animacion = 1.0
+            self.x_visual = self.destino_x
+            self.y_visual = self.destino_y
+            self.animando = False
+        else:
+            # Interpolar posición (movimiento suave)
+            self.x_visual = self.lerp(self.origen_x, self.destino_x, self.progreso_animacion)
+            self.y_visual = self.lerp(self.origen_y, self.destino_y, self.progreso_animacion)
+    
+    def lerp(self, inicio, fin, t):
+        """Interpolación lineal entre dos valores."""
+        return inicio + (fin - inicio) * t
 
 # CLASES DE ROOKS
 class Rook(Entidad):
@@ -127,7 +188,7 @@ class Avatar(Entidad):
         # Sistema de animación
         self.frame_actual = 1
         self.contador_frames = 0
-        self.frames_por_cambio = 2
+        self.frames_por_cambio = 6
 
     def can_move(self) -> bool:
         """Verifica si el avatar puede moverse."""
@@ -260,7 +321,18 @@ class ProyectilAvatar:
         self.dano = dano
         self.posicion = None
         self.move_cooldown = 0
-        self.move_cooldown_max = 5  # Velocidad media
+        self.move_cooldown_max = 3  # Velocidad media
+
+        #Atributos para animacion
+        self.x_visual = 0
+        self.y_visual = 0
+        self.animando = False
+        self.origen_x = 0
+        self.origen_y = 0
+        self.destino_x = 0
+        self.destino_y = 0
+        self.progreso_animacion = 0.0
+        self.duracion_animacion = 800  # Proyectiles muy rápidos 
 
     def can_move(self) -> bool:
         """Verifica si el proyectil puede moverse."""
@@ -276,8 +348,24 @@ class ProyectilAvatar:
         self.move_cooldown = self.move_cooldown_max
 
     def set_pos(self, fila, col):
-        """Establece la posición del proyectil."""
-        self.posicion = (fila, col)
+        """Establece la posición del proyectil e inicia animación."""
+        from game_logic import TAM_CASILLA
+        
+        if self.posicion is None:
+            # Primera vez (spawn)
+            self.posicion = (fila, col)
+            self.x_visual = col * TAM_CASILLA + TAM_CASILLA // 2
+            self.y_visual = fila * TAM_CASILLA + TAM_CASILLA // 2
+            self.animando = False
+        else:
+            # Movimiento posterior
+            self.origen_x = self.x_visual
+            self.origen_y = self.y_visual
+            self.destino_x = col * TAM_CASILLA + TAM_CASILLA // 2
+            self.destino_y = fila * TAM_CASILLA + TAM_CASILLA // 2
+            self.animando = True
+            self.progreso_animacion = 0.0
+            self.posicion = (fila, col)
 
     def take_damage(self, cantidad: int):
         """Los proyectiles no reciben daño, pero implementamos el método por consistencia."""
@@ -286,6 +374,27 @@ class ProyectilAvatar:
     def tick(self):
         """Actualiza el cooldown de movimiento."""
         self.move_tick()
+
+    def actualizar_animacion_movimiento(self, delta_ms):
+        """Actualiza la animación de movimiento suave."""
+        if not self.animando:
+            return
+        
+        incremento = delta_ms / self.duracion_animacion
+        self.progreso_animacion += incremento
+        
+        if self.progreso_animacion >= 1.0:
+            self.progreso_animacion = 1.0
+            self.x_visual = self.destino_x
+            self.y_visual = self.destino_y
+            self.animando = False
+        else:
+            self.x_visual = self.lerp(self.origen_x, self.destino_x, self.progreso_animacion)
+            self.y_visual = self.lerp(self.origen_y, self.destino_y, self.progreso_animacion)
+    
+    def lerp(self, inicio, fin, t):
+        """Interpolación lineal entre dos valores."""
+        return inicio + (fin - inicio) * t
 
 # CLASE RAFAGA
 class Rafaga:
@@ -296,7 +405,18 @@ class Rafaga:
         self.dano = dano
         self.posicion = None
         self.move_cooldown = 0  # Cooldown para controlar velocidad
-        self.move_cooldown_max = 5  # Ajusta este valor: más alto = más lento (aumentado para hacer más lentas)
+        self.move_cooldown_max = 3  # Ajusta este valor: más alto = más lento (aumentado para hacer más lentas)
+
+        #Atributos para animacion visual
+        self.x_visual = 0
+        self.y_visual = 0
+        self.animando = False
+        self.origen_x = 0
+        self.origen_y = 0
+        self.destino_x = 0
+        self.destino_y = 0
+        self.progreso_animacion = 0.0
+        self.duracion_animacion = 700
 
     def can_move(self) -> bool:
         """Verifica si la ráfaga puede moverse."""
@@ -312,8 +432,33 @@ class Rafaga:
         self.move_cooldown = self.move_cooldown_max
 
     def set_pos(self, fila, col):
-        """Establece la posición de la ráfaga."""
-        self.posicion = (fila, col)
+        """Establece la posición de la ráfaga e inicia animación."""
+        from game_logic import TAM_CASILLA
+        
+        # Calcular nueva posición en píxeles
+        nuevo_x = col * TAM_CASILLA + TAM_CASILLA // 2
+        nuevo_y = fila * TAM_CASILLA + TAM_CASILLA // 2
+        
+        if self.posicion is None:
+            #Primera vez (spawn) - colocar directamente sin animar
+            self.posicion = (fila, col)
+            self.x_visual = nuevo_x
+            self.y_visual = nuevo_y
+            self.animando = False
+        else:
+            #Movimiento posterior - SIEMPRE animar
+            # Guardar origen ANTES de cambiar posición lógica
+            self.origen_x = self.x_visual
+            self.origen_y = self.y_visual
+            self.destino_x = nuevo_x
+            self.destino_y = nuevo_y
+            
+            # Iniciar animación
+            self.animando = True
+            self.progreso_animacion = 0.0
+            
+            # Actualizar posición lógica DESPUÉS de guardar origen
+            self.posicion = (fila, col)
 
     def take_damage(self, cantidad: int):
         """Las ráfagas no reciben daño, pero implementamos el método por consistencia."""
@@ -322,6 +467,28 @@ class Rafaga:
     def tick(self):
         """Actualiza el cooldown de movimiento."""
         self.move_tick()
+
+    #metodos para animacion visual
+    def actualizar_animacion_movimiento(self, delta_ms):
+        """Actualiza la animación de movimiento suave."""
+        if not self.animando:
+            return
+        
+        incremento = delta_ms / self.duracion_animacion
+        self.progreso_animacion += incremento
+        
+        if self.progreso_animacion >= 1.0:
+            self.progreso_animacion = 1.0
+            self.x_visual = self.destino_x
+            self.y_visual = self.destino_y
+            self.animando = False
+        else:
+            self.x_visual = self.lerp(self.origen_x, self.destino_x, self.progreso_animacion)
+            self.y_visual = self.lerp(self.origen_y, self.destino_y, self.progreso_animacion)
+    
+    def lerp(self, inicio, fin, t):
+        """Interpolación lineal entre dos valores."""
+        return inicio + (fin - inicio) * t
 
 # Diccionario de ayuda para crear rooks por tipo
 TIPOS_ROOK = {

@@ -87,12 +87,29 @@ class GameLogic:
                             if e.vida <= 0:
                                 self.eliminar_avatar_con_sonido(e, f, c)
                                 continue
-                        
-                        # 2. Game over si llega arriba
+
+                        # 2. Game over si llega arriba Y terminó de animar
                         if f == 0:
-                            if on_game_over_callback:
-                                on_game_over_callback()
-                            return
+                            # VERIFICAR QUE EL AVATAR ESTÉ REALMENTE EN LA MATRIZ
+                            if e not in matriz_juego[0][c]:
+                                continue  # Avatar zombie, ignorar
+                            
+                            # Verificar si la animacion esta activa
+                            if not getattr(e, 'animando', False):
+                                if on_game_over_callback:
+                                    on_game_over_callback()
+                                return
+                            else:
+                                #Contar cuánto tiempo lleva animando
+                                if not hasattr(e, 'frames_en_fila_0'):
+                                    e.frames_en_fila_0 = 0
+                                e.frames_en_fila_0 += 1
+                                
+                                #Si lleva más de 100 frames animando en fila 0, forzar game over
+                                if e.frames_en_fila_0 > 100:
+                                    if on_game_over_callback:
+                                        on_game_over_callback()
+                                    return
                         
                         # 3. ATAQUE A DISTANCIA (Flechador y Escudero)
                         if e.ataque_a_distancia and e.can_shoot():
@@ -112,6 +129,9 @@ class GameLogic:
 
                         destino = f - 1
 
+                        if f == 0:
+                            continue
+
                         #Para avatars a distancia (Flechador y Escudero)
                         if e.ataque_a_distancia:
                             # Verificar si hay rooks adelante usando el método que agregaste
@@ -127,9 +147,19 @@ class GameLogic:
                         rook_dest = [r for r in matriz_juego[destino][c] if isinstance(r, Rook)]
                         if rook_dest:
                             if not e.ataque_a_distancia:
-                                # Solo avatars cuerpo a cuerpo atacan directamente
+                                # Avatars cuerpo a cuerpo: atacar Y verificar si el rook murió
                                 e.attack(rook_dest[0])
-                            continue  # No moverse si hay rook en destino
+                                
+                                # Si el rook murió, el avatar puede avanzar a esa casilla
+                                if rook_dest[0].vida <= 0:
+                                    # El rook murió, continuar con el movimiento normal
+                                    pass 
+                                else:
+                                    # El rook sigue vivo, no avanzar
+                                    continue
+                            else:
+                                # Avatars a distancia no avanzan si hay rook
+                                continue
 
                         # RESTRICCIÓN: NO MÁS DE UN AVATAR POR CASILLA
                         avatar_dest = [a for a in matriz_juego[destino][c] if isinstance(a, Avatar)]

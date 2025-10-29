@@ -591,6 +591,7 @@ class GameInterface:
         # Iniciar bucles principales
         self.root.after(1000, self.actualizar_tiempo)
         self.actualizar_juego()
+        self.bucle_visual()  
 
     def programar_generacion(self, tipo):
         """Programa la generación de un avatar del tipo especificado."""
@@ -659,11 +660,22 @@ class GameInterface:
         # Actualizar lógica del juego
         self.game_logic.actualizar_logica_juego(self.game_over)
         
+        # Programar siguiente actualización
+        self.root.after(self.velocidad, self.actualizar_juego)
+
+    def bucle_visual(self):
+        """Bucle de ANIMACIÓN y DIBUJO - 60 FPS."""
+        if self.juego_terminado:
+            return
+        
+        # Actualizar animaciones (movimiento suave)
+        self.actualizar_animaciones()
+        
         # Dibujar estado actual
         self.dibujar_entidades()
         
-        # Programar siguiente actualización
-        self.root.after(self.velocidad, self.actualizar_juego)
+        # Programar siguiente frame visual
+        self.root.after(16, self.bucle_visual)
 
     def dibujar_entidades(self):
         """Dibuja todas las entidades del juego (rooks, avatars, ráfagas, proyectiles) en el canvas."""
@@ -674,8 +686,15 @@ class GameInterface:
         for f in range(FILAS):
             for c in range(COLUMNAS):
                 for e in matriz[f][c]:
-                    cx = c * TAM_CASILLA + TAM_CASILLA // 2
-                    cy = f * TAM_CASILLA + TAM_CASILLA // 2
+
+                    # Usar posición visual si está disponible
+                    if hasattr(e, 'x_visual') and hasattr(e, 'y_visual'):
+                        cx = e.x_visual
+                        cy = e.y_visual
+                    else:
+                        # Fallback: calcular desde posición lógica
+                        cx = c * TAM_CASILLA + TAM_CASILLA // 2
+                        cy = f * TAM_CASILLA + TAM_CASILLA // 2
                     
                     if isinstance(e, Rook):
 
@@ -692,6 +711,21 @@ class GameInterface:
                     elif isinstance(e, ProyectilAvatar):
                         
                         self.DibujarProyectilAvatar(cx,cy,e)
+
+    def actualizar_animaciones(self):
+        """Actualiza las animaciones de todas las entidades en el tablero."""
+        from game_logic import get_matriz_juego, FILAS, COLUMNAS
+        
+        matriz = get_matriz_juego()
+        delta_ms = 16  # Aproximadamente 60 FPS (16ms por frame)
+        
+        # Recorrer todas las entidades en la matriz
+        for f in range(FILAS):
+            for c in range(COLUMNAS):
+                for e in matriz[f][c]:
+                    # Si la entidad tiene el método actualizar_animacion, llamarlo
+                    if hasattr(e, 'actualizar_animacion_movimiento'):
+                        e.actualizar_animacion_movimiento(delta_ms)
     
     def DibujarRook(self, cx, cy, e):
         """Dibuja una torre (Rook) en el canvas con su imagen o forma de respaldo."""
