@@ -25,6 +25,8 @@ class MainMenu:
         self.c5 = c5  # Color de acento
         self.c6 = c6  # Color de hover
         self.c7 = c7  # Color adicional
+
+        self.cambio = not (self.c1 == "#000000" and self.c2 == "#1a1a1a" and self.c3 == "#535353" and self.c4 == "#cc0000" and self.c5 == "#990000" and self.c6 == "#FFFFFF" and self.c7 == "#CCCCCC")
         
         # Configurar ventana
         self.root.geometry("1000x600")
@@ -223,25 +225,42 @@ class MainMenu:
         self.root.withdraw()
         root_nivel1 = tk.Toplevel(self.root)
         root_nivel1.title("Avatars vs Rooks - Nivel 1 (Fácil)")
-        GameInterface(root_nivel1, 
-              callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel),
-              tempo=self.tempo, 
-              popularidad=self.popularidad,
-              username_enc=self.username_enc
-              )
-
+        if self.cambio:
+            GameInterface(root_nivel1, 
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel),
+                tempo=self.tempo, 
+                popularidad=self.popularidad,
+                username_enc=self.username_enc,
+                c1=self.c1, c2=self.c2, c3=self.c3, c4=self.c4, c5=self.c5, c6=self.c6, c7=self.c7
+                )
+        else:
+            GameInterface(root_nivel1, 
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel),
+                tempo=self.tempo, 
+                popularidad=self.popularidad,
+                username_enc=self.username_enc
+                )
 
     def start_level2(self):
         set_nivel_actual(2)
         self.root.withdraw()
         root_nivel2 = tk.Toplevel(self.root)
         root_nivel2.title("Avatars vs Rooks - Nivel 2 (Medio)")
-        GameInterface(root_nivel2, 
-              callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel),
-              tempo=self.tempo, 
-              popularidad=self.popularidad,
-              username_enc=self.username_enc
-              )
+        if self.cambio:
+            GameInterface(root_nivel2, 
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel),
+                tempo=self.tempo, 
+                popularidad=self.popularidad,
+                username_enc=self.username_enc,
+                c1=self.c1, c2=self.c2, c3=self.c3, c4=self.c4, c5=self.c5, c6=self.c6, c7=self.c7
+                )
+        else:
+            GameInterface(root_nivel2, 
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel),
+                tempo=self.tempo, 
+                popularidad=self.popularidad,
+                username_enc=self.username_enc
+                )
 
 
     def start_level3(self):
@@ -249,12 +268,21 @@ class MainMenu:
         self.root.withdraw()
         root_nivel3 = tk.Toplevel(self.root)
         root_nivel3.title("Avatars vs Rooks - Nivel 3 (Difícil)")
-        GameInterface(root_nivel3, 
-              callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel),
-              tempo=self.tempo, 
-              popularidad=self.popularidad,
-              username_enc=self.username_enc
-              )
+        if self.cambio:
+            GameInterface(root_nivel3, 
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel),
+                tempo=self.tempo, 
+                popularidad=self.popularidad,
+                username_enc=self.username_enc,
+                c1=self.c1, c2=self.c2, c3=self.c3, c4=self.c4, c5=self.c5, c6=self.c6, c7=self.c7
+                )
+        else:
+            GameInterface(root_nivel3, 
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel),
+                tempo=self.tempo, 
+                popularidad=self.popularidad,
+                username_enc=self.username_enc
+                )
 
 
 
