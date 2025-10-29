@@ -108,6 +108,10 @@ class GameInterface:
         # Cargar imágenes de ráfagas
         self.imagenes_rafagas = {}
         self.cargar_imagenes_rafagas()
+
+        # Cargar imágenes de proyectiles de avatares
+        self.imagenes_proyectiles_avatares = {}
+        self.cargar_imagenes_proyectiles_avatares()
         
         # Crear interfaz
         self.crear_interfaz()
@@ -146,7 +150,7 @@ class GameInterface:
                 
                 try:
                     img = Image.open(path)
-                    # Redimensionar según tamaño de casilla
+                    # Redimensionar
                     img = img.resize((35, 50), Image.Resampling.LANCZOS)
                     self.imagenes_avatares[key] = ImageTk.PhotoImage(img)
                 except Exception as e:
@@ -168,12 +172,32 @@ class GameInterface:
             try:
                 # Cargar imagen desde el path
                 img = Image.open(path)
-                # Redimensionar a un tamaño apropiado (ajusta si es necesario)
+                # Redimensionar
                 img = img.resize((30, 30), Image.Resampling.LANCZOS)
                 self.imagenes_rafagas[tipo] = ImageTk.PhotoImage(img)
             except Exception as e:
                 print(f"Error cargando imagen {path}: {e}")
                 self.imagenes_rafagas[tipo] = None
+
+    def cargar_imagenes_proyectiles_avatares(self):
+        """Carga las imágenes de los proyectiles de avatares desde la carpeta images/proyectiles_avatars"""
+        
+        # Diccionario con los tipos y sus rutas de archivo
+        tipos_proyectiles = {
+            "flechador": "./images/proyectiles_avatars/proyectil_flechador.png",
+            "escudero": "./images/proyectiles_avatars/proyectil_escudero.png"
+        }
+        
+        for tipo, path in tipos_proyectiles.items():
+            try:
+                # Cargar imagen desde el path
+                img = Image.open(path)
+                # Redimensionar 
+                img = img.resize((40, 65), Image.Resampling.LANCZOS)  # Formato vertical para flechas
+                self.imagenes_proyectiles_avatares[tipo] = ImageTk.PhotoImage(img)
+            except Exception as e:
+                print(f"Error cargando imagen {path}: {e}")
+                self.imagenes_proyectiles_avatares[tipo] = None
 
 
     def center_window(self):
@@ -320,7 +344,7 @@ class GameInterface:
         frame_boton.pack_propagate(False)
         
         # Hacer el frame clickeable
-        frame_boton.bind("<Button-1>", lambda e: self.seleccionar_rook_desde_frame(config["clase"], frame_boton))
+        frame_boton.bind("<Button-1>", lambda e, cfg=config, fb=frame_boton: self.seleccionar_rook_desde_frame(cfg["clase"], fb))
         
         # Frame izquierdo 
         frame_emoji = tk.Frame(frame_boton, bg=COLOR_PANEL, width=80)
@@ -351,12 +375,12 @@ class GameInterface:
             )
             label_emoji.pack(expand=True)
         
-        label_emoji.bind("<Button-1>", lambda e: self.seleccionar_rook_desde_frame(config["clase"], frame_boton))
+        label_emoji.bind("<Button-1>", lambda e, cfg=config, fb=frame_boton: self.seleccionar_rook_desde_frame(cfg["clase"], fb))
         
         # Frame derecho para información
         frame_info = tk.Frame(frame_boton, bg=COLOR_PANEL)
         frame_info.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
-        frame_info.bind("<Button-1>", lambda e: self.seleccionar_rook_desde_frame(config["clase"], frame_boton))
+        frame_info.bind("<Button-1>", lambda e, cfg=config, fb=frame_boton: self.seleccionar_rook_desde_frame(cfg["clase"], fb))
         
         # Nombre del rook
         label_nombre = tk.Label(
@@ -368,7 +392,7 @@ class GameInterface:
             anchor="w"
         )
         label_nombre.pack(fill=tk.X, pady=(8, 2))
-        label_nombre.bind("<Button-1>", lambda e: self.seleccionar_rook_desde_frame(config["clase"], frame_boton))
+        label_nombre.bind("<Button-1>", lambda e, cfg=config, fb=frame_boton: self.seleccionar_rook_desde_frame(cfg["clase"], fb))
         
         # Costo
         label_costo = tk.Label(
@@ -380,7 +404,7 @@ class GameInterface:
             anchor="w"
         )
         label_costo.pack(fill=tk.X, pady=2)
-        label_costo.bind("<Button-1>", lambda e: self.seleccionar_rook_desde_frame(config["clase"], frame_boton))
+        label_costo.bind("<Button-1>", lambda e, cfg=config, fb=frame_boton: self.seleccionar_rook_desde_frame(cfg["clase"], fb))
         
         # Daño
         label_daño = tk.Label(
@@ -392,7 +416,7 @@ class GameInterface:
             anchor="w"
         )
         label_daño.pack(fill=tk.X, pady=2)
-        label_daño.bind("<Button-1>", lambda e: self.seleccionar_rook_desde_frame(config["clase"], frame_boton))
+        label_daño.bind("<Button-1>", lambda e, cfg=config, fb=frame_boton: self.seleccionar_rook_desde_frame(cfg["clase"], fb))
         
         # Guardar referencia al frame para poder resaltarlo
         self.botones_rooks.append(frame_boton)
@@ -688,11 +712,31 @@ class GameInterface:
                             )
                     
                     elif isinstance(e, ProyectilAvatar):
-                        # Proyectiles de avatars (verdes, hacia arriba)
-                        self.canvas.create_oval(
-                            cx - 4, cy - 4, cx + 4, cy + 4,
-                            fill="green", tags="entidad"
-                        )
+                        # Proyectiles de avatares con imágenes personalizadas
+                        tipo_proyectil = getattr(e, 'tipo_proyectil', 'flechador')
+                        
+                        # Intentar dibujar con imagen
+                        if tipo_proyectil in self.imagenes_proyectiles_avatares and self.imagenes_proyectiles_avatares[tipo_proyectil]:
+                            self.canvas.create_image(
+                                cx, cy,
+                                image=self.imagenes_proyectiles_avatares[tipo_proyectil],
+                                tags="entidad"
+                            )
+                        else:
+                            # Fallback: si no hay imagen, usar formas de colores
+                            colores_fallback = {
+                                "flechador": "brown",
+                                "escudero": "blue"
+                            }
+                            color = colores_fallback.get(tipo_proyectil, "brown")
+                            
+                            # Dibujar flecha con color
+                            self.canvas.create_polygon(
+                                cx, cy - 8,      # punta arriba
+                                cx - 4, cy + 8,  # base izquierda
+                                cx + 4, cy + 8,  # base derecha
+                                fill=color, outline="black", tags="entidad"
+                            )
     
     def DibujarRook(self, cx, cy, e):
         # Obtener la imagen correspondiente al tipo de rook

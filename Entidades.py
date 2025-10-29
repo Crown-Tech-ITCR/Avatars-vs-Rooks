@@ -210,6 +210,13 @@ class AvatarFlechador(Avatar):
         self.tipo = "avatar_flechador"
         self.color = "orange"
 
+    def shoot(self):  
+        """Dispara un proyectil de flechador y reinicia el cooldown."""
+        if self.can_shoot():
+            self.shot_cooldown = self.shot_cooldown_max
+            return ProyectilAvatar(self.dano, tipo_proyectil="flechador")
+        return None
+
 
 class AvatarEscudero(Avatar):
     """Avatar Escudero: Ataca a distancia, velocidad media-lenta con regeneración moderada."""
@@ -218,6 +225,13 @@ class AvatarEscudero(Avatar):
                         ataque_a_distancia=True, shot_cooldown_max=10)  # Dispara cada 3 ticks
         self.tipo = "avatar_escudero"
         self.color = "blue"
+
+    def shoot(self):  
+        """Dispara un proyectil de flechador y reinicia el cooldown."""
+        if self.can_shoot():
+            self.shot_cooldown = self.shot_cooldown_max
+            return ProyectilAvatar(self.dano, tipo_proyectil="escudero")
+        return None
 
 
 class AvatarLenador(Avatar):
@@ -240,8 +254,9 @@ class AvatarCanibal(Avatar):
 # CLASE PROYECTIL DE AVATAR
 class ProyectilAvatar:
     """Proyectil disparado por los avatars."""
-    def __init__(self, dano: int = 3):
+    def __init__(self, dano: int = 3, tipo_proyectil: str = "flechador"):
         self.tipo = "proyectil_avatar"
+        self.tipo_proyectil = tipo_proyectil
         self.dano = dano
         self.posicion = None
         self.move_cooldown = 0

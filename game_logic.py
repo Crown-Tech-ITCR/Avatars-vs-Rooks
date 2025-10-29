@@ -319,10 +319,10 @@ AUMENTO_VELOCIDAD = 0.15        # +15% de rapidez (menos tiempo entre actualizac
 
 # Tiempos base de regeneración (ms)
 TIEMPOS_BASE_AVATARS = {
-    "flechador": 3000,
-    "escudero": 4000,
-    "lenador": 10000,
-    "canibal": 12000
+    "flechador": 4000,
+    "escudero": 7000,
+    "lenador": 13000,
+    "canibal": 17000
 }
 
 # --------------------------------------------------------------
