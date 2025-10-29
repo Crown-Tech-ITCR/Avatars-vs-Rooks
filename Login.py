@@ -559,6 +559,7 @@ class LoginAvatarsRooks:
         if encrip_aes.verify_password(record['password_hash'], password):
             nombre = encrip_aes.decrypt_data(record['nombre_enc'], self.master_key)
             username = encrip_aes.decrypt_data(key, self.master_key)
+            username_enc = key
             primerIngreso = record['primerIngreso']
             
             if primerIngreso:
@@ -570,7 +571,7 @@ class LoginAvatarsRooks:
             else:
                 self.login_frame.pack_forget()
                 MainMenu(self.root, username, nombre, 120,20, self.reiniciar_login,
-                                self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
+                                self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7, username_enc)
         else:
             messagebox.showerror("Error", t("error_uc"))
 
