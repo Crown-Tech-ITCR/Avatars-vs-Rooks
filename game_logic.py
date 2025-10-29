@@ -1,5 +1,8 @@
 from Entidades import Avatar, Rafaga, Rook, ProyectilAvatar
 import numpy as np
+import pygame  # Para reproducir sonidos
+import os
+import os  # Para verificar archivos de sonido
 
 class GameLogic:
     """Clase que maneja toda la lógica principal del juego."""
@@ -10,6 +13,55 @@ class GameLogic:
         self.juego_terminado = False
         self.avatars_eliminados = 0
         self.puntos_vida_acumulados = 0
+        
+        # Inicializar pygame mixer para sonidos
+        try:
+            pygame.mixer.init()
+            
+            # Sonido de muerte de avatar
+            sonido_muerte_path = "sounds/avatar_muerte.wav"
+            if os.path.exists(sonido_muerte_path):
+                self.sonido_muerte = pygame.mixer.Sound(sonido_muerte_path)
+            else:
+                self.sonido_muerte = None
+                print(f"Archivo de sonido no encontrado: {sonido_muerte_path}")
+            
+            # Sonido de disparo de torre
+            sonido_disparo_path = "sounds/rook_disparo.wav"
+            if os.path.exists(sonido_disparo_path):
+                self.sonido_disparo = pygame.mixer.Sound(sonido_disparo_path)
+            else:
+                self.sonido_disparo = None
+                print(f"Archivo de sonido no encontrado: {sonido_disparo_path}")
+                
+        except Exception as e:
+            self.sonido_muerte = None
+            self.sonido_disparo = None
+            print(f"Error inicializando sonidos: {e}")
+    
+    def eliminar_avatar_con_sonido(self, avatar, fila, columna):
+        """Elimina un avatar de la matriz y reproduce sonido de muerte."""
+        # Reproducir sonido de muerte
+        if self.sonido_muerte:
+            try:
+                self.sonido_muerte.play()
+            except:
+                pass  # Ignorar errores de sonido
+        
+        # Incrementar contador de avatars eliminados
+        self.avatars_eliminados += 1
+        
+        # Remover avatar de la matriz si aún está ahí
+        if avatar in matriz_juego[fila][columna]:
+            matriz_juego[fila][columna].remove(avatar)
+    
+    def reproducir_sonido_disparo(self):
+        """Reproduce el sonido de disparo de torre."""
+        if self.sonido_disparo:
+            try:
+                self.sonido_disparo.play()
+            except:
+                pass  # Ignorar errores de sonido
             
     def mover_avatars(self, on_game_over_callback=None):
         """Mueve todos los avatars y maneja ataques a distancia."""
@@ -33,7 +85,7 @@ class GameLogic:
                             e.take_damage(total_dano)
                             self.puntos_vida_acumulados += total_dano
                             if e.vida <= 0:
-                                self.avatars_eliminados += 1
+                                self.eliminar_avatar_con_sonido(e, f, c)
                                 continue
                         
                         # 2. Game over si llega arriba
@@ -60,7 +112,7 @@ class GameLogic:
 
                         destino = f - 1
 
-                        # NUEVA LÓGICA: Para avatars a distancia (Flechador y Escudero)
+                        #Para avatars a distancia (Flechador y Escudero)
                         if e.ataque_a_distancia:
                             # Verificar si hay rooks adelante usando el método que agregaste
                             if e.hay_rooks_adelante(matriz_juego, f, c):
@@ -98,9 +150,7 @@ class GameLogic:
                             e.take_damage(total_dano_destino)
                             self.puntos_vida_acumulados += total_dano_destino
                             if e.vida <= 0:
-                                self.avatars_eliminados += 1
-                                if e in matriz_juego[f][c]:
-                                    matriz_juego[f][c].remove(e)
+                                self.eliminar_avatar_con_sonido(e, f, c)
                                 continue
                         
                         # 5. MOVER avatar si no murió
@@ -175,7 +225,7 @@ class GameLogic:
                                 avatar.take_damage(e.dano)
                                 self.puntos_vida_acumulados += e.dano
                                 if avatar.vida <= 0:
-                                    self.avatars_eliminados += 1
+                                    self.eliminar_avatar_con_sonido(avatar, f, c)
                             
                             # ELIMINAR LA RÁFAGA tras el impacto
                             if e in matriz_juego[f][c]:
@@ -201,7 +251,7 @@ class GameLogic:
                                         avatar.take_damage(e.dano)
                                         self.puntos_vida_acumulados += e.dano
                                         if avatar.vida <= 0:
-                                            self.avatars_eliminados += 1
+                                            self.eliminar_avatar_con_sonido(avatar, destino_f, c)
                                     # La ráfaga se destruye al impactar, NO se mueve
                                 else:
                                     # NO hay colisión: mover ráfaga normalmente
@@ -222,6 +272,17 @@ class GameLogic:
                         e.tick()  # Actualizar cooldown
                         
                         if e.can_shoot():
+                            hay_avatares = False
+                            for fila_check in range(f + 1, FILAS):
+                                avatares_en_columna = [a for a in matriz_juego[fila_check][c] if isinstance(a, Avatar)]
+                                if avatares_en_columna:
+                                    hay_avatares = True
+                                    break
+                            
+                            # Solo disparar si hay avatares en la columna
+                            if not hay_avatares:
+                                continue 
+
                             # La ráfaga aparece en la fila siguiente hacia abajo
                             destino_f = f + 1
                             
@@ -233,11 +294,12 @@ class GameLogic:
                                     # DISPARO DIRECTO: Aplicar daño inmediatamente
                                     rafaga_temporal = e.shoot()
                                     if rafaga_temporal:
+                                        self.reproducir_sonido_disparo()  # Sonido de disparo
                                         for avatar in avatars_adyacentes:
                                             avatar.take_damage(rafaga_temporal.dano)
                                             self.puntos_vida_acumulados += rafaga_temporal.dano
                                             if avatar.vida <= 0:
-                                                self.avatars_eliminados += 1
+                                                self.eliminar_avatar_con_sonido(avatar, destino_f, c)
                                         # NO agregar la ráfaga al tablero - se destruye inmediatamente
                                 else:
                                     # NO hay avatar: crear ráfaga normalmente
@@ -246,6 +308,7 @@ class GameLogic:
                                     if not rafagas_existentes:
                                         rafaga = e.shoot()
                                         if rafaga:
+                                            self.reproducir_sonido_disparo()  # Sonido de disparo
                                             rafaga.set_pos(destino_f, c)
                                             rafaga.reset_move_cooldown()  # Iniciar con cooldown completo
                                             matriz_juego[destino_f][c].append(rafaga)
@@ -256,10 +319,7 @@ class GameLogic:
             return
         
         # 1. Disparar rooks
-        self.shot_tick += 1
-        if self.shot_tick >= self.shot_interval:
-            self.disparar_rooks()
-            self.shot_tick = 0
+        self.disparar_rooks()
         
         # 2. Mover avatars (incluye disparos)
         self.mover_avatars(on_game_over_callback)
@@ -311,10 +371,10 @@ AUMENTO_VELOCIDAD = 0.15        # +15% de rapidez (menos tiempo entre actualizac
 
 # Tiempos base de regeneración (ms)
 TIEMPOS_BASE_AVATARS = {
-    "flechador": 3000,
-    "escudero": 4000,
-    "lenador": 10000,
-    "canibal": 12000
+    "flechador": 4000,
+    "escudero": 7000,
+    "lenador": 13000,
+    "canibal": 17000
 }
 
 # --------------------------------------------------------------

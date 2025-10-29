@@ -34,7 +34,7 @@ class Rook(Entidad):
     def __init__(self, vida: int = 10, dano: int = 10, shot_cooldown_max: int = 0, costo: int = 0):
         super().__init__("rook", vida=vida, dano=dano, movil=False)
         self.shot_cooldown = 0
-        self.shot_cooldown_max = shot_cooldown_max
+        self.shot_cooldown_max = shot_cooldown_max if shot_cooldown_max > 0 else 10
         self.costo = costo
         self.color = "green"
 
@@ -59,33 +59,53 @@ class Rook(Entidad):
 class RookRoca(Rook):
     """Rook de Roca: Resistente pero daño moderado."""
     def __init__(self):
-        super().__init__(vida=12, dano=4, shot_cooldown_max=0, costo=100)
+        super().__init__(vida=12, dano=4, shot_cooldown_max=12, costo=100)
         self.tipo = "rook_roca"
         self.color = "gray"
+
+    def shoot(self): 
+        """Dispara una rafaga de roca y reinicia el cooldown."""
+        self.shot_cooldown = self.shot_cooldown_max
+        return Rafaga(self.dano, tipo_rafaga="roca")
 
 
 class RookFuego(Rook):
     """Rook de Fuego: Buen daño y resistencia equilibrada."""
     def __init__(self):
-        super().__init__(vida=12, dano=8, shot_cooldown_max=0, costo=150)
+        super().__init__(vida=12, dano=8, shot_cooldown_max=15, costo=150)
         self.tipo = "rook_fuego"
         self.color = "orange"
+
+    def shoot(self): 
+        """Dispara una rafaga de roca y reinicia el cooldown."""
+        self.shot_cooldown = self.shot_cooldown_max
+        return Rafaga(self.dano, tipo_rafaga="fuego")
 
 
 class RookAgua(Rook):
     """Rook de Agua: Alta resistencia y alto daño."""
     def __init__(self):
-        super().__init__(vida=15, dano=10, shot_cooldown_max=0, costo=150)
+        super().__init__(vida=15, dano=15, shot_cooldown_max=17, costo=150)
         self.tipo = "rook_agua"
         self.color = "cyan"
+
+    def shoot(self): 
+        """Dispara una rafaga de roca y reinicia el cooldown."""
+        self.shot_cooldown = self.shot_cooldown_max
+        return Rafaga(self.dano, tipo_rafaga="agua")
 
 
 class RookArena(Rook):
     """Rook de Arena: Barato pero frágil y poco daño."""
     def __init__(self):
-        super().__init__(vida=8, dano=2, shot_cooldown_max=0, costo=50)
+        super().__init__(vida=8, dano=2, shot_cooldown_max=9, costo=50)
         self.tipo = "rook_arena"
         self.color = "yellow"
+
+    def shoot(self): 
+        """Dispara una rafaga de roca y reinicia el cooldown."""
+        self.shot_cooldown = self.shot_cooldown_max
+        return Rafaga(self.dano, tipo_rafaga="arena")
 
 
 # CLASES DE AVATARS
@@ -190,6 +210,13 @@ class AvatarFlechador(Avatar):
         self.tipo = "avatar_flechador"
         self.color = "orange"
 
+    def shoot(self):  
+        """Dispara un proyectil de flechador y reinicia el cooldown."""
+        if self.can_shoot():
+            self.shot_cooldown = self.shot_cooldown_max
+            return ProyectilAvatar(self.dano, tipo_proyectil="flechador")
+        return None
+
 
 class AvatarEscudero(Avatar):
     """Avatar Escudero: Ataca a distancia, velocidad media-lenta con regeneración moderada."""
@@ -198,6 +225,13 @@ class AvatarEscudero(Avatar):
                         ataque_a_distancia=True, shot_cooldown_max=10)  # Dispara cada 3 ticks
         self.tipo = "avatar_escudero"
         self.color = "blue"
+
+    def shoot(self):  
+        """Dispara un proyectil de flechador y reinicia el cooldown."""
+        if self.can_shoot():
+            self.shot_cooldown = self.shot_cooldown_max
+            return ProyectilAvatar(self.dano, tipo_proyectil="escudero")
+        return None
 
 
 class AvatarLenador(Avatar):
@@ -220,8 +254,9 @@ class AvatarCanibal(Avatar):
 # CLASE PROYECTIL DE AVATAR
 class ProyectilAvatar:
     """Proyectil disparado por los avatars."""
-    def __init__(self, dano: int = 3):
+    def __init__(self, dano: int = 3, tipo_proyectil: str = "flechador"):
         self.tipo = "proyectil_avatar"
+        self.tipo_proyectil = tipo_proyectil
         self.dano = dano
         self.posicion = None
         self.move_cooldown = 0
@@ -255,8 +290,9 @@ class ProyectilAvatar:
 # CLASE RAFAGA
 class Rafaga:
     """Proyectil disparado por los rooks."""
-    def __init__(self, dano: int = 5):
+    def __init__(self, dano: int = 5, tipo_rafaga: str = "arena"):
         self.tipo = "rafaga"
+        self.tipo_rafaga = tipo_rafaga
         self.dano = dano
         self.posicion = None
         self.move_cooldown = 0  # Cooldown para controlar velocidad
