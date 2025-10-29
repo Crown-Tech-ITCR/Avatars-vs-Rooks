@@ -7,10 +7,11 @@ from SalonDeLaFama import SalonDeLaFama
 
 class MainMenu:
     def __init__(self, root, username, nombre, tempo, popularidad, callback_login, c1, 
-                 c2, c3, c4, c5, c6, c7):
-        """ Menú Principal del juego Avatars vs Rooks"""
+                 c2, c3, c4, c5, c6, c7, username_enc):
+        " Menú Principal del juego Avatars vs Rooks"
         self.root = root
         self.username = username
+        self.username_enc = username_enc
         self.nombre = nombre
         self.callback_login = callback_login
         self.tempo = tempo
@@ -32,7 +33,7 @@ class MainMenu:
         self.create_interface()
 
     def center_window(self):
-        """Centra la ventana en la pantalla"""
+        "Centra la ventana en la pantalla"
         self.root.update_idletasks()
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -41,7 +42,7 @@ class MainMenu:
         self.root.geometry(f'1000x600+{x}+{y}')
     
     def create_interface(self):
-        """Crea la interfaz del menú principal"""
+        "Crea la interfaz del menú principal"
 
         # Frame principal
         self.frame = tk.Frame(self.root, bg=self.c1)
@@ -197,7 +198,7 @@ class MainMenu:
         btn_cerrar_sesion.pack(side="left")
     
     def go_to_customization(self):
-        """Navega a la personalización de usuario"""
+        "Navega a la personalización de usuario"
         MenuPersonalizacion(self.root, self.username, self.nombre, self.callback_login, self.reset_MainMenu,
                             self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
     
@@ -205,7 +206,7 @@ class MainMenu:
         "Navega al salón de la fama"
         SalonDeLaFama(
             self.root,
-            self.username,  
+            self.username_enc,  
             self.volver_desde_salon_fama,
             self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
         )
@@ -226,7 +227,7 @@ class MainMenu:
               callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel),
               tempo=self.tempo, 
               popularidad=self.popularidad,
-              username_enc=self.username
+              username_enc=self.username_enc
               )
 
 
@@ -239,7 +240,7 @@ class MainMenu:
               callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel),
               tempo=self.tempo, 
               popularidad=self.popularidad,
-              username_enc=self.username
+              username_enc=self.username_enc
               )
 
 
@@ -252,7 +253,7 @@ class MainMenu:
               callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel),
               tempo=self.tempo, 
               popularidad=self.popularidad,
-              username_enc=self.username
+              username_enc=self.username_enc
               )
 
 

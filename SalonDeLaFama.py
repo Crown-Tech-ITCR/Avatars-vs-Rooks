@@ -3,7 +3,7 @@ from SalonFamaNivel import SalonFamaNivel
 
 class SalonDeLaFama:
     def __init__(self, root, username_enc, callback_volver, c1, c2, c3, c4, c5, c6, c7):
-        """Interfaz de selección de nivel del Salón de la Fama"""
+        "Interfaz de selección de nivel del Salón de la Fama"
         self.root = root
         self.username_enc = username_enc
         self.callback_volver = callback_volver
@@ -21,7 +21,7 @@ class SalonDeLaFama:
         self.crear_interfaz()
     
     def crear_interfaz(self):
-        """Crea la interfaz de selección de nivel"""
+        "Crea la interfaz de selección de nivel"
         # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -150,7 +150,7 @@ class SalonDeLaFama:
         btn_dificil.pack(pady=10)
     
     def ver_nivel(self, nivel):
-        """Navega a la vista del ranking de un nivel específico"""
+        "Navega a la vista del ranking de un nivel específico"
         SalonFamaNivel(
             self.root,
             nivel,
@@ -160,11 +160,22 @@ class SalonDeLaFama:
         )
     
     def volver_seleccion(self):
-        """Vuelve a la pantalla de selección de nivel"""
+        "Vuelve a la pantalla de selección de nivel"
         self.crear_interfaz()
     
     def volver_menu(self):
-        """Vuelve al menú principal"""
-        
+        "Vuelve al menú principal de selección de niveles"
+        # Detener cualquier animación si existe
+        if hasattr(self, 'detener_animacion_fondo'):
+            try:
+                self.detener_animacion_fondo()
+            except:
+                pass
+    
+        # Limpiar la ventana
+        for widget in self.root.winfo_children():
+            widget.destroy()
+    
+        # Llamar al callback para volver
         if self.callback_volver:
             self.callback_volver()
