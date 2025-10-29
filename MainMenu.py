@@ -223,7 +223,7 @@ class MainMenu:
         root_nivel1 = tk.Toplevel(self.root)
         root_nivel1.title("Avatars vs Rooks - Nivel 1 (Fácil)")
         GameInterface(root_nivel1, 
-              callback_volver_menu=lambda: self.regresar_menu(root_nivel1),
+              callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel),
               tempo=self.tempo, 
               popularidad=self.popularidad,
               username_enc=self.username
@@ -236,7 +236,7 @@ class MainMenu:
         root_nivel2 = tk.Toplevel(self.root)
         root_nivel2.title("Avatars vs Rooks - Nivel 2 (Medio)")
         GameInterface(root_nivel2, 
-              callback_volver_menu=lambda: self.regresar_menu(root_nivel2),
+              callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel),
               tempo=self.tempo, 
               popularidad=self.popularidad,
               username_enc=self.username
@@ -249,7 +249,7 @@ class MainMenu:
         root_nivel3 = tk.Toplevel(self.root)
         root_nivel3.title("Avatars vs Rooks - Nivel 3 (Difícil)")
         GameInterface(root_nivel3, 
-              callback_volver_menu=lambda: self.regresar_menu(root_nivel3),
+              callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel),
               tempo=self.tempo, 
               popularidad=self.popularidad,
               username_enc=self.username
@@ -257,10 +257,20 @@ class MainMenu:
 
 
 
-    def regresar_menu(self, ventana_juego):
-        """Destruye la ventana del juego y regresa al menú principal."""
+    def regresar_menu(self, ventana_juego, iniciar_nuevo_nivel=False):
         ventana_juego.destroy()
         self.root.deiconify()
+
+        if iniciar_nuevo_nivel:
+            from game_logic import NIVEL_ACTUAL
+
+            if NIVEL_ACTUAL == 1:
+                self.start_level1()
+            elif NIVEL_ACTUAL == 2:
+                self.start_level2()
+            elif NIVEL_ACTUAL == 3:
+                self.start_level3()
+
 
 
 
