@@ -185,6 +185,104 @@
             "fecha": "2025-10-29 02:20:42",
             "tempo": 120,
             "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 39.4,
+            "fecha": "2025-10-29 02:22:02",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 35.2,
+            "fecha": "2025-10-29 02:22:25",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.8,
+            "fecha": "2025-10-29 02:22:40",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 34.6,
+            "fecha": "2025-10-29 02:34:22",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 31.4,
+            "fecha": "2025-10-29 02:37:13",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 31.8,
+            "fecha": "2025-10-29 02:37:34",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 36.0,
+            "fecha": "2025-10-29 02:41:44",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 34.6,
+            "fecha": "2025-10-29 02:43:53",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 45.2,
+            "fecha": "2025-10-29 02:44:15",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 49.2,
+            "fecha": "2025-10-29 02:44:39",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 37.8,
+            "fecha": "2025-10-29 02:44:59",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 55.52,
+            "fecha": "2025-10-29 02:45:56",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 46.8,
+            "fecha": "2025-10-29 02:46:15",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 41.4,
+            "fecha": "2025-10-29 02:46:38",
+            "tempo": 120,
+            "popularidad": 20
         }
     ]
 }

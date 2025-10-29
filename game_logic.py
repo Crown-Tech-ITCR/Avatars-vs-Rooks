@@ -232,7 +232,7 @@ class GameLogic:
                             # Solo disparar si hay avatares en la columna
                             if not hay_avatares:
                                 continue 
-                            
+
                             # La ráfaga aparece en la fila siguiente hacia abajo
                             destino_f = f + 1
                             
@@ -267,10 +267,7 @@ class GameLogic:
             return
         
         # 1. Disparar rooks
-        self.shot_tick += 1
-        if self.shot_tick >= self.shot_interval:
-            self.disparar_rooks()
-            self.shot_tick = 0
+        self.disparar_rooks()
         
         # 2. Mover avatars (incluye disparos)
         self.mover_avatars(on_game_over_callback)

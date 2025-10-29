@@ -34,7 +34,7 @@ class Rook(Entidad):
     def __init__(self, vida: int = 10, dano: int = 10, shot_cooldown_max: int = 0, costo: int = 0):
         super().__init__("rook", vida=vida, dano=dano, movil=False)
         self.shot_cooldown = 0
-        self.shot_cooldown_max = shot_cooldown_max
+        self.shot_cooldown_max = shot_cooldown_max if shot_cooldown_max > 0 else 10
         self.costo = costo
         self.color = "green"
 
@@ -59,7 +59,7 @@ class Rook(Entidad):
 class RookRoca(Rook):
     """Rook de Roca: Resistente pero daño moderado."""
     def __init__(self):
-        super().__init__(vida=12, dano=4, shot_cooldown_max=0, costo=100)
+        super().__init__(vida=12, dano=4, shot_cooldown_max=12, costo=100)
         self.tipo = "rook_roca"
         self.color = "gray"
 
@@ -72,7 +72,7 @@ class RookRoca(Rook):
 class RookFuego(Rook):
     """Rook de Fuego: Buen daño y resistencia equilibrada."""
     def __init__(self):
-        super().__init__(vida=12, dano=8, shot_cooldown_max=0, costo=150)
+        super().__init__(vida=12, dano=8, shot_cooldown_max=15, costo=150)
         self.tipo = "rook_fuego"
         self.color = "orange"
 
@@ -85,7 +85,7 @@ class RookFuego(Rook):
 class RookAgua(Rook):
     """Rook de Agua: Alta resistencia y alto daño."""
     def __init__(self):
-        super().__init__(vida=15, dano=10, shot_cooldown_max=0, costo=150)
+        super().__init__(vida=15, dano=15, shot_cooldown_max=17, costo=150)
         self.tipo = "rook_agua"
         self.color = "cyan"
 
@@ -98,7 +98,7 @@ class RookAgua(Rook):
 class RookArena(Rook):
     """Rook de Arena: Barato pero frágil y poco daño."""
     def __init__(self):
-        super().__init__(vida=8, dano=2, shot_cooldown_max=0, costo=50)
+        super().__init__(vida=8, dano=2, shot_cooldown_max=9, costo=50)
         self.tipo = "rook_arena"
         self.color = "yellow"
 
