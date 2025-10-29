@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-from game_logic import GameLogic, FILAS, COLUMNAS, TAM_CASILLA, get_matriz_juego, NIVEL_ACTUAL, reset_matriz_juego
+from game_logic import GameLogic, FILAS, COLUMNAS, TAM_CASILLA, get_matriz_juego, NIVEL_ACTUAL, reset_matriz_juego, set_nivel_actual
 from Entidades import RookRoca, RookFuego, RookAgua, RookArena, crear_avatar, Rook, Avatar, Rafaga, ProyectilAvatar
 from sistema_puntos import SistemaPuntos
 from gestion_puntajes import agregar_puntaje
@@ -65,6 +65,7 @@ class GameInterface:
         self.root = root
         self.root.title("Avatars vs Rooks - Desktop game")
         self.callback_volver_menu = callback_volver_menu
+
         
         # Configurar tamaño de ventana
         self.root.geometry("1000x600")
@@ -701,52 +702,184 @@ class GameInterface:
             
 
     def game_over(self):
-        """Maneja el game over cuando un avatar llega arriba."""
+        """
+        Se ejecuta cuando el jugador PIERDE.
+        Muestra opciones: reintentar el nivel, menú principal.
+        """
+        # ✅ Evitar múltiples ejecuciones simultáneas
         if self.juego_terminado:
             return
-            
+
+        # ✅ Guardar nivel actual INMEDIATAMENTE antes de cualquier otra operación
+        from game_logic import NIVEL_ACTUAL
+        nivel_actual = NIVEL_ACTUAL
+
+        # ✅ Detener la lógica del juego
         self.juego_terminado = True
         self.game_logic.finalizar_juego()
-        
-        # Mostrar mensaje de game over
-        self.canvas.create_text(
-            COLUMNAS * TAM_CASILLA // 2, 
-            FILAS * TAM_CASILLA // 2,
-            text="💀 GAME OVER 💀",
-            font=("Arial", 24, "bold"), 
-            fill="red",
-            tags="mensaje"
-        )
-        
-        # Calcular puntaje final
-        self.calcular_puntaje_final()
-        
-        # Volver al menú después de 3 segundos
-        self.root.after(3000, self.volver_al_menu)
+
+        # ✅ Crear popup visual
+        ventana = tk.Toplevel(self.root)
+        ventana.title("¡Has perdido! 💀")
+        ventana.geometry("500x300")
+        ventana.config(bg=COLOR_PANEL)
+        ventana.resizable(False, False)
+
+        # ✅ Mostrar mensaje con el nivel CORRECTO
+        tk.Label(
+            ventana,
+            text=f"💀 Perdiste en el Nivel {nivel_actual} 💀",
+            font=("Arial", 18, "bold"),
+            bg=COLOR_PANEL, fg="red",
+            pady=10
+        ).pack()
+
+        # ✅ Frame para alinear botones en fila
+        frame_botones = tk.Frame(ventana, bg=COLOR_PANEL)
+        frame_botones.pack(pady=20)
+
+        # ✅ 🔁 Reintentar → Reinicia el MISMO nivel
+        tk.Button(
+            frame_botones,
+            text="🔁 Reintentar",
+            font=("Arial", 12, "bold"),
+            bg=COLOR_BOTON,
+            fg=COLOR_TEXTO,
+            width=12,
+            command=lambda: self.repetir_nivel(ventana, nivel_actual)
+        ).pack(side=tk.LEFT, padx=8)
+
+        # ✅ 🏠 Volver al menú → solo mostrar menú principal
+        tk.Button(
+            frame_botones,
+            text="🏠 Menú",
+            font=("Arial", 12, "bold"),
+            bg=COLOR_BOTON,
+            fg=COLOR_TEXTO,
+            width=12,
+            command=lambda: self.volver_menu_win(ventana)
+        ).pack(side=tk.LEFT, padx=8)
+
+
+
+
 
     def finalizar_nivel(self):
-        """Maneja la finalización exitosa del nivel."""
+        """
+        Se ejecuta cuando el jugador GANA un nivel.
+        Muestra una ventana con opciones: repetir, siguiente nivel (si aplica) o menú.
+        """
+
+        from game_logic import NIVEL_ACTUAL  # ✅ Importar el nivel actual sin modificarlo todavía
+
+        # ✅ Evitar ejecutar dos veces si ya terminó
         if self.juego_terminado:
             return
-            
+                
+        # ✅ Detener la lógica del juego
         self.juego_terminado = True
         self.game_logic.finalizar_juego()
-        
-        # Mostrar mensaje de victoria
-        self.canvas.create_text(
-            COLUMNAS * TAM_CASILLA // 2,
-            FILAS * TAM_CASILLA // 2,
-            text=f"🎉 ¡Nivel {NIVEL_ACTUAL} completado! 🎉",
-            font=("Arial", 20, "bold"),
-            fill="blue",
-            tags="mensaje"
-        )
-        
-        # Calcular puntaje final
+
+        # ✅ Guardar datos en el salón de la fama ANTES del popup
         self.calcular_puntaje_final()
-        
-        # Volver al menú después de 3 segundos
-        self.root.after(3000, self.volver_al_menu)
+
+        # ✅ Guardar el nivel actual en una variable segura (evita que se resetee a 1)
+        nivel_terminado = NIVEL_ACTUAL
+
+        # ✅ Crear popup con mensaje de victoria
+        ventana = tk.Toplevel(self.root)
+        ventana.title("Nivel completado ✅")
+        ventana.geometry("450x300")
+        ventana.config(bg=COLOR_PANEL)
+        ventana.resizable(False, False)
+
+        # ✅ Mostrar mensaje con el nivel CORRECTO
+        tk.Label(
+            ventana,
+            text=f"🎉 ¡Nivel {nivel_terminado} completado! 🎉",
+            font=("Arial", 18, "bold"),
+            fg=COLOR_TEXTO,
+            bg=COLOR_PANEL,
+            pady=20
+        ).pack()
+
+        # ✅ Botón para repetir nivel (siempre disponible)
+        tk.Button(
+            ventana,
+            text="🔁 Repetir nivel",
+            font=("Arial", 12, "bold"),
+            bg=COLOR_BOTON,
+            fg=COLOR_TEXTO,
+            width=20,
+            command=lambda: self.repetir_nivel(ventana, nivel_terminado)
+        ).pack(pady=8)
+
+        # ✅ Botón siguiente nivel SOLO si el nivel actual es menor a 3
+        if nivel_terminado < 3:
+            tk.Button(
+                ventana,
+                text="⏭ Siguiente nivel",
+                font=("Arial", 12, "bold"),
+                bg=COLOR_BOTON,
+                fg=COLOR_TEXTO,
+                width=20,
+                command=lambda: self.next_level(ventana, nivel_terminado)
+            ).pack(pady=8)
+
+        # ✅ Botón menú principal
+        tk.Button(
+            ventana,
+            text="🏠 Menú principal",
+            font=("Arial", 12, "bold"),
+            bg=COLOR_BOTON,
+            fg=COLOR_TEXTO,
+            width=20,
+            command=lambda: self.volver_menu_win(ventana)
+        ).pack(pady=8)
+
+
+
+    def repetir_nivel(self, ventana, nivel):
+        """
+        Reinicia el nivel que el jugador acaba de jugar.
+        """
+
+        from game_logic import set_nivel_actual
+
+        set_nivel_actual(nivel)  # ✅ Mantener el mismo nivel
+        ventana.destroy()
+        self.root.destroy()
+
+        # ✅ Iniciar el mismo nivel directamente sin pasar por el menú
+        self.callback_volver_menu(iniciar_nuevo_nivel=True)
+
+
+
+    def next_level(self, ventana, nivel):
+        """
+        Avanza al siguiente nivel correctamente.
+        """
+
+        from game_logic import set_nivel_actual
+
+        set_nivel_actual(nivel + 1)  # ✅ Aumentar nivel de manera segura
+        ventana.destroy()
+        self.root.destroy()
+
+        # ✅ Lanzar el siguiente nivel inmediatamente
+        self.callback_volver_menu(iniciar_nuevo_nivel=True)
+
+
+
+    # --- Reemplazar volver_menu_win ---
+    def volver_menu_win(self, ventana):
+        # Cerrar sólo el popup y notificar al MainMenu. El MainMenu se encargará de cerrar la ventana de juego.
+        ventana.destroy()
+        # No destruir self.root aquí.
+        self.callback_volver_menu()
+
+
+
 
     def calcular_puntaje_final(self):
         """Calcula el puntaje final usando el sistema de puntos."""
@@ -781,12 +914,3 @@ class GameInterface:
         
         except Exception as e:
             print(f"❌ Error calculando/guardando puntaje: {e}")
-
-        try:
-            if self.callback_volver_menu:
-                self.root.destroy()
-                self.callback_volver_menu()
-            else:
-                self.root.destroy()
-        except:
-            pass
