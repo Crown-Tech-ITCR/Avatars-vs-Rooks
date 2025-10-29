@@ -666,7 +666,7 @@ class GameInterface:
         self.root.after(self.velocidad, self.actualizar_juego)
 
     def dibujar_entidades(self):
-        """Dibuja todas las entidades en el canvas."""
+        """Dibuja todas las entidades del juego (rooks, avatars, ráfagas, proyectiles) en el canvas."""
         self.canvas.delete("entidad")
         
         matriz = get_matriz_juego()
@@ -686,59 +686,15 @@ class GameInterface:
                         self.DibujarAvatar(cx,cy,e)
                     
                     elif isinstance(e, Rafaga):
-                        # Ráfagas con imágenes personalizadas
-                        tipo_rafaga = getattr(e, 'tipo_rafaga', 'arena')
-                        
-                        # Intentar dibujar con imagen
-                        if tipo_rafaga in self.imagenes_rafagas and self.imagenes_rafagas[tipo_rafaga]:
-                            self.canvas.create_image(
-                                cx, cy,
-                                image=self.imagenes_rafagas[tipo_rafaga],
-                                tags="entidad"
-                            )
-                        else:
-                            # Fallback: si no hay imagen, usar colores
-                            colores_fallback = {
-                                "fuego": "orange",
-                                "roca": "gray",
-                                "agua": "cyan",
-                                "arena": "yellow"
-                            }
-                            color = colores_fallback.get(tipo_rafaga, "yellow")
-                            
-                            self.canvas.create_oval(
-                                cx - 5, cy - 5, cx + 5, cy + 5,
-                                fill=color, tags="entidad"
-                            )
+
+                        self.DibujarRafaga(cx,cy,e)
                     
                     elif isinstance(e, ProyectilAvatar):
-                        # Proyectiles de avatares con imágenes personalizadas
-                        tipo_proyectil = getattr(e, 'tipo_proyectil', 'flechador')
                         
-                        # Intentar dibujar con imagen
-                        if tipo_proyectil in self.imagenes_proyectiles_avatares and self.imagenes_proyectiles_avatares[tipo_proyectil]:
-                            self.canvas.create_image(
-                                cx, cy,
-                                image=self.imagenes_proyectiles_avatares[tipo_proyectil],
-                                tags="entidad"
-                            )
-                        else:
-                            # Fallback: si no hay imagen, usar formas de colores
-                            colores_fallback = {
-                                "flechador": "brown",
-                                "escudero": "blue"
-                            }
-                            color = colores_fallback.get(tipo_proyectil, "brown")
-                            
-                            # Dibujar flecha con color
-                            self.canvas.create_polygon(
-                                cx, cy - 8,      # punta arriba
-                                cx - 4, cy + 8,  # base izquierda
-                                cx + 4, cy + 8,  # base derecha
-                                fill=color, outline="black", tags="entidad"
-                            )
+                        self.DibujarProyectilAvatar(cx,cy,e)
     
     def DibujarRook(self, cx, cy, e):
+        """Dibuja una torre (Rook) en el canvas con su imagen o forma de respaldo."""
         # Obtener la imagen correspondiente al tipo de rook
         imagen = self.imagenes_rooks.get(type(e))
         
@@ -763,7 +719,8 @@ class GameInterface:
                 font=("Arial", 8, "bold"), fill="white", tags="entidad"
             )
 
-    def DibujarAvatar(self,cx,cy,e):
+    def DibujarAvatar(self, cx, cy, e):
+        """Dibuja un avatar animado con sus frames de animación y barra de vida."""
         # Actualizar animación del avatar
         e.actualizar_animacion()
         
@@ -797,6 +754,63 @@ class GameInterface:
                 cx, cy, text=str(e.vida),
                 font=("Arial", 8, "bold"), fill="white", tags="entidad"
             )
+
+    def DibujarRafaga(self, cx, cy, e):
+        """Dibuja una ráfaga (proyectil de torre) con imagen específica según su tipo."""
+        # Ráfagas con imágenes personalizadas
+        tipo_rafaga = getattr(e, 'tipo_rafaga', 'arena')
+        
+        # Intentar dibujar con imagen
+        if tipo_rafaga in self.imagenes_rafagas and self.imagenes_rafagas[tipo_rafaga]:
+            self.canvas.create_image(
+                cx, cy,
+                image=self.imagenes_rafagas[tipo_rafaga],
+                tags="entidad"
+            )
+        else:
+            # Fallback: si no hay imagen, usar colores
+            colores_fallback = {
+                "fuego": "orange",
+                "roca": "gray",
+                "agua": "cyan",
+                "arena": "yellow"
+            }
+            color = colores_fallback.get(tipo_rafaga, "yellow")
+            
+            self.canvas.create_oval(
+                cx - 5, cy - 5, cx + 5, cy + 5,
+                fill=color, tags="entidad"
+            )
+
+    def DibujarProyectilAvatar(self, cx, cy, e):
+        """Dibuja un proyectil de avatar (flecha, etc.) con imagen o forma de respaldo."""
+        # Proyectiles de avatares con imágenes personalizadas
+        tipo_proyectil = getattr(e, 'tipo_proyectil', 'flechador')
+        
+        # Intentar dibujar con imagen
+        if tipo_proyectil in self.imagenes_proyectiles_avatares and self.imagenes_proyectiles_avatares[tipo_proyectil]:
+            self.canvas.create_image(
+                cx, cy,
+                image=self.imagenes_proyectiles_avatares[tipo_proyectil],
+                tags="entidad"
+            )
+        else:
+            # Fallback: si no hay imagen, usar formas de colores
+            colores_fallback = {
+                "flechador": "brown",
+                "escudero": "blue"
+            }
+            color = colores_fallback.get(tipo_proyectil, "brown")
+            
+            # Dibujar flecha con color
+            self.canvas.create_polygon(
+                cx, cy - 8,      # punta arriba
+                cx - 4, cy + 8,  # base izquierda
+                cx + 4, cy + 8,  # base derecha
+                fill=color, outline="black", tags="entidad"
+            )
+
+
             
 
     def game_over(self):
