@@ -144,7 +144,8 @@ def get_cards_decrypted() -> dict:
 # -----------------------
 def register_user_aes(username: str, password: str, nombre: str, email: str, 
                       nacionalidad: str, apellidos: str, telefono: str,
-                      pregunta_seguridad: str = None, respuesta_seguridad: str = None):
+                      pregunta_seguridad: str = None, respuesta_seguridad: str = None,
+                      save_photo_callback = None):
     users = load_users_aes()
     enc_username = encrypt_data(username, master_key)
     if enc_username in users:
@@ -171,6 +172,16 @@ def register_user_aes(username: str, password: str, nombre: str, email: str,
         "telefono_enc": enc_telefono,
         "primerIngreso": True
     }
+
+    # Guardar foto de perfil si se proporciona el callback
+    if save_photo_callback:
+        try:
+            final_photo_path = save_photo_callback(enc_username)
+            if final_photo_path:
+                enc_profile_photo = encrypt_data(final_photo_path, master_key)
+                user_data["profile_photo_enc"] = enc_profile_photo
+        except Exception as e:
+            print(f"Error guardando foto de perfil: {e}")
 
     # Agregar pregunta de seguridad si se proporciona
     if pregunta_seguridad and respuesta_seguridad:

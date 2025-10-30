@@ -157,7 +157,6 @@ class GameInterface:
             # BUSCAR POR EL username_enc ACTUAL
             if self.username_enc in users_enc:
                 self.username = encrip_aes.decrypt_data(self.username_enc, self.master_key)
-                print(f"Username cargado correctamente: {self.username}")
             else:
                 # Si no se encuentra, buscar en todos los usuarios encriptados
                 # (por si cambió el username_enc)
@@ -168,7 +167,6 @@ class GameInterface:
                         if dec_username == self.username:  # Comparar con username actual
                             self.username_enc = enc_username
                             username_encontrado = True
-                            print(f"Username_enc actualizado: {enc_username}")
                             break
                     except Exception:
                         continue
@@ -190,7 +188,6 @@ class GameInterface:
                 img = img.resize((50, 50), Image.Resampling.LANCZOS)
                 self.imagenes_rooks[config["clase"]] = ImageTk.PhotoImage(img)
             except Exception as e:
-                print(f"Error cargando imagen {config['imagen']}: {e}")
                 self.imagenes_rooks[config["clase"]] = None
 
     def cargar_imagenes_avatares(self):
@@ -497,58 +494,91 @@ class GameInterface:
         # Función para volver (cerrar ventana)
         def callback_volver():
             ventana_modificar.destroy()
-            # RECARGAR USERNAME Y USERNAME_ENC DESPUÉS DE LOS CAMBIOS
-            old_username = self.username
-            old_username_enc = self.username_enc
             
-            # Buscar el username_enc actualizado
+            # Recargar datos del usuario desde la base de datos
+            # para obtener cualquier cambio de username
             try:
                 users_enc = encrip_aes.load_users_aes()
-                username_encontrado = False
                 
-                for enc_username, user_data in users_enc.items():
+                # Primero intentar encontrar con el username_enc actual
+                if self.username_enc in users_enc:
+                    # El username_enc no cambió, pero podría haber cambiado el username
                     try:
-                        dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
-                        if dec_username == self.username:
-                            self.username_enc = enc_username
-                            username_encontrado = True
-                            print(f"Username_enc actualizado: {enc_username}")
-                            break
-                    except Exception:
-                        continue
-                
-                if not username_encontrado:
-                    print(f"No se pudo encontrar username_enc para: {self.username}")
+                        new_username = encrip_aes.decrypt_data(self.username_enc, self.master_key)
+                        if new_username != self.username:
+                            self.username = new_username
+                    except Exception as e:
+                        print(f"Error desencriptando username: {e}")
+                else:
+                    # El username_enc cambió, necesitamos encontrar el nuevo
+                    usuario_encontrado = False
+                    for enc_username, user_data in users_enc.items():
+                        try:
+                            dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
+                            # Buscar por el username anterior (antes del cambio)
+                            old_username_enc = self.username_enc
+                            
+                            # También buscar en los datos del usuario si tiene referencia anterior
+                            if dec_username == self.username:
+                                self.username_enc = enc_username
+                                usuario_encontrado = True
+                                break
+                        except Exception as e:
+                            continue
                     
+                    if not usuario_encontrado:
+                        print(f"⚠️ No se encontró el usuario después del cambio")
+                        # Última oportunidad: buscar cualquier usuario que no sea conocido
+                        print("Usuarios disponibles en la base de datos:")
+                        for enc_username in users_enc.keys():
+                            try:
+                                dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
+                                print(f"  - {dec_username} ({enc_username[:20]}...)")
+                            except:
+                                pass
+                
             except Exception as e:
-                print(f"Error actualizando username_enc: {e}")
+                print(f"Error actualizando datos del usuario: {e}")
             
             # Reanudar el juego si estaba pausado
             if self.game_logic.esta_pausado():
                 self.toggle_pausa()
         
+        def callback_volver_con_datos(mod_instance):
+            """Función que obtiene los datos actualizados antes de cerrar"""
+            try:
+                # Obtener datos actualizados del modificador
+                if hasattr(mod_instance, 'get_updated_data'):
+                    updated_data = mod_instance.get_updated_data()
+                    if updated_data:
+                        old_username = self.username
+                        old_username_enc = self.username_enc
+                        
+                        # Actualizar con los nuevos datos
+                        self.username = updated_data['username']
+                        self.username_enc = updated_data['username_enc']
+                        
+                        if old_username != self.username or old_username_enc != self.username_enc:
+                            print(f"   Username: {old_username} → {self.username}")
+                        else:
+                            print("No hubo cambios en los datos del usuario")
+                else:
+                    print("⚠️ No se pudo obtener get_updated_data del modificador")
+                    
+            except Exception as e:
+                print(f"Error obteniendo datos actualizados: {e}")
+            
+            # Ejecutar callback original
+            callback_volver()
+
         # Mostrar interfaz de modificación con colores personalizados
         modificador = mostrar_modificar_datos(
             ventana_modificar,
             self.username,
             self.username_enc,
-            callback_volver,
+            lambda: callback_volver_con_datos(modificador),
             self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
         )
-        
-        # Función especial para actualizar datos después del guardado
-        original_volver = modificador.volver
-        def nuevo_volver():
-            # Obtener datos actualizados antes de cerrar
-            datos_actualizados = modificador.get_updated_data()
-            if datos_actualizados:
-                self.username = datos_actualizados['username']
-                self.username_enc = datos_actualizados['username_enc']
-                print(f"Datos actualizados en GameInterface: {self.username}")
-            original_volver()
-        
-        modificador.volver = nuevo_volver
-
 
     def crear_boton_rook(self, parent, config):
         """Crea un botón estilizado para seleccionar un rook."""
@@ -1418,7 +1448,12 @@ class GameInterface:
     def volver_menu_win(self, ventana):
         # Cerrar sólo el popup y notificar al MainMenu
         ventana.destroy()
-        self.callback_volver_menu()
+        # Pasar los datos actualizados al callback
+        self.callback_volver_menu(
+            iniciar_nuevo_nivel=False,
+            username_actualizado=self.username,
+            username_enc_actualizado=self.username_enc
+        )
 
 
     def calcular_puntaje_final(self):

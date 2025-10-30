@@ -45,6 +45,28 @@ class SalonFamaNivel:
         self.cargar_animacion_fondo()
         self.crear_interfaz()
     
+    def obtener_foto_perfil(self, username_enc):
+        """Obtiene la foto de perfil del usuario si existe"""
+        try:
+            # Convertir username encriptado a nombre de archivo seguro
+            safe_username = username_enc.replace('/', '_').replace('\\', '_').replace(':', '_').replace('*', '_').replace('?', '_').replace('"', '_').replace('<', '_').replace('>', '_').replace('|', '_')
+            
+            # Buscar archivo de foto de perfil
+            profile_photos_dir = os.path.join(os.path.dirname(__file__), "profile_photos")
+            photo_path = os.path.join(profile_photos_dir, f"profile_{safe_username}.jpg")
+            
+            if os.path.exists(photo_path):
+                # Cargar y redimensionar la imagen para el podio
+                img = Image.open(photo_path)
+                img = img.resize((60, 60), Image.Resampling.LANCZOS)  # Tamaño apropiado para el podio
+                return ImageTk.PhotoImage(img)
+            else:
+                return None
+                
+        except Exception as e:
+            print(f"Error cargando foto de perfil para {username_enc}: {e}")
+            return None
+    
     def obtener_carpeta_imagenes(self):
         """Retorna la carpeta de imágenes según el nivel"""
         carpetas = {
@@ -294,20 +316,19 @@ class SalonFamaNivel:
 
         window_width = self.root.winfo_width() or 800
 
-        # Posiciones ajustadas para que coincidan mejor con el podio de la imagen
         posiciones_podio = [
-            {"x": window_width // 2, "y": 320},          # 1er lugar - centro (podio más alto)
-            {"x": window_width // 2 - 180, "y": 380},    # 2do lugar - izquierda (podio medio)
-            {"x": window_width // 2 + 180, "y": 420},    # 3er lugar - derecha (podio más bajo)
+            {"x": window_width // 2 + 10, "y": 360},     # 1er lugar
+            {"x": window_width // 2 - 215, "y": 400},    # 2do lugar
+            {"x": window_width // 2 + 225, "y": 400},    # 3er lugar
         ]
 
         # Tamaños de fuente más grandes y legibles
-        font_medalla = ("Arial", 24, "bold")      # Aumentado de 18 a 24
-        font_pos = ("Arial", 16, "bold")          # Aumentado de 12 a 16
-        font_nombre = ("Arial", 12, "bold")       # Aumentado de 9 a 12
-        font_puntaje = ("Arial", 11, "bold")      # Aumentado de 8 a 11
-        font_extra = ("Arial", 9)                # Aumentado de 7 a 9
-        font_fecha = ("Arial", 8)                # Aumentado de 6 a 8
+        font_medalla = ("Arial", 24, "bold")  
+        font_pos = ("Arial", 16, "bold")     
+        font_nombre = ("Arial", 12, "bold")       
+        font_puntaje = ("Arial", 11, "bold")    
+        font_extra = ("Arial", 9)              
+        font_fecha = ("Arial", 8)             
 
         # borrar cualquier elemento previo del podio
         for item in getattr(self, "podium_items", []):
@@ -316,6 +337,11 @@ class SalonFamaNivel:
             except:
                 pass
         self.podium_items = []
+        
+        # Lista para mantener referencias a las imágenes de perfil
+        if not hasattr(self, 'profile_images'):
+            self.profile_images = []
+        self.profile_images.clear()
 
         for idx, (username_enc, puntaje, fecha, tempo, popularidad) in enumerate(top3):
             try:
@@ -326,29 +352,49 @@ class SalonFamaNivel:
             pos = posiciones_podio[idx]
             x = pos["x"]
             y = pos["y"]
+            
+            # Intentar cargar foto de perfil
+            profile_photo = self.obtener_foto_perfil(username_enc)
+            
+            # Ajustar posición vertical si hay foto de perfil
+            if profile_photo:
+                # Si hay foto, mover todo hacia abajo para hacer espacio
+                foto_y = y - 40  # Foto arriba del podio
+                content_y_offset = 20  # Mover contenido hacia abajo
+                
+                # Mostrar foto de perfil
+                photo_id = self.canvas.create_image(x, foto_y, image=profile_photo, anchor="n")
+                self.podium_items.append(photo_id)
+                self.profile_images.append(profile_photo)  # Mantener referencia
+                
+                # Crear borde circular alrededor de la foto (opcional)
+                # circle_id = self.canvas.create_oval(x-32, foto_y-32, x+32, foto_y+32, outline="white", width=3)
+                # self.podium_items.append(circle_id)
+            else:
+                content_y_offset = 0
 
             # Medalla (dibujar como texto grande con outline)
-            ids = self._draw_outlined_text(x, y, emojis[idx], font_medalla, fill="gold", outline="black", anchor="n")
+            ids = self._draw_outlined_text(x, y + content_y_offset, emojis[idx], font_medalla, fill="gold", outline="black", anchor="n")
             self.podium_items.extend(ids)
 
             # Número de posición (abajo de la medalla)
-            ids = self._draw_outlined_text(x, y+35, f"#{idx+1}", font_pos, fill="white", outline="black", anchor="n")
+            ids = self._draw_outlined_text(x, y + content_y_offset + 35, f"#{idx+1}", font_pos, fill="white", outline="black", anchor="n")
             self.podium_items.extend(ids)
 
             # Nombre (centro) - con más espaciado
-            ids = self._draw_outlined_text(x, y+60, username_display, font_nombre, fill="white", outline="black", anchor="n")
+            ids = self._draw_outlined_text(x, y + content_y_offset + 60, username_display, font_nombre, fill="white", outline="black", anchor="n")
             self.podium_items.extend(ids)
 
             # Puntaje - con más espaciado
-            ids = self._draw_outlined_text(x, y+80, f"{puntaje:.1f} pts", font_puntaje, fill="yellow", outline="black", anchor="n")
+            ids = self._draw_outlined_text(x, y + content_y_offset + 80, f"{puntaje:.1f} pts", font_puntaje, fill="yellow", outline="black", anchor="n")
             self.podium_items.extend(ids)
 
             # Extra (tempo y popularidad) - con más espaciado
-            ids = self._draw_outlined_text(x, y+98, f"T:{tempo} P:{popularidad}", font_extra, fill="lightblue", outline="black", anchor="n")
+            ids = self._draw_outlined_text(x, y + content_y_offset + 98, f"T:{tempo} P:{popularidad}", font_extra, fill="lightblue", outline="black", anchor="n")
             self.podium_items.extend(ids)
 
             # Fecha - con más espaciado
-            ids = self._draw_outlined_text(x, y+115, fecha, font_fecha, fill="lightgray", outline="black", anchor="n")
+            ids = self._draw_outlined_text(x, y + content_y_offset + 115, fecha, font_fecha, fill="lightgray", outline="black", anchor="n")
             self.podium_items.extend(ids)
 
             # Si es el usuario actual, destacar con color especial

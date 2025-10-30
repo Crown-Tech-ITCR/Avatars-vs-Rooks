@@ -479,9 +479,10 @@ class ModificarDatosUsuario:
             users_enc[self.username_enc] = user_data
             encrip_aes.save_users_aes(users_enc)
             
-            # ACTUALIZAR TAMBIÉN LOS PUNTAJES SI CAMBIÓ EL USERNAME
+            # ACTUALIZAR TAMBIÉN LOS PUNTAJES Y ARCHIVOS SI CAMBIÓ EL USERNAME
             if username_cambio:
                 self.actualizar_puntajes_username(old_username_enc)
+                self.actualizar_archivos_usuario(old_username_enc, self.username_enc)
             
             messagebox.showinfo("Éxito", "Datos actualizados correctamente")
             self.volver()
@@ -511,6 +512,41 @@ class ModificarDatosUsuario:
                 
         except Exception as e:
             print(f"Error al actualizar puntajes: {e}")
+    
+    def actualizar_archivos_usuario(self, old_username_enc, new_username_enc):
+        """Actualiza los archivos de cara y foto de perfil cuando cambia el username"""
+        try:
+            import os
+            import shutil
+            
+            # Convertir usernames encriptados a nombres de archivo seguros
+            old_safe_username = old_username_enc.replace('/', '_').replace('\\', '_').replace(':', '_').replace('*', '_').replace('?', '_').replace('"', '_').replace('<', '_').replace('>', '_').replace('|', '_')
+            new_safe_username = new_username_enc.replace('/', '_').replace('\\', '_').replace(':', '_').replace('*', '_').replace('?', '_').replace('"', '_').replace('<', '_').replace('>', '_').replace('|', '_')
+            
+            # 1. Actualizar archivo de datos faciales (.npy)
+            users_lbph_dir = os.path.join(os.path.dirname(__file__), "users_lbph")
+            old_face_file = os.path.join(users_lbph_dir, f"{old_safe_username}.npy")
+            new_face_file = os.path.join(users_lbph_dir, f"{new_safe_username}.npy")
+            
+            if os.path.exists(old_face_file):
+                shutil.move(old_face_file, new_face_file)
+                print(f"Archivo facial renombrado: {old_safe_username}.npy → {new_safe_username}.npy")
+            else:
+                print(f"No se encontró archivo facial: {old_face_file}")
+            
+            # 2. Actualizar foto de perfil (.jpg)
+            profile_photos_dir = os.path.join(os.path.dirname(__file__), "profile_photos")
+            old_photo_file = os.path.join(profile_photos_dir, f"profile_{old_safe_username}.jpg")
+            new_photo_file = os.path.join(profile_photos_dir, f"profile_{new_safe_username}.jpg")
+            
+            if os.path.exists(old_photo_file):
+                shutil.move(old_photo_file, new_photo_file)
+                print(f"Foto de perfil renombrada: profile_{old_safe_username}.jpg → profile_{new_safe_username}.jpg")
+            else:
+                print(f"No se encontró foto de perfil: {old_photo_file}")
+                
+        except Exception as e:
+            print(f"Error al actualizar archivos de usuario: {e}")
 
     def volver(self):
         """Vuelve a la ventana anterior"""

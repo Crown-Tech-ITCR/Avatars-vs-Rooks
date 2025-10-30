@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, Frame, Label, Toplevel, Button
 import os
+import uuid
+import time
+import tempfile
 from face_gui import Face_Recognition
 import encrip_aes
 from PersonalizaciónUI import MenuPersonalizacion
@@ -45,6 +48,16 @@ class LoginAvatarsRooks:
         self.load_users()
         self.load_cards()
         
+        # Limpiar archivos temporales antiguos
+        self.cleanup_temp_photos()
+        
+        # Limpiar archivos faciales temporales antiguos
+        try:
+            fr = Face_Recognition(self.root, show_main_gui=False)
+            fr.cleanup_temp_faces()
+        except:
+            pass  # Ignorar errores de limpieza
+        
         # Variables de tema
         self.dark_mode = True
         
@@ -58,7 +71,7 @@ class LoginAvatarsRooks:
         # Para guardar la foto
         self.profile_photo_path = None
         self.profile_photo_display = None
-        
+    
     def center_window(self):
         """Centra la ventana en la pantalla"""
         self.root.update_idletasks()
@@ -609,44 +622,40 @@ class LoginAvatarsRooks:
             messagebox.showerror("Error", t("error_facial").format(error=e))
 
 
-    def facial_login(self, username):
+    def facial_login(self, username_encrypted):
         """Login automático por reconocimiento facial"""
         try:
+            
             users_enc = encrip_aes.load_users_aes()
-            key = None
-            record = None
+            record = users_enc[username_encrypted]
             
-            # Buscar el usuario por username
-            for enc_username, user_data in users_enc.items():
-                try:
-                    dec_username = encrip_aes.decrypt_data(enc_username, self.master_key)
-                    if username == dec_username:
-                        key = enc_username
-                        record = user_data
-                        break
-                except Exception:
-                    continue
-            
-            if not key or not record:
-                messagebox.showerror("Error", "Usuario no encontrado")
+            # Desencriptar el username real para usarlo en la sesión
+            try:
+                username_real = encrip_aes.decrypt_data(username_encrypted, self.master_key)
+                print(f"Username real desencriptado: '{username_real}'")
+            except Exception as e:
+                print(f"Error desencriptando username para sesión: {e}")
+                messagebox.showerror("Error", "Error procesando datos de usuario")
                 return
             
             # Procesar login exitoso
             nombre = encrip_aes.decrypt_data(record['nombre_enc'], self.master_key)
             primerIngreso = record['primerIngreso']
             
+            # Ya tenemos username_real del proceso de desencriptación anterior
+            
             if primerIngreso:
                 self.login_frame.pack_forget()
-                users_enc[key]['primerIngreso'] = False
+                users_enc[username_encrypted]['primerIngreso'] = False
                 encrip_aes.save_users_aes(users_enc)
-                MenuPersonalizacion(self.root, username, nombre, self.reiniciar_login,self.crear_main_menu,
+                MenuPersonalizacion(self.root, username_real, nombre, self.reiniciar_login,self.crear_main_menu,
                                 self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
             else:
                 self.login_frame.pack_forget()
-                username_enc = key
+                # username_encrypted es la clave encriptada, username_real es el desencriptado
                 MainMenu(
-                    self.root, username, nombre, 120, 20, self.reiniciar_login,
-                    self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7, username_enc
+                    self.root, username_real, nombre, 120, 20, self.reiniciar_login,
+                    self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7, username_encrypted
                 )
                 
         except Exception as e:
@@ -877,7 +886,7 @@ class LoginAvatarsRooks:
         camera_window.protocol("WM_DELETE_WINDOW", on_closing)
 
     def process_image(self, file_path):
-        """Procesar y mostrar imagen de perfil"""
+        """Procesar y mostrar imagen de perfil (guarda temporalmente hasta completar registro)"""
         try:
             with Image.open(file_path) as img:
                 if img.mode in ("RGBA", "LA", "P"):
@@ -889,8 +898,24 @@ class LoginAvatarsRooks:
                 elif img.mode != "RGB":
                     img = img.convert("RGB")
             
-                img.thumbnail((150, 150), Image.Resampling.LANCZOS)
-                self.profile_photo_display = ImageTk.PhotoImage(img)
+                # Redimensionar para mostrar
+                img_display = img.copy()
+                img_display.thumbnail((400, 400), Image.Resampling.LANCZOS)
+                self.profile_photo_display = ImageTk.PhotoImage(img_display)
+                
+                # Guardar temporalmente hasta que se complete el registro
+                timestamp = int(time.time())
+                unique_id = str(uuid.uuid4())[:8]
+                temp_filename = f"temp_profile_{timestamp}_{unique_id}.jpg"
+                temp_path = os.path.join(tempfile.gettempdir(), temp_filename)
+                
+                # Guardar imagen redimensionada para el registro
+                img_to_save = img.resize((300, 300), Image.Resampling.LANCZOS)
+                img_to_save.save(temp_path, "JPEG", quality=90)
+                
+                # Guardar la ruta temporal de la imagen
+                self.profile_photo_temp_path = temp_path
+                
                 self.photo_btn.config(
                     image=self.profile_photo_display,
                     text=""
@@ -899,6 +924,110 @@ class LoginAvatarsRooks:
                 messagebox.showinfo("Éxito", t("succes_photo"))
         except Exception as e:
             messagebox.showerror("Error", t("error_photo").format(error=e))
+    
+    def save_facial_data_final(self, encrypted_username):
+        """
+        Mueve los datos faciales temporales al nombre final encriptado
+        """
+        try:
+            import shutil
+            import os
+            
+            temp_path = self.face_temp_path
+            if temp_path and os.path.exists(temp_path):
+                # Crear ruta final con username encriptado
+                final_path = os.path.join("users_lbph", f"{encrypted_username}.npy")
+                
+                # Mover archivo temporal al nombre final
+                shutil.move(temp_path, final_path)
+                
+                # Limpiar referencia temporal
+                self.face_temp_path = None
+            else:
+                print("No se encontró archivo temporal de datos faciales")
+                
+        except Exception as e:
+            print(f"Error guardando datos faciales finales: {e}")
+    
+    def cleanup_temp_faces(self):
+        """
+        Limpia archivos temporales de datos faciales
+        """
+        try:
+            import os
+            
+            if hasattr(self, 'face_temp_path') and self.face_temp_path:
+                if os.path.exists(self.face_temp_path):
+                    os.remove(self.face_temp_path)
+                self.face_temp_path = None
+                
+        except Exception as e:
+            print(f"Error limpiando archivos temporales faciales: {e}")
+    
+    def save_profile_photo_final(self, username_enc):
+        """Guarda la foto de perfil con el nombre de usuario encriptado"""
+        if not hasattr(self, 'profile_photo_temp_path') or not self.profile_photo_temp_path:
+            return None
+        
+        try:
+            # Crear carpeta de fotos de perfil si no existe
+            profile_photos_dir = os.path.join(os.path.dirname(__file__), "profile_photos")
+            if not os.path.exists(profile_photos_dir):
+                os.makedirs(profile_photos_dir)
+            
+            # Generar nombre de archivo usando el username encriptado completo
+            # Convertir caracteres especiales a caracteres seguros para nombres de archivo
+            safe_username = username_enc.replace('/', '_').replace('\\', '_').replace(':', '_').replace('*', '_').replace('?', '_').replace('"', '_').replace('<', '_').replace('>', '_').replace('|', '_')
+            final_filename = f"profile_{safe_username}.jpg"
+            final_path = os.path.join(profile_photos_dir, final_filename)
+            
+            # Copiar el archivo temporal al destino final
+            import shutil
+            shutil.copy2(self.profile_photo_temp_path, final_path)
+            
+            # Limpiar archivo temporal
+            try:
+                os.remove(self.profile_photo_temp_path)
+            except:
+                pass  # No importa si no se puede eliminar el archivo temporal
+            
+            return final_path
+            
+        except Exception as e:
+            print(f"Error guardando foto de perfil: {e}")
+            return None
+    
+    def cleanup_temp_photos(self):
+        """Limpia archivos temporales de fotos antiguos (más de 1 hora)"""
+        try:
+            temp_dir = tempfile.gettempdir()
+            current_time = time.time()
+            
+            for filename in os.listdir(temp_dir):
+                if filename.startswith("temp_profile_") and filename.endswith(".jpg"):
+                    file_path = os.path.join(temp_dir, filename)
+                    # Si el archivo tiene más de 1 hora (3600 segundos), eliminarlo
+                    if current_time - os.path.getmtime(file_path) > 3600:
+                        try:
+                            os.remove(file_path)
+                        except:
+                            pass  # Ignorar errores de eliminación
+        except:
+            pass  # Ignorar errores de limpieza
+    
+    def save_facial_data_final(self, username_enc):
+        """Guarda el archivo facial con el nombre de usuario encriptado"""
+        if not hasattr(self, 'face_temp_path') or not self.face_temp_path:
+            return None
+        
+        try:
+            fr = Face_Recognition(self.root, show_main_gui=False)
+            final_face_path = fr.save_face_final(self.face_temp_path, username_enc)
+            return final_face_path
+            
+        except Exception as e:
+            print(f"Error guardando datos faciales: {e}")
+            return None
     
     def forgot_password(self):
         # Limpiar ventana
@@ -1462,8 +1591,8 @@ class LoginAvatarsRooks:
             font=("Arial", 10),
             bg=self.colors[5],
             fg=self.colors[2],
-            width=10,
-            height=4,
+            width=30,
+            height=12,
             relief=tk.FLAT,
             cursor="hand2",
             command=self.selec_profile_photo
@@ -2118,13 +2247,23 @@ class LoginAvatarsRooks:
         self.register_frame.pack(fill=tk.BOTH, expand=True)
 
     def open_face_gui(self):
-        """Abre la interfaz para capturar rostro"""
+        """Abre la interfaz para capturar rostro temporalmente"""
         self.root.attributes('-disabled', True)
         try:
+            # Generar identificador temporal único
+            timestamp = int(time.time())
+            unique_id = str(uuid.uuid4())[:8]
+            temp_identifier = f"facial_{timestamp}_{unique_id}"
+            
             fr = Face_Recognition(self.root, show_main_gui=False)
-            fr.register_face_gui()
+            temp_face_path = fr.register_face_gui(temp_mode=True, temp_identifier=temp_identifier)
+            
+            # Guardar la ruta temporal para usar en el registro
+            if temp_face_path:
+                self.face_temp_path = temp_face_path
+            
         except Exception as e:
-            messagebox.showerror(t("error_register_facial").format(error=e))
+            messagebox.showerror("Error", f"Error en registro facial: {e}")
         self.root.attributes('-disabled', False)
 
 
@@ -2225,6 +2364,11 @@ class LoginAvatarsRooks:
             return
              
         try:
+            # Crear callback para guardar foto si existe
+            photo_callback = None
+            if hasattr(self, 'profile_photo_temp_path') and self.profile_photo_temp_path:
+                photo_callback = self.save_profile_photo_final
+            
             # Registrar usuario con pregunta de seguridad incluida
             success = encrip_aes.register_user_aes(
                 username, 
@@ -2235,12 +2379,36 @@ class LoginAvatarsRooks:
                 apellidos, 
                 telefono,
                 pregunta_seguridad=security_question,
-                respuesta_seguridad=security_answer
+                respuesta_seguridad=security_answer,
+                save_photo_callback=photo_callback
             )
             
             if not success:
+                # Si el registro falló, limpiar archivos temporales
+                self.cleanup_temp_photos()
+                self.cleanup_temp_faces()
                 messagebox.showerror("Error", "El usuario ya existe o hubo un error en el registro")
                 return
+            
+            # Si el registro fue exitoso, guardar datos faciales con username encriptado
+            if hasattr(self, 'face_temp_path') and self.face_temp_path:
+                try:
+                    # Necesitamos obtener el username encriptado
+                    users_enc = encrip_aes.load_users_aes()
+                    username_enc = None
+                    for enc_key in users_enc.keys():
+                        try:
+                            dec_username = encrip_aes.decrypt_data(enc_key, self.master_key)
+                            if username == dec_username:
+                                username_enc = enc_key
+                                break
+                        except:
+                            continue
+                    
+                    if username_enc:
+                        self.save_facial_data_final(username_enc)
+                except Exception as e:
+                    print(f"Error guardando datos faciales: {e}")
             
             self.load_users()
             
@@ -2259,6 +2427,9 @@ class LoginAvatarsRooks:
             self.show_login_window()
             
         except Exception as e:
+            # Si hay error, limpiar archivos temporales
+            self.cleanup_temp_photos()
+            self.cleanup_temp_faces()
             messagebox.showerror("Error", f"{t('error_register_usuario')}\n\nDetalles: {str(e)}")
 
     def reiniciar_login(self, c1, c2, c3, c4, c5, c6, c7):
