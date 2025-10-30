@@ -1386,8 +1386,8 @@ class LoginAvatarsRooks:
                 messagebox.showerror("Error", t("paswords_notmatch"))
                 return
             
-            if len(new_pass) < 4:
-                messagebox.showerror("Error", t("min_caracters"))
+            if len(new_pass) < 8:
+                messagebox.showerror("Error", "La contraseña debe tener mínimo 8 caracteres")
                 return
             
             # Restablecer contraseña

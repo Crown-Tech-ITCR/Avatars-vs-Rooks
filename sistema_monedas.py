@@ -28,7 +28,7 @@ def generar_cantidades_poisson():
         {100: 0, 50: 0, 25: 4},
     ]
     
-    # Intentar con Poisson solo 10 veces (evita bucles largos)
+    # Intentar con Poisson solo 10 veces
     for intento in range(10):
         cant_100 = np.random.poisson(LAMBDA_POISSON[100])
         cant_50 = np.random.poisson(LAMBDA_POISSON[50])
@@ -53,7 +53,7 @@ def generar_cantidades_poisson():
                 print(f"✅ Ajustado: agregando {diferencia // 25}x25")
                 return {100: cant_100, 50: cant_50, 25: cant_25 + diferencia // 25}
     
-    # Fallback: usar combinaciones predefinidas con probabilidades según Poisson
+    # usar combinaciones predefinidas con probabilidades según Poisson
     # Mayor peso para combinaciones con más monedas pequeñas
     pesos = [10, 20, 30, 40]  # Mayor peso para 4x25
     combinacion = random.choices(combinaciones_validas, weights=pesos)[0]

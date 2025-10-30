@@ -1,4 +1,3 @@
-# Modos.py
 from colorsys import rgb_to_hls, hls_to_rgb
 
 def adjust_brightness(hex_color, factor=0.7):

@@ -116,7 +116,7 @@ class GameInterface:
         self.tiempos_generacion = {}
         
         # Sistema de monedas
-        self.monedas = 400
+        self.monedas = 400 # CAMBIAR LAS MONEDAS INICIALES
         self.rook_seleccionado = RookArena
         self.boton_seleccionado = None
 
