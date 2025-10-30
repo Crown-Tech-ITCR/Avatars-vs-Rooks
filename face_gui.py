@@ -223,12 +223,20 @@ class Face_Recognition:
         else:
             return None
 
-    def register_face_gui(self):
-        """Registrar rostro con OpenCV LBPH"""
-        name = self.SolicitarNombre()
-        if not name:
-            messagebox.showerror("Error", "Nombre inválido.")
-            return 
+    def register_face_gui(self, temp_mode=False, temp_identifier=None):
+        """Registrar rostro con OpenCV LBPH
+        
+        Args:
+            temp_mode (bool): Si True, guarda temporalmente hasta confirmar registro
+            temp_identifier (str): Identificador temporal único para el archivo
+        """
+        if temp_mode and temp_identifier:
+            name = temp_identifier
+        else:
+            name = self.SolicitarNombre()
+            if not name:
+                messagebox.showerror("Error", "Nombre inválido.")
+                return None
         
         name = name.strip()
         if not os.path.exists(self.USERS_DIR):
@@ -239,7 +247,10 @@ class Face_Recognition:
         count = 0
         faces_data = []
         
-        messagebox.showinfo("Instrucción", "Mira a la cámara directamente.")
+        if temp_mode:
+            messagebox.showinfo("Instrucción", "Mira a la cámara directamente para el registro facial.")
+        else:
+            messagebox.showinfo("Instrucción", "Mira a la cámara directamente.")
         
         while True:
             ret, frame = cap.read()
@@ -273,11 +284,67 @@ class Face_Recognition:
         
         if faces_data:
             mean_face = np.mean(faces_data, axis=0)  # Promediar las 10 capturas
-            filepath = os.path.join(self.USERS_DIR, f"{name}.npy")
-            np.save(filepath, mean_face)
-            messagebox.showinfo("Registro exitoso", f" Hola {name} !, tu rostro se ha registrado correctamente")
+            
+            if temp_mode:
+                # Guardar temporalmente
+                filepath = os.path.join(self.USERS_DIR, f"temp_{name}.npy")
+                np.save(filepath, mean_face)
+                messagebox.showinfo("Registro facial temporal", "Tu rostro se ha capturado correctamente y se guardará al completar el registro.")
+                return filepath  # Retornar la ruta del archivo temporal
+            else:
+                # Guardar definitivamente
+                filepath = os.path.join(self.USERS_DIR, f"{name}.npy")
+                np.save(filepath, mean_face)
+                messagebox.showinfo("Registro exitoso", f" Hola {name} !, tu rostro se ha registrado correctamente")
+                return filepath
         else:
             messagebox.showwarning("¡INTENTA DE NUEVO!", "No se capturó ningún rostro.")
+            return None
+
+    def save_face_final(self, temp_file_path, username_enc):
+        """Guarda el archivo facial temporal con el nombre de usuario encriptado"""
+        try:
+            if not temp_file_path or not os.path.exists(temp_file_path):
+                return None
+            
+            # Usar el username encriptado completo, reemplazando caracteres problemáticos
+            # para nombres de archivo en sistemas Windows
+            safe_username = username_enc.replace('/', '_').replace('\\', '_').replace(':', '_').replace('*', '_').replace('?', '_').replace('"', '_').replace('<', '_').replace('>', '_').replace('|', '_')
+            final_filename = f"{safe_username}.npy"
+            final_path = os.path.join(self.USERS_DIR, final_filename)
+            
+            # Copiar el archivo temporal al destino final
+            import shutil
+            shutil.copy2(temp_file_path, final_path)
+            
+            # Eliminar archivo temporal
+            try:
+                os.remove(temp_file_path)
+            except:
+                pass  # No importa si no se puede eliminar
+            
+            return final_path
+            
+        except Exception as e:
+            print(f"Error guardando archivo facial: {e}")
+            return None
+    
+    def cleanup_temp_faces(self):
+        """Limpia archivos temporales de rostros antiguos (más de 1 hora)"""
+        try:
+            current_time = time.time()
+            
+            for filename in os.listdir(self.USERS_DIR):
+                if filename.startswith("temp_") and filename.endswith(".npy"):
+                    file_path = os.path.join(self.USERS_DIR, filename)
+                    # Si el archivo tiene más de 1 hora (3600 segundos), eliminarlo
+                    if current_time - os.path.getmtime(file_path) > 3600:
+                        try:
+                            os.remove(file_path)
+                        except:
+                            pass  # Ignorar errores de eliminación
+        except:
+            pass  # Ignorar errores de limpieza
 
     def train_lbph_model(self):
         """Entrenamiento del modelo LBPH"""
@@ -316,7 +383,12 @@ class Face_Recognition:
                 path = os.path.join(self.USERS_DIR, file)
                 encoding = np.load(path).flatten()
                 encodings.append(encoding)
-                names.append(os.path.splitext(file)[0])
+                # Extraer nombre sin extensión y convertir de vuelta a username encriptado original
+                safe_username = os.path.splitext(file)[0]
+                # Convertir de vuelta los caracteres seguros al username encriptado original
+                # Solo convertimos '_' de vuelta a '/', que es el más común en base64
+                username_enc = safe_username.replace('_', '/')
+                names.append(username_enc)
         
         return encodings, names
     
@@ -360,7 +432,7 @@ class Face_Recognition:
                         
                         if min_distance < 3000:
                             name = known_names[best_match_index]
-                            label = f"Reconocido: {name}"
+                            label = "Reconocido"
                             color = (0, 255, 0)
                             recognized = True
                             recognized_name = name
@@ -416,7 +488,7 @@ class Face_Recognition:
         self.root.mainloop()
 
     def MostrarExito(self, username):
-        """Ejecuta el login automático después de reconocimiento facial exitoso"""
+        """Ejecuta el login automático después de reconocimiento facial exitoso"""        
         if self.callback_login:
             # Llamar al callback de login pasando el username
             self.callback_login(username)

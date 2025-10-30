@@ -227,7 +227,7 @@ class MainMenu:
         root_nivel1.title("Avatars vs Rooks - Nivel 1 (Fácil)")
         if self.cambio:
             GameInterface(root_nivel1, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel),
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
                 tempo=self.tempo, 
                 popularidad=self.popularidad,
                 username_enc=self.username_enc,
@@ -235,7 +235,7 @@ class MainMenu:
                 )
         else:
             GameInterface(root_nivel1, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel),
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
                 tempo=self.tempo, 
                 popularidad=self.popularidad,
                 username_enc=self.username_enc
@@ -248,7 +248,7 @@ class MainMenu:
         root_nivel2.title("Avatars vs Rooks - Nivel 2 (Medio)")
         if self.cambio:
             GameInterface(root_nivel2, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel),
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
                 tempo=self.tempo, 
                 popularidad=self.popularidad,
                 username_enc=self.username_enc,
@@ -256,7 +256,7 @@ class MainMenu:
                 )
         else:
             GameInterface(root_nivel2, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel),
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
                 tempo=self.tempo, 
                 popularidad=self.popularidad,
                 username_enc=self.username_enc
@@ -270,7 +270,7 @@ class MainMenu:
         root_nivel3.title("Avatars vs Rooks - Nivel 3 (Difícil)")
         if self.cambio:
             GameInterface(root_nivel3, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel),
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
                 tempo=self.tempo, 
                 popularidad=self.popularidad,
                 username_enc=self.username_enc,
@@ -278,7 +278,7 @@ class MainMenu:
                 )
         else:
             GameInterface(root_nivel3, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel),
+                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
                 tempo=self.tempo, 
                 popularidad=self.popularidad,
                 username_enc=self.username_enc
@@ -286,8 +286,15 @@ class MainMenu:
 
 
 
-    def regresar_menu(self, ventana_juego, iniciar_nuevo_nivel=False):
+    def regresar_menu(self, ventana_juego, iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None):
         ventana_juego.destroy()
+        
+        # Actualizar datos del usuario si se proporcionaron
+        if username_actualizado and username_enc_actualizado:
+            if self.username != username_actualizado or self.username_enc != username_enc_actualizado:
+                self.username = username_actualizado
+                self.username_enc = username_enc_actualizado
+        
         self.root.deiconify()
 
         if iniciar_nuevo_nivel:
