@@ -14,6 +14,8 @@ class GameLogic:
         self.avatars_eliminados = 0
         self.puntos_vida_acumulados = 0
         self.juego_pausado = False
+        self.ultimo_checkpoint_monedas = 0 #Para medir los multiplos de 30 de daño
+        self.callback_generar_monedas = None 
         
         # Inicializar pygame mixer para sonidos
         try:
@@ -383,6 +385,13 @@ class GameLogic:
         # 4. Mover ráfagas de rooks
         self.mover_rafagas()
 
+        #5. Verificar generacion monedas
+        self.verificar_generacion_monedas()
+
+        #6. Verificar las monedas expiradas
+        from sistema_monedas import verificar_monedas_expiradas
+        verificar_monedas_expiradas(matriz_juego, FILAS, COLUMNAS)
+
     def finalizar_juego(self):
         """Marca el juego como terminado."""
         self.juego_terminado = True
@@ -406,6 +415,27 @@ class GameLogic:
         """Reinicia las estadísticas del juego."""
         self.avatars_eliminados = 0
         self.puntos_vida_acumulados = 0
+        self.ultimo_checkpoint_monedas = 0
+    
+    def set_callback_generar_monedas(self, callback):
+        "Es para establecer el callback cuando se ejecute la generacion de monedas"
+        self.callback_generar_monedas = callback
+
+    def verificar_generacion_monedas(self):
+        "Verificar si se acumularon 30 puntos de daño para generar monedas"
+        puntos_desde_ultimo = self.puntos_vida_acumulados - self.ultimo_checkpoint_monedas
+        
+        if puntos_desde_ultimo >= 30:
+            "Calcular los lotes de 30 puntos"
+            lotes_completados = puntos_desde_ultimo // 30
+
+            "Actualizar checkpoint"
+            self.ultimo_checkpoint_monedas += (lotes_completados+30)
+
+            if self.callback_generar_monedas:
+                for _ in range(lotes_completados):
+                    self.callback_generar_monedas()
+
 
 #CONFIGURACIONES DEL JUEGO
 

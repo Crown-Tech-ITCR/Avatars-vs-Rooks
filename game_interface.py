@@ -101,6 +101,9 @@ class GameInterface:
         
         # Lógica del juego
         self.game_logic = GameLogic()
+
+        # Callback Monedas
+        self.game_logic.set_callback_generar_monedas(self.generar_monedas_lote)
         
         # Variables de estado del juego
         self.juego_terminado = False
@@ -132,6 +135,10 @@ class GameInterface:
         # Cargar imágenes de proyectiles de avatares
         self.imagenes_proyectiles_avatares = {}
         self.cargar_imagenes_proyectiles_avatares()
+
+        # Cargar imagen moneda
+        self.imagen_moneda = {}
+        self.cargar_imagen_moneda()
         
         # Crear interfaz
         self.crear_interfaz()
@@ -249,6 +256,58 @@ class GameInterface:
             except Exception as e:
                 print(f"Error cargando imagen {path}: {e}")
                 self.imagenes_proyectiles_avatares[tipo] = None
+
+    def cargar_imagen_moneda(self):
+        "Cargar la imagen de la moneda"
+        try:
+            img = Image.open("./images/moneda.png")
+            img = img.resize((40, 40), Image.Resampling.LANCZOS)
+            self.imagen_moneda = ImageTk.PhotoImage(img)
+        except Exception as e:
+            print(f"Error cargando imagen moneda: {e}")
+            self.imagen_moneda = None
+    
+    def generar_monedas_lote(self):
+        "Genera lote de monedas"
+        from sistema_monedas import crear_monedas_en_tablero
+
+        monedas_creadas = crear_monedas_en_tablero(
+            get_matriz_juego(),
+            FILAS,
+            COLUMNAS
+        )
+
+        if monedas_creadas:
+            total_valor = sum(m.valor for m in monedas_creadas)
+            print(f"💰 {len(monedas_creadas)} monedas generadas (total: {total_valor})")
+
+            self.mostrar_notificacion_monedas(len(monedas_creadas))
+
+    def mostrar_notificacion_monedas(self, cantidad):
+        "Muestra notificacion cuando aparecen monedas"
+        label_notif = tk.Label(
+            self.frame_principal,
+            text=f"💰 {cantidad} moneda{'s' if cantidad > 1 else ''} apareció!",
+            font=("Arial", 12, "bold"),
+            bg="gold",
+            fg="black",
+            padx=15,
+            pady=10,
+            relief="raised",
+            borderwidth=3
+        )
+        canvas_x = COLUMNAS * TAM_CASILLA
+        label_notif.place(x=canvas_x - 200, y=80)
+
+        def fade_out(alpha=1.0, counter=0):
+            if counter < 60:
+                current_y = label_notif.winfo_y()
+                label_notif.place(y=current_y - 1)
+                self.root.after(33, lambda: fade_out(alpha, counter +1))
+            else:
+                label_notif.destroy()
+
+        self.root.after(1000, fade_out)
 
 
     def center_window(self):
@@ -715,6 +774,22 @@ class GameInterface:
         matriz = get_matriz_juego()
         
         entidades_en_casilla = matriz[f][c]
+
+        from Moneda import Moneda
+        monedas = [e for e in entidades_en_casilla if isinstance(e, Moneda)]
+
+        if monedas:
+            moneda = monedas[0]
+            valor_recogido = moneda.recoger()
+            self.monedas += valor_recogido
+            self.label_monedas.config(text=str(self.monedas))
+
+            #Eliminar la moneda de la matriz
+            if moneda in matriz[f][c]:
+                matriz[f][c].remove(moneda)
+
+            print(f"💰 Moneda de {valor_recogido} recogida! Total: {self.monedas}")
+            return
         
         # Verificar si hay rooks o avatars en la casilla
         hay_rook = any(isinstance(e, Rook) for e in entidades_en_casilla)
@@ -725,8 +800,15 @@ class GameInterface:
         
         # Crear y colocar el rook
         rook = self.rook_seleccionado()
-        rook.set_pos(f, c)
-        matriz[f][c].append(rook)
+       
+        # Verificar monedas
+        if self.monedas >= rook.costo:
+            self.monedas -= rook.costo
+            self.label_monedas.config(text=str(self.monedas))
+            rook.set_pos(f,c)
+            matriz[f][c].append(rook)
+        else:
+            print(f"❌ No tienes suficientes monedas (necesitas {rook.costo}, tienes {self.monedas})")
 
     def inicializar_nivel(self):
         """Inicializa la configuración específica del nivel actual."""
@@ -911,6 +993,49 @@ class GameInterface:
                     elif isinstance(e, ProyectilAvatar):
                         
                         self.DibujarProyectilAvatar(cx,cy,e)
+
+                    elif hasattr(e, 'tipo') and e.tipo == "moneda":
+                        self.DibujarMoneda(cx, cy, e)
+    
+    def DibujarMoneda (self, cx, cy, moneda):
+        "Dibuja la moneda con su valor y tiempo"
+        if self.imagen_moneda:
+            self.canvas.create_image(cx, cy, image=self.imagen_moneda, tags="entidad")
+        else:
+            self.canvas.create_oval(
+                cx - 20, cy - 20, cx + 20, cy + 20, 
+                fill="gold", outline="orange", width=3, tags="entidad"
+                )
+            
+        #Mostrar valor
+        self.canvas.create_text(
+            cx, cy,
+            text=str(moneda.valor),
+            font=("Arial", 10, "bold"),
+            fill="black",
+            tags="entidad"
+        )
+        tiempo_restante = moneda.get_tiempo_restante()
+        porcentaje = tiempo_restante / moneda.tiempo_limite
+    
+        # Barra de tiempo
+        barra_ancho = 30
+        barra_actual = int(barra_ancho * porcentaje)
+    
+        # Fondo de la barra
+        self.canvas.create_rectangle(
+            cx - 15, cy + 22,
+            cx + 15, cy + 26,
+            fill="gray", outline="", tags="entidad"
+        )
+
+        # Barra de progreso
+        color_barra = "green" if porcentaje > 0.5 else ("yellow" if porcentaje > 0.25 else "red")
+        self.canvas.create_rectangle(
+            cx - 15, cy + 22,
+            cx - 15 + barra_actual, cy + 26,
+            fill=color_barra, outline="", tags="entidad"
+        )
 
     def actualizar_animaciones(self):
         """Actualiza las animaciones de todas las entidades en el tablero."""
