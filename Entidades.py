@@ -120,7 +120,7 @@ class Rook(Entidad):
 class RookRoca(Rook):
     """Rook de Roca: Resistente pero daño moderado."""
     def __init__(self):
-        super().__init__(vida=12, dano=4, shot_cooldown_max=12, costo=100)
+        super().__init__(vida=12, dano=6, shot_cooldown_max=12, costo=100)
         self.tipo = "rook_roca"
         self.color = "gray"
 
@@ -133,7 +133,7 @@ class RookRoca(Rook):
 class RookFuego(Rook):
     """Rook de Fuego: Buen daño y resistencia equilibrada."""
     def __init__(self):
-        super().__init__(vida=12, dano=8, shot_cooldown_max=15, costo=150)
+        super().__init__(vida=14, dano=10, shot_cooldown_max=15, costo=125)
         self.tipo = "rook_fuego"
         self.color = "orange"
 
@@ -146,7 +146,7 @@ class RookFuego(Rook):
 class RookAgua(Rook):
     """Rook de Agua: Alta resistencia y alto daño."""
     def __init__(self):
-        super().__init__(vida=15, dano=15, shot_cooldown_max=17, costo=150)
+        super().__init__(vida=15, dano=17, shot_cooldown_max=17, costo=150)
         self.tipo = "rook_agua"
         self.color = "cyan"
 
@@ -159,7 +159,7 @@ class RookAgua(Rook):
 class RookArena(Rook):
     """Rook de Arena: Barato pero frágil y poco daño."""
     def __init__(self):
-        super().__init__(vida=8, dano=2, shot_cooldown_max=9, costo=50)
+        super().__init__(vida=8, dano=4, shot_cooldown_max=9, costo=50)
         self.tipo = "rook_arena"
         self.color = "yellow"
 
@@ -266,7 +266,7 @@ class Avatar(Entidad):
 class AvatarFlechador(Avatar):
     """Avatar Flechador: Ataca a distancia, más lento, poco daño pero se regenera."""
     def __init__(self):
-        super().__init__(vida=8, dano=3, regeneracion=2, move_cooldown_max=6, 
+        super().__init__(vida=8, dano=2, regeneracion=2, move_cooldown_max=6, 
                         ataque_a_distancia=True, shot_cooldown_max=12)  # Dispara cada 4 ticks
         self.tipo = "avatar_flechador"
         self.color = "orange"
@@ -282,7 +282,7 @@ class AvatarFlechador(Avatar):
 class AvatarEscudero(Avatar):
     """Avatar Escudero: Ataca a distancia, velocidad media-lenta con regeneración moderada."""
     def __init__(self):
-        super().__init__(vida=12, dano=4, regeneracion=1, move_cooldown_max=5, 
+        super().__init__(vida=12, dano=3, regeneracion=1, move_cooldown_max=5, 
                         ataque_a_distancia=True, shot_cooldown_max=10)  # Dispara cada 3 ticks
         self.tipo = "avatar_escudero"
         self.color = "blue"
@@ -307,7 +307,7 @@ class AvatarLenador(Avatar):
 class AvatarCanibal(Avatar):
     """Avatar Caníbal: Ataque cuerpo a cuerpo, más rápido, alto daño y regeneración alta."""
     def __init__(self):
-        super().__init__(vida=25, dano=12, regeneracion=4, move_cooldown_max=4, 
+        super().__init__(vida=22, dano=12, regeneracion=4, move_cooldown_max=4, 
                         ataque_a_distancia=False)  # Solo cuerpo a cuerpo
         self.tipo = "avatar_canibal"
         self.color = "red"

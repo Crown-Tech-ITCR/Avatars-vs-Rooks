@@ -25,7 +25,7 @@ ROOK_UI_CONFIG = [
         "nombre": "Rook de fuego",
         "emoji": "🔥",
         "imagen": "./images/rooks/rook_fuego.png",
-        "costo": 150,
+        "costo": 125,
         "daño": 8,
         "clase": RookFuego,
         "color": "orange"
@@ -116,7 +116,7 @@ class GameInterface:
         self.tiempos_generacion = {}
         
         # Sistema de monedas
-        self.monedas = 350
+        self.monedas = 400
         self.rook_seleccionado = RookArena
         self.boton_seleccionado = None
 

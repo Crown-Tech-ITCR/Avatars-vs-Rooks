@@ -4,7 +4,7 @@ from Moneda import Moneda
 
 # Configuración de distribuciones
 LAMBDA_POISSON = {
-    100: 0.3,  # Pocas monedas de 100
+    100: 0.5,  # Pocas monedas de 100
     50: 1.0,   # Algunas monedas de 50
     25: 2.0    # Más monedas de 25
 }
@@ -69,8 +69,8 @@ def generar_tiempo_limite_exponencial():
         float: Tiempo en segundos (mínimo 3, promedio 10)
     """
     tiempo = np.random.exponential(1 / LAMBDA_EXPONENCIAL)
-    # Establecer un mínimo de 3 segundos para que sea jugable
-    return max(3.0, tiempo)
+    # Establecer un mínimo de 4 segundos para que sea jugable
+    return max(4.0, tiempo)
 
 
 def crear_monedas_en_tablero(matriz_juego, filas, columnas):
