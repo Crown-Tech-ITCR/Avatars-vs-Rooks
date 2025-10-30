@@ -11,7 +11,7 @@ class ColorPicker(tk.Frame):
         self.bar_width = bar_width
         self.selected_color = "#FFFFFFFF"
         
-        # IMPORTANTE: Definir valores HSV ANTES de crear imágenes
+        # Definir valores HSV ANTES de crear imágenes
         self.value = 1.0
         self.hue = 0.0
         self.saturation = 0.0
@@ -79,7 +79,7 @@ class ColorPicker(tk.Frame):
 
     def generate_monochromatic_palette(self, base_hue, base_saturation, num_colors=7):
         """
-        Genera una paleta monocromática variando el valor (brillo) y ligeramente la saturación
+        Genera una paleta monocromática variando el valor y ligeramente la saturación
         Los últimos dos colores son colores de texto (blanco/negro) legibles sobre el color seleccionado
         """
         colors = []

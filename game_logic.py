@@ -186,11 +186,11 @@ class GameLogic:
                                 # Avatars a distancia no avanzan si hay rook
                                 continue
 
-                        # RESTRICCIÓN: NO MÁS DE UN AVATAR POR CASILLA
+                        # NO MÁS DE UN AVATAR POR CASILLA
                         avatar_dest = [a for a in matriz_juego[destino][c] if isinstance(a, Avatar)]
                         if avatar_dest:
                             continue  # No puede moverse, casilla ocupada por otro avatar
-                        # NUEVA LÓGICA: Avatars a distancia solo se detienen si NO hay espacio libre adelante
+                        # Avatars a distancia solo se detienen si NO hay espacio libre adelante
                         # Eliminamos completamente la verificación de rooks en toda la columna
                         # Los avatars a distancia ahora se mueven libremente cuando hay espacio
                         
@@ -275,14 +275,14 @@ class GameLogic:
                         avatars_en_celda = [avatar for avatar in matriz_juego[f][c] if isinstance(avatar, Avatar)]
                         
                         if avatars_en_celda:
-                            # COLISIÓN DETECTADA: Aplicar daño y eliminar ráfaga
+                            # Aplicar daño y eliminar ráfaga
                             for avatar in avatars_en_celda:
                                 avatar.take_damage(e.dano)
                                 self.puntos_vida_acumulados += e.dano
                                 if avatar.vida <= 0:
                                     self.eliminar_avatar_con_sonido(avatar, f, c)
                             
-                            # ELIMINAR LA RÁFAGA tras el impacto
+                            # Eliminar rafaga tras el impacto
                             if e in matriz_juego[f][c]:
                                 matriz_juego[f][c].remove(e)
                             continue  # NO mover esta ráfaga
@@ -301,7 +301,7 @@ class GameLogic:
                                 avatars_en_destino = [avatar for avatar in matriz_juego[destino_f][c] if isinstance(avatar, Avatar)]
                                 
                                 if avatars_en_destino:
-                                    # COLISIÓN EN DESTINO: Aplicar daño y destruir ráfaga
+                                    # Aplicar daño y destruir ráfaga
                                     for avatar in avatars_en_destino:
                                         avatar.take_damage(e.dano)
                                         self.puntos_vida_acumulados += e.dano
@@ -346,7 +346,7 @@ class GameLogic:
                                 avatars_adyacentes = [avatar for avatar in matriz_juego[destino_f][c] if isinstance(avatar, Avatar)]
                                 
                                 if avatars_adyacentes:
-                                    # DISPARO DIRECTO: Aplicar daño inmediatamente
+                                    # Disparo directo: Aplicar daño inmediatamente
                                     rafaga_temporal = e.shoot()
                                     if rafaga_temporal:
                                         self.reproducir_sonido_disparo()  # Sonido de disparo
