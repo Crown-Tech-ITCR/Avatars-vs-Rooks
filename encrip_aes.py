@@ -142,12 +142,14 @@ def get_cards_decrypted() -> dict:
 # -----------------------
 # Registro y login
 # -----------------------
-def register_user_aes(username: str, password: str, nombre: str, email: str, nacionalidad: str, apellidos: str, telefono : str):
+def register_user_aes(username: str, password: str, nombre: str, email: str, 
+                      nacionalidad: str, apellidos: str, telefono: str,
+                      pregunta_seguridad: str = None, respuesta_seguridad: str = None):
     users = load_users_aes()
     enc_username = encrypt_data(username, master_key)
     if enc_username in users:
         print("❌ Usuario ya existe")
-        return
+        return False
 
     # Hash de contraseña
     pwd_hash = hash_password(password)
@@ -159,7 +161,8 @@ def register_user_aes(username: str, password: str, nombre: str, email: str, nac
     enc_apellidos = encrypt_data(apellidos, master_key)
     enc_telefono = encrypt_data(telefono, master_key)
 
-    users[enc_username] = {
+    # Preparar datos del usuario
+    user_data = {
         "password_hash": pwd_hash,
         "nombre_enc": enc_nombre,
         "email_enc": enc_email,
@@ -167,9 +170,18 @@ def register_user_aes(username: str, password: str, nombre: str, email: str, nac
         "apellidos_enc": enc_apellidos,
         "telefono_enc": enc_telefono,
         "primerIngreso": True
-
     }
+
+    # Agregar pregunta de seguridad si se proporciona
+    if pregunta_seguridad and respuesta_seguridad:
+        enc_pregunta = encrypt_data(pregunta_seguridad, master_key)
+        respuesta_hash = hash_password(respuesta_seguridad.lower().strip())
+        user_data["security_question_enc"] = enc_pregunta
+        user_data["security_answer_hash"] = respuesta_hash
+
+    users[enc_username] = user_data
     save_users_aes(users)
+    return True
 
 def register_user_card(username: str, cvv: str, numero: str, expiry: str, titular: str):
     cards = load_cards_aes()

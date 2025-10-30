@@ -901,347 +901,406 @@ class LoginAvatarsRooks:
             messagebox.showerror("Error", t("error_photo").format(error=e))
     
     def forgot_password(self):
+        # Limpiar ventana
         self.login_frame.pack_forget()
-
-        recovery_frame = tk.Frame(self.root, bg=self.bg_black)
+        
+        # Frame principal
+        recovery_frame = tk.Frame(self.root, bg=self.colors[0])
         recovery_frame.pack(fill=tk.BOTH, expand=True)
-
-        title_label = tk.Label(
-            recovery_frame, 
+        
+        # BARRA SUPERIOR ROJA
+        top_bar = tk.Frame(recovery_frame, bg=self.colors[3], height=40)
+        top_bar.pack(fill=tk.X)
+        top_bar.pack_propagate(False)
+        
+        tk.Label(
+            top_bar,
+            text="Avatars vs Rooks - Desktop game",
+            font=("Arial", 12, "bold"),
+            fg=self.colors[5],
+            bg=self.colors[3]
+        ).pack(side=tk.LEFT, padx=15, pady=8)
+        
+        # ÁREA DE CONTENIDO
+        content_area = tk.Frame(recovery_frame, bg=self.colors[0])
+        content_area.pack(fill=tk.BOTH, expand=True)
+        
+        # CONTENEDOR CENTRAL
+        login_container = tk.Frame(content_area, bg=self.colors[0])
+        login_container.place(relx=0.5, rely=0.5, anchor='center')
+        
+        # Título principal
+        tk.Label(
+            login_container,
             text=t("recover_password"),
-            font=("Arial", 24, "bold"),
-            fg=self.c4,
-            bg=self.bg_black
-        )
-        title_label.pack(pady=30)
-
-        form_frame = tk.Frame(recovery_frame, bg="#FF0000", width=400, height=300)
-        form_frame.pack(pady=20, padx=50)
-        form_frame.pack_propagate(False)
-
-        #Paso 1 Ingresar Usuario
+            font=("Arial", 30, "bold"),
+            fg=self.colors[5],
+            bg=self.colors[0]
+        ).pack(pady=(0, 40))
+        
+        # Frame del formulario
+        form_frame = tk.Frame(login_container, bg=self.colors[0])
+        form_frame.pack()
+        
+        # Label "Ingresa tu nombre de usuario:"
         tk.Label(
             form_frame,
             text=t("enter_username"),
-            font=("Arial", 12),
-            fg=self.c6,
-            bg=self.bg_black
-        ).pack(pady=(20, 10))
-    
+            font=("Arial", 11, "bold"),
+            fg=self.colors[5],
+            bg=self.colors[0]
+        ).pack(anchor='w', pady=(0, 5))
+        
+        # Frame blanco para el entry
+        username_frame = tk.Frame(form_frame, bg=self.colors[5])
+        username_frame.pack(pady=(0, 20))
+        
         username_entry = tk.Entry(
-            form_frame,
-            font=("Arial", 11),
-            bg=self.c2,
-            fg=self.c6,
-            insertbackground=self.c6,
+            username_frame, 
+            font=("Arial", 12),
+            bg=self.colors[5],
+            fg=self.colors[0],
+            width=44,
             relief=tk.FLAT,
-            width=30
+            borderwidth=0
         )
-        username_entry.pack(pady=10, ipady=8)
-    
+        username_entry.pack(side=tk.LEFT, padx=5, pady=5)
+
         def verify_user():
             username = username_entry.get().strip()
-
             if not username:
-                messagebox.showerror("Error",t("error_username"))
-                return
-            #Verificar si el usuario existe
-            users = encrip_aes.get_users_decrypted()
-            if username not in users:
-                messagebox.showerror("Error",t("error_usernot_found"))
+                messagebox.showerror("Error", t("error_username"))
                 return
             
-            if not self.password_recovery.user_has_security_question(username):
-                messagebox.showerror("Error",t("error_usernot_question"))
+            # Buscar el username encriptado
+            users_enc = encrip_aes.load_users_aes()
+            username_enc = None
+            
+            for enc_key in users_enc.keys():
+                try:
+                    dec_username = encrip_aes.decrypt_data(enc_key, self.master_key)
+                    if username == dec_username:
+                        username_enc = enc_key
+                        break
+                except:
+                    continue
+            
+            if not username_enc:
+                messagebox.showerror("Error", t("error_usernot_found"))
                 return
-            question = self.password_recovery.get_security_question(username)
-
+            
+            # Verificar pregunta de seguridad
+            if not self.password_recovery.user_has_security_question(username_enc):
+                messagebox.showerror("Error", t("error_usernot_question"))
+                return
+            
+            question = self.password_recovery.get_security_question(username_enc)
             if question:
-                self.show_security_question(username,question)
+                recovery_frame.destroy()
+                self.show_security_question(username_enc, question)
             else:
-                messagebox.showerror("Error",t("error_recovery_question"))
-
-        #Boton Continuar
+                messagebox.showerror("Error", t("error_recovery_question"))
+        
+        # Frame para botones
+        buttons_frame = tk.Frame(form_frame, bg=self.colors[0])
+        buttons_frame.pack(pady=(0, 15))
+        
+        # Botón Continuar
         continue_btn = tk.Button(
-            form_frame,
+            buttons_frame,
             text=t("continue"),
-            font=("Arial", 11, "bold"),
-            bg=self.c4,
-            fg=self.c6,
-            activebackground=self.c5,
-            activeforeground=self.c6,
+            font=("Arial", 12, "bold"),
+            bg=self.colors[3],
+            fg=self.colors[5],
+            width=19,
+            height=1,
             relief=tk.FLAT,
             cursor="hand2",
+            activebackground=self.colors[4],
             command=verify_user
         )
-        continue_btn.pack(pady=20, ipady=10, ipadx=40)
-    
-        # Botón volver
-        back_btn = tk.Label(
-            form_frame,
+        continue_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Botón Volver al login
+        back_btn = tk.Button(
+            buttons_frame,
             text=t("return_login"),
-            font=("Arial", 10),
-            fg=self.c6,
-            bg=self.c1,
-            cursor="hand2"
+            font=("Arial", 12, "bold"),
+            bg=self.colors[3],
+            fg=self.colors[5],
+            width=19,
+            height=1,
+            relief=tk.FLAT,
+            cursor="hand2",
+            activebackground=self.colors[4],
+            command=lambda: [
+                recovery_frame.destroy(),
+                self.reiniciar_login(
+                    self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+                )
+            ]
         )
-        back_btn.pack(pady=(10, 20))
-        back_btn.bind('<Button-1>', lambda e: self.reiniciar_login(
-            self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
-        ))
+        back_btn.pack(side=tk.LEFT, padx=5)
 
-    def show_security_question(self, username, question):
+    def show_security_question(self, username_enc, question):
         """Muestra la pregunta de seguridad para verificar"""
         # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
-    
-        # Frame principal
-        recovery_frame = tk.Frame(self.root, bg=self.bg_black)
-        recovery_frame.pack(fill=tk.BOTH, expand=True)
-    
-        # Título
-        tk.Label(
-            recovery_frame,
-            text=t("question_security"),
-            font=("Arial", 24, "bold"),
-            fg=self.c4,
-            bg=self.bg_black
-        ).pack(pady=30)
-    
-        # Frame del formulario
-        form_frame = tk.Frame(recovery_frame, bg=self.c1)
-        form_frame.pack(pady=20, padx=50, fill=tk.BOTH, expand=True)
         
-
-    
-        # Mostrar pregunta
+        # Frame principal negro
+        recovery_frame = tk.Frame(self.root, bg=self.colors[0])
+        recovery_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # CONTENEDOR CENTRAL
+        center_container = tk.Frame(recovery_frame, bg=self.colors[0])
+        center_container.place(relx=0.5, rely=0.5, anchor='center')
+        
+        # Título "Pregunta de Seguridad" en rojo
         tk.Label(
-            form_frame,
+            center_container,
+            text=t("question_security"),
+            font=("Arial", 36, "bold"),
+            fg=self.colors[4],
+            bg=self.colors[0]
+        ).pack(pady=(0, 60))
+        
+        # Mostrar la pregunta en blanco
+        tk.Label(
+            center_container,
             text=question,
-            font=("Arial", 12, "bold"),
-            fg=self.c6,
-            bg=self.c1,
-            wraplength=400
-        ).pack(pady=(20, 10))
-    
-        # Entry para respuesta
+            font=("Arial", 14),
+            fg=self.colors[5],
+            bg=self.colors[0],
+            wraplength=600
+        ).pack(pady=(0, 30))
+        
+        # Label "Tu respuesta:" en rojo
         tk.Label(
-            form_frame,
-            text=t("answer"),
-            font=("Arial", 11),
-            fg=self.c3,
-            bg=self.c1
-        ).pack(pady=(10, 5))
-    
+            center_container,
+            text=t("answer") + ":",
+            font=("Arial", 12),
+            fg=self.colors[4],
+            bg=self.colors[0]
+        ).pack(pady=(0, 15))
+        
+        # Entry para respuesta (blanco, más ancho)
         answer_entry = tk.Entry(
-            form_frame,
-            font=("Arial", 11),
-            bg=self.c2,
-            fg=self.c6,
-            insertbackground=self.c6,
+            center_container, 
+            font=("Arial", 13),
+            bg=self.colors[6],
+            fg=self.colors[0],
+            width=50,
             relief=tk.FLAT,
-            width=30
+            borderwidth=0,
+            insertbackground=self.colors[0]
         )
-        answer_entry.pack(pady=10, ipady=8)
-    
+        answer_entry.pack(ipady=10, pady=(0, 40))
+
         def verify_answer():
             answer = answer_entry.get().strip()
         
             if not answer:
-                messagebox.showerror("Error",t("enter_answer"))
+                messagebox.showerror("Error", t("enter_answer"))
                 return
         
-            # Verificar respuesta
-            if self.password_recovery.verify_security_answer(username, answer):
-                self.show_reset_password(username)
+            # Verificar respuesta usando username_enc
+            if self.password_recovery.verify_security_answer(username_enc, answer):
+                recovery_frame.destroy()
+                self.show_reset_password(username_enc)
             else:
-                messagebox.showerror(t("answer_incorrect"))
+                messagebox.showerror("Error", t("answer_incorrect"))
                 answer_entry.delete(0, tk.END)
-    
-        # Botón verificar
+        
+        # Botón VERIFICAR (gris claro)
         verify_btn = tk.Button(
-            form_frame,
-            text=t("verify"),
-            font=("Arial", 11, "bold"),
-            bg=self.c4,
-            fg=self.c6,
-            activebackground=self.c5,
-            activeforeground=self.c6,
+            center_container,
+            text=t("verify").upper(),
+            font=("Arial", 12, "bold"),
+            bg=self.colors[6],
+            fg=self.colors[0],
+            width=25,
+            height=2,
             relief=tk.FLAT,
             cursor="hand2",
+            activebackground=self.colors[6],
             command=verify_answer
         )
-        verify_btn.pack(pady=20, ipady=10, ipadx=40)
-    
-        # Botón cancelar
-        cancel_btn = tk.Label(
-            form_frame,
+        verify_btn.pack(pady=(0, 20))
+        
+        # Label "Cancelar" en gris
+        cancel_label = tk.Label(
+            center_container,
             text=t("cancel"),
-            font=("Arial", 10),
-            fg=self.c3,
-            bg=self.c1,
+            font=("Arial", 11),
+            fg=self.colors[3],
+            bg=self.colors[0],
             cursor="hand2"
         )
-        cancel_btn.pack(pady=(10, 20))
-        cancel_btn.bind('<Button-1>', lambda e: self.reiniciar_login(
-            self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
-        ))
+        cancel_label.pack()
+        cancel_label.bind('<Button-1>', lambda e: [
+            recovery_frame.destroy(),
+            self.reiniciar_login(
+                self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+            )
+        ])
     
-    def show_reset_password(self, username):
+    def show_reset_password(self, username_enc):
         """Muestra el formulario para restablecer contraseña"""
         # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
-
-        # Frame principal
-        recovery_frame = tk.Frame(self.root, bg=self.bg_black)
+        
+        # Frame principal negro
+        recovery_frame = tk.Frame(self.root, bg=self.colors[0])
         recovery_frame.pack(fill=tk.BOTH, expand=True)
-
-        # Título
+        
+        # CONTENEDOR CENTRAL
+        center_container = tk.Frame(recovery_frame, bg=self.colors[0])
+        center_container.place(relx=0.5, rely=0.5, anchor='center')
+        
+        # Título "Restablecer Contraseña" en rojo
         tk.Label(
-            recovery_frame,
+            center_container,
             text=t("reset_password"),
-            font=("Arial", 24, "bold"),
-            fg=self.c4,
-            bg=self.bg_black
-        ).pack(pady=30)
-
-        # Frame del formulario
-        form_frame = tk.Frame(recovery_frame, bg=self.c1)
-        form_frame.pack(pady=20, padx=50, fill=tk.BOTH, expand=True)
-
+            font=("Arial", 36, "bold"),
+            fg=self.colors[4],
+            bg=self.colors[0]
+        ).pack(pady=(0, 50))
+        
         # --- Nueva contraseña ---
         tk.Label(
-            form_frame,
-            text=t("new_password"),
-            font=("Arial", 11),
-            fg=self.c6,
-            bg=self.c1
-        ).pack(pady=(20, 5), anchor="w", padx=20)
-
-        new_pass_frame = tk.Frame(form_frame, bg=self.c2)
-        new_pass_frame.pack(fill=tk.X, padx=20, pady=5)
-
+            center_container,
+            text=t("new_password") + ":",
+            font=("Arial", 12),
+            fg=self.colors[5],
+            bg=self.colors[0]
+        ).pack(pady=(0, 10))
+        
+        new_pass_frame = tk.Frame(center_container, bg=self.colors[5])
+        new_pass_frame.pack(pady=(0, 25))
+        
         new_password_entry = tk.Entry(
             new_pass_frame,
-            font=("Arial", 11),
-            bg=self.c2,
-            fg=self.c6,
-            insertbackground=self.c6,
+            font=("Arial", 13),
+            bg=self.colors[5],
+            fg=self.colors[0],
+            insertbackground=self.colors[0],
             relief=tk.FLAT,
             show="•",
-            width=30
+            width=42
         )
-        new_password_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=8)
-
-        # 👁 Botón mostrar/ocultar contraseña nueva
+        new_password_entry.pack(side=tk.LEFT, ipady=10, padx=5)
+        
+        # Botón mostrar/ocultar contraseña nueva
         show_new_pass_btn = tk.Button(
             new_pass_frame,
             text="👁",
-            font=("Arial", 11),
-            bg=self.c2,
-            fg=self.c6,
+            font=("Arial", 12),
+            bg=self.colors[6],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0,
             cursor="hand2",
             command=lambda: self.toggle_password_field(new_password_entry, show_new_pass_btn)
         )
         show_new_pass_btn.pack(side=tk.RIGHT, padx=5)
-
+        
         # --- Confirmar contraseña ---
         tk.Label(
-            form_frame,
-            text=t("confirm_password"),
-            font=("Arial", 11),
-            fg=self.c6,
-            bg=self.c1
-        ).pack(pady=(15, 5), anchor="w", padx=20)
-
-        confirm_pass_frame = tk.Frame(form_frame, bg=self.c2)
-        confirm_pass_frame.pack(fill=tk.X, padx=20, pady=5)
-
+            center_container,
+            text=t("confirm_password") + ":",
+            font=("Arial", 12),
+            fg=self.colors[5],
+            bg=self.colors[0]
+        ).pack(pady=(0, 10))
+        
+        confirm_pass_frame = tk.Frame(center_container, bg=self.colors[5])
+        confirm_pass_frame.pack(pady=(0, 40))
+        
         confirm_password_entry = tk.Entry(
             confirm_pass_frame,
-            font=("Arial", 11),
-            bg=self.c2,
-            fg=self.c6,
-            insertbackground=self.c6,
+            font=("Arial", 13),
+            bg=self.colors[6],
+            fg=self.colors[0],
+            insertbackground=self.colors[0],
             relief=tk.FLAT,
             show="•",
-            width=30
+            width=42
         )
-        confirm_password_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=8)
-
-        # 👁 Botón mostrar/ocultar confirmación
+        confirm_password_entry.pack(side=tk.LEFT, ipady=10, padx=5)
+        
+        # Botón mostrar/ocultar confirmación
         show_confirm_pass_btn = tk.Button(
             confirm_pass_frame,
             text="👁",
-            font=("Arial", 11),
-            bg=self.c2,
-            fg=self.c6,
+            font=("Arial", 12),
+            bg=self.colors[6],
+            fg=self.colors[0],
             relief=tk.FLAT,
             borderwidth=0,
             cursor="hand2",
             command=lambda: self.toggle_password_field(confirm_password_entry, show_confirm_pass_btn)
         )
         show_confirm_pass_btn.pack(side=tk.RIGHT, padx=5)
-
-        # --- Función para confirmar el cambio ---
+        
+        # Función para confirmar el cambio
         def reset_password():
             new_pass = new_password_entry.get()
             confirm_pass = confirm_password_entry.get()
-
+            
             if not all([new_pass, confirm_pass]):
-                messagebox.showerror("Error",t("error_enter_all"))
+                messagebox.showerror("Error", t("error_enter_all"))
                 return
-
+            
             if new_pass != confirm_pass:
-                messagebox.showerror("Error",t("paswords_notmatch"))
+                messagebox.showerror("Error", t("paswords_notmatch"))
                 return
-
+            
             if len(new_pass) < 4:
-                messagebox.showerror("Error",t("min_caracters"))
+                messagebox.showerror("Error", t("min_caracters"))
                 return
-
+            
             # Restablecer contraseña
-            if self.password_recovery.reset_password(username, new_pass):
-                messagebox.showinfo(t("successful_change"))
+            if self.password_recovery.reset_password(username_enc, new_pass):
+                messagebox.showinfo("Éxito", t("successful_change"))
+                recovery_frame.destroy()
                 self.reiniciar_login(self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7)
             else:
-                messagebox.showerror("Error",t("error_change"))
-
-        # Botón restablecer
+                messagebox.showerror("Error", t("error_change"))
+        
+        # Botón RESTABLECER (gris claro)
         reset_btn = tk.Button(
-            form_frame,
-            text=t("restore"),
-            font=("Arial", 11, "bold"),
-            bg=self.c4,
-            fg=self.c6,
-            activebackground=self.c5,
-            activeforeground=self.c6,
+            center_container,
+            text=t("restore").upper(),
+            font=("Arial", 12, "bold"),
+            bg=self.colors[6],
+            fg=self.colors[0],
+            width=25,
+            height=2,
             relief=tk.FLAT,
             cursor="hand2",
+            activebackground=self.colors[5],
             command=reset_password
         )
-        reset_btn.pack(pady=20, ipady=10, ipadx=40)
-
-        # Botón cancelar
-        cancel_btn = tk.Label(
-            form_frame,
+        reset_btn.pack(pady=(0, 20))
+        
+        # Label "Cancelar" en gris
+        cancel_label = tk.Label(
+            center_container,
             text=t("cancel"),
-            font=("Arial", 10),
-            fg=self.c3,
-            bg=self.c1,
+            font=("Arial", 11),
+            fg=self.colors[3],
+            bg=self.colors[0],
             cursor="hand2"
         )
-        cancel_btn.pack(pady=(10, 20))
-        cancel_btn.bind('<Button-1>', lambda e: self.reiniciar_login(
-            self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
-        ))
-
-
-
+        cancel_label.pack()
+        cancel_label.bind('<Button-1>', lambda e: [
+            recovery_frame.destroy(),
+            self.reiniciar_login(
+                self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7
+            )
+        ])
     def create_register_widgets(self):
         """Crea los widgets para el registro con tema oscuro"""
         self.register_frame = tk.Frame(self.root, bg=self.colors[0])  # ✅ Correcto
@@ -2166,34 +2225,24 @@ class LoginAvatarsRooks:
             return
              
         try:
-            encrip_aes.register_user_aes(username, password, nombre, correo, nacionalidad, apellidos, telefono)
-            self.load_users()
-            users_aes = encrip_aes.load_users_aes()
-            username_enc = None
-            
-            # Buscar el username encriptado comparando los datos desencriptados
-            for enc_key in users_aes.keys():
-                try:
-                    # Intentar desencriptar y comparar
-                    if encrip_aes.decrypt_data(users_aes[enc_key]['nombre_enc'], self.master_key) == nombre and \
-                    encrip_aes.decrypt_data(users_aes[enc_key]['email_enc'], self.master_key) == correo:
-                        username_enc = enc_key
-                        break
-                except:
-                    continue
-            
-            if not username_enc:
-                messagebox.showerror("Error", "No se pudo obtener el identificador del usuario")
-                return
-
-            success, message = self.password_recovery.add_security_question(
-                username_enc,
-                security_question,
-                security_answer
+            # Registrar usuario con pregunta de seguridad incluida
+            success = encrip_aes.register_user_aes(
+                username, 
+                password, 
+                nombre, 
+                correo, 
+                nacionalidad, 
+                apellidos, 
+                telefono,
+                pregunta_seguridad=security_question,
+                respuesta_seguridad=security_answer
             )
+            
             if not success:
-                messagebox.showerror("Error",t("error_guardar_pregunta"))
+                messagebox.showerror("Error", "El usuario ya existe o hubo un error en el registro")
                 return
+            
+            self.load_users()
             
             
             if self.guardar_tarjeta_var.get():
