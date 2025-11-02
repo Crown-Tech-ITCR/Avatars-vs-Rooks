@@ -38,6 +38,29 @@
             "fecha": "2025-10-29 23:26:12",
             "tempo": 120,
             "popularidad": 20
+        },
+        {
+            "nivel": 3,
+            "puntaje": 52.21,
+            "fecha": "2025-10-30 13:10:50",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 2,
+            "puntaje": 53.13,
+            "fecha": "2025-11-02 17:27:14",
+            "tempo": 120,
+            "popularidad": 20
+        }
+    ],
+    "IbfmT9aFDNfuu33TG0ZLK/KBi8xnOLK/McoUOD70gHOCigs=": [
+        {
+            "nivel": 2,
+            "puntaje": 49.4,
+            "fecha": "2025-10-30 13:13:01",
+            "tempo": 120,
+            "popularidad": 20
         }
     ]
 }
