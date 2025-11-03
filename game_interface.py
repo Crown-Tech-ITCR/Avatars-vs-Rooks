@@ -278,35 +278,6 @@ class GameInterface:
             total_valor = sum(m.valor for m in monedas_creadas)
             print(f"💰 {len(monedas_creadas)} monedas generadas (total: {total_valor})")
 
-            self.mostrar_notificacion_monedas(len(monedas_creadas))
-
-    def mostrar_notificacion_monedas(self, cantidad):
-        "Muestra notificacion cuando aparecen monedas"
-        label_notif = tk.Label(
-            self.frame_principal,
-            text=f"💰 {cantidad} moneda{'s' if cantidad > 1 else ''} apareció!",
-            font=("Arial", 12, "bold"),
-            bg="gold",
-            fg="black",
-            padx=15,
-            pady=10,
-            relief="raised",
-            borderwidth=3
-        )
-        canvas_x = COLUMNAS * TAM_CASILLA
-        label_notif.place(x=canvas_x - 200, y=80)
-
-        def fade_out(alpha=1.0, counter=0):
-            if counter < 60:
-                current_y = label_notif.winfo_y()
-                label_notif.place(y=current_y - 1)
-                self.root.after(33, lambda: fade_out(alpha, counter +1))
-            else:
-                label_notif.destroy()
-
-        self.root.after(1000, fade_out)
-
-
     def center_window(self):
         "Centra la ventana en la pantalla"
         self.root.update_idletasks()

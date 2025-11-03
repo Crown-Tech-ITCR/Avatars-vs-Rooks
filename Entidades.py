@@ -266,7 +266,7 @@ class Avatar(Entidad):
 class AvatarFlechador(Avatar):
     """Avatar Flechador: Ataca a distancia, más lento, poco daño pero se regenera."""
     def __init__(self):
-        super().__init__(vida=8, dano=2, regeneracion=2, move_cooldown_max=6, 
+        super().__init__(vida=8, dano=2, regeneracion=2, move_cooldown_max=8, 
                         ataque_a_distancia=True, shot_cooldown_max=12)  # Dispara cada 4 ticks
         self.tipo = "avatar_flechador"
         self.color = "orange"
@@ -282,7 +282,7 @@ class AvatarFlechador(Avatar):
 class AvatarEscudero(Avatar):
     """Avatar Escudero: Ataca a distancia, velocidad media-lenta con regeneración moderada."""
     def __init__(self):
-        super().__init__(vida=12, dano=3, regeneracion=1, move_cooldown_max=5, 
+        super().__init__(vida=12, dano=3, regeneracion=1, move_cooldown_max=7, 
                         ataque_a_distancia=True, shot_cooldown_max=10)  # Dispara cada 3 ticks
         self.tipo = "avatar_escudero"
         self.color = "blue"
@@ -298,19 +298,55 @@ class AvatarEscudero(Avatar):
 class AvatarLenador(Avatar):
     """Avatar Leñador: Ataque cuerpo a cuerpo, velocidad media-rápida, alto daño sin regeneración."""
     def __init__(self):
-        super().__init__(vida=20, dano=9, regeneracion=0, move_cooldown_max=4, 
+        super().__init__(vida=20, dano=9, regeneracion=0, move_cooldown_max=6, 
                         ataque_a_distancia=False)  # Solo cuerpo a cuerpo
         self.tipo = "avatar_lenador"
         self.color = "sienna"
+        self.attack_cooldown = 0  # Cooldown para ataques
+        self.attack_cooldown_max = 5  # 5 ticks de cooldown
+
+    def can_attack(self) -> bool:
+        """Verifica si el avatar puede atacar."""
+        return self.attack_cooldown == 0
+
+    def attack(self, objetivo):
+        """Ataca a un objetivo si puede atacar y el objetivo puede recibir daño."""
+        if self.can_attack() and hasattr(objetivo, "take_damage"):
+            objetivo.take_damage(self.dano)
+            self.attack_cooldown = self.attack_cooldown_max  # Iniciar cooldown
+
+    def tick(self):
+        super().tick()
+        # Actualizar cooldown de ataque
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= 1
 
 
 class AvatarCanibal(Avatar):
     """Avatar Caníbal: Ataque cuerpo a cuerpo, más rápido, alto daño y regeneración alta."""
     def __init__(self):
-        super().__init__(vida=22, dano=12, regeneracion=4, move_cooldown_max=4, 
+        super().__init__(vida=22, dano=12, regeneracion=4, move_cooldown_max=5, 
                         ataque_a_distancia=False)  # Solo cuerpo a cuerpo
         self.tipo = "avatar_canibal"
         self.color = "red"
+        self.attack_cooldown = 0  # Cooldown para ataques
+        self.attack_cooldown_max = 5  # 5 ticks de cooldown
+
+    def can_attack(self) -> bool:
+        """Verifica si el avatar puede atacar."""
+        return self.attack_cooldown == 0
+
+    def attack(self, objetivo):
+        """Ataca a un objetivo si puede atacar y el objetivo puede recibir daño."""
+        if self.can_attack() and hasattr(objetivo, "take_damage"):
+            objetivo.take_damage(self.dano)
+            self.attack_cooldown = self.attack_cooldown_max  # Iniciar cooldown
+
+    def tick(self):
+        super().tick()
+        # Actualizar cooldown de ataque
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= 1
 
 # CLASE PROYECTIL DE AVATAR
 class ProyectilAvatar:
