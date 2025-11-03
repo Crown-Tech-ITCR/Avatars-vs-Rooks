@@ -64,11 +64,11 @@
     },
     "d1YyOTkAYDwjLW3WaEgY/y/ZjPTwHp3//TD3io9LSxlxI3aA": {
         "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$SXZC1Rne1upnCEub4FP18w$DEuX9HwJRb5PUREXrArNYOdBEJR5YU67rm+22LN+tW0",
-        "nombre_enc": "IxHuro2KpDVOr7pZH7X2oRgrWA+Lxfo9X9PFVeceTA8tSA==",
-        "email_enc": "ofJWClrOGKfkMECWMqpvAn5YZoi+vaZaNn6lfZB5dNTbqwk/B9IhmA8Ppo2dMA==",
-        "nacionalidad_enc": "ZT7wUH/568z/gSDTmXUDj2n22hWz33goDvHxtpjgeakK/BU=",
-        "apellidos_enc": "bXhYvF5RDkydACC6gXoQvTi85tBoYI8eE/slp1ir5Tpda1o=",
-        "telefono_enc": "xJR/jf6r9/4GJC+Ix1VFgPH+cgLeAN0HZdiFzDogHTZx0X+z",
+        "nombre_enc": "uqZIuZjLzHU14Y8auQGtMHIsEryk9KNRVg9OPG/KGVccQw==",
+        "email_enc": "OKi9Dd8nsKqlDvc3PAPwhHElgF7jab6t536FPsDppTvPwe8FXf2mJc2XS3XcGQ==",
+        "nacionalidad_enc": "1Bo6FGsfSuo51+PHtNAzleVAPUB06gnlQ8yEmd+Dl2YSUw0=",
+        "apellidos_enc": "rfPYBWz4FuIRncYlv27fTUOAS2PA8DndEJfPcpzARp5Igi0=",
+        "telefono_enc": "1Lwbbulhj2JES1Ae0usAKnXcvC7zIdRFkoWei8WazD6M8Epd",
         "primerIngreso": false
     },
     "0Nh7PvYsMAtN1QjWXWZJ4c0lcYjBGTb44gJ10j8uBfAB+A==": {
@@ -658,5 +658,17 @@
         "primerIngreso": false,
         "security_question_enc": "C0OHqryPtdxvH3Yh+EKR2Qv35BqSPDlllijFwEMPFg6Pg6R315mF+dpzAtrqR4Vgvwl5ne16uTPyX3sq",
         "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$GvMs/5r+8DwEvXTDMjdzSA$PiqjNBOdP/g0DFTL89jB3odKC0h3U05w5z5FGP1ovbE"
+    },
+    "Hd3L97PoprWli06Mlci9K4nojIIofocsPf+npH7gIrjj7KU=": {
+        "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$W5CVi/k976iJBdy/Xkyxnw$UU9AMj4+sA9a+EaohUZGPm6wZbsCX19GAZdyG7Ww6ag",
+        "nombre_enc": "wWRksjjE7WGH6A52I0fpGgrgW7xxWUAxPR2hH//w/dqHky0=",
+        "email_enc": "xpMAGjEZqmHmhv0t2X1rHohuOGVTvKzx0/U4e8MaUI47q4mYENFgnFTiizyK",
+        "nacionalidad_enc": "8r4dyKFCRlPWWGg/OK9GEb7nQyy9i03FqPnViprn8kO4Nsh9xK5d",
+        "apellidos_enc": "taVM6V6SXIITKzu3iRtdJpaY0LFgmgG+Fo6QdAj1cMKDGm3jzg==",
+        "telefono_enc": "Rpitc8eGovms/SWp7xYcWPPnWyDYi7BJRr5oFvRT+FTRAt02",
+        "primerIngreso": false,
+        "profile_photo_enc": "tFBrU3cL2CLGbYtOexXR9SFLQc6RtnCqCk7PDMvOujhqL1brJWMqDDTlkZcanhgfjBvfWKg+MXjPUxkuoImicW3LTo1oRjiyIH+nsCQL82v0F0OK53mpkiLN9EdowEbu7AdSu90n9VwOhHP2HLj1rcWjWdLdr7LQIxp4AD/HWFcFgYT36Qf+SKtvmEkExbu084kf4XjcewGFsgyzXQ==",
+        "security_question_enc": "eD/7CAd3ZvlHEJ0YjgxMf98JfQM/CldI765kpcqvgnI6d2HLvvMrF/FZ8Qwky/7i4NbjRDEB3BGsG8qp",
+        "security_answer_hash": "$argon2id$v=19$m=65536,t=3,p=4$zH6SaI/0x83PA20QyX0Ntg$KHd+bigWQ8Mtl7ZRR1AEBR/r9vZy6JMvIhzkaL1wnpc"
     }
 }
