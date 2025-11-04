@@ -1258,6 +1258,8 @@ class GameInterface:
         if not datos_puntaje['exito']:
             print(f"Error calculando puntaje: {datos_puntaje.get('error', 'Error desconocido')}")
         
+        entra_salon, posicion, top_actual = self.verificar_entrada_salon_fama(datos_puntaje)
+        
         # Configuración según resultado
         if gano:
             titulo = "Nivel completado"
@@ -1289,6 +1291,11 @@ class GameInterface:
             fg=color_mensaje,
             pady=10
         ).pack()
+
+        #Banner salon de la Fama(si consigue entrar)
+        if entra_salon:
+            print(f"🎉¡Puntaje entra al Salón de la Fama en la posición #{posicion}!")
+            self.crear_banner_salon_fama(ventana, posicion)
         
         # Mostrar puntuación
         tk.Label(
@@ -1425,7 +1432,75 @@ class GameInterface:
             username_actualizado=self.username,
             username_enc_actualizado=self.username_enc
         )
+    
+    def verificar_entrada_salon_fama(self, datos_puntaje):
+        "Verificar si el puntaje entro al salon de la fama"
+        
+        from gestion_puntajes import obtener_top_nivel
 
+        nivel=datos_puntaje['nivel']
+        puntaje=datos_puntaje['puntaje']
+
+        top_3= obtener_top_nivel(nivel, limit=3)
+
+        #Si hay menos de 3 jugadores entra directo
+        if len(top_3) < 3:
+            posicion = len(top_3)+1
+            return True, posicion, top_3
+        tercer_puntaje = top_3[2][1] #verificar que el puntaje supere al tercero
+
+        if puntaje > tercer_puntaje:
+            posicion = 1
+            for idx, (_, ptj, _, _, _) in enumerate(top_3):
+                if puntaje > ptj:
+                    posicion = idx + 1
+                    break
+            posicion = idx + 2
+
+            return True, posicion, top_3
+        return False, 0, top_3
+    
+    def crear_banner_salon_fama(self, parent, posicion):
+        frame_banner = tk.Frame(parent, bg=COLOR_PANEL)
+        frame_banner.pack(fill=tk.X, padx=20, pady=15)
+
+        tk.Label(
+            frame_banner,
+            text="🎉 ¡SALÓN DE LA FAMA! 🎉",
+            font=("Arial", 16, "bold"),
+            bg=COLOR_PANEL,
+            fg="#f39c12",
+            pady=8
+        ).pack()
+    
+        # Emojis de posición
+        emojis_posicion = {1: "🥇", 2: "🥈", 3: "🥉"}
+        emoji_pos = emojis_posicion.get(posicion, "🏆")
+        
+        # Mensaje de posición
+        tk.Label(
+            frame_banner,
+            text=f"{emoji_pos} Entraste en la posición #{posicion} {emoji_pos}",
+            font=("Arial", 14, "bold"),
+            bg=COLOR_PANEL,
+            fg="#3498db",
+            pady=5
+        ).pack()
+    
+        # Línea decorativa
+        canvas_linea = tk.Canvas(frame_banner, width=400, height=2, bg=COLOR_PANEL, highlightthickness=0)
+        canvas_linea.pack(pady=5)
+        canvas_linea.create_line(0, 1, 400, 1, fill="#f39c12", width=2)
+        
+        # Mensaje adicional
+        tk.Label(
+            frame_banner,
+            text="Tu puntaje está entre los mejores del nivel",
+            font=("Arial", 10),
+            bg=COLOR_PANEL,
+            fg="#ecf0f1",
+            pady=5
+        ).pack()
 
     def calcular_puntaje_final(self):
             """Calcula el puntaje final usando el sistema de puntos y retorna los datos."""
