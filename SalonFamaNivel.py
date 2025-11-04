@@ -58,7 +58,7 @@ class SalonFamaNivel:
             if os.path.exists(photo_path):
                 # Cargar y redimensionar la imagen para el podio
                 img = Image.open(photo_path)
-                img = img.resize((60, 60), Image.Resampling.LANCZOS)  # Tamaño apropiado para el podio
+                img.thumbnail((75, 75), Image.Resampling.LANCZOS)
                 return ImageTk.PhotoImage(img)
             else:
                 return None

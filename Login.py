@@ -889,6 +889,7 @@ class LoginAvatarsRooks:
         """Procesar y mostrar imagen de perfil (guarda temporalmente hasta completar registro)"""
         try:
             with Image.open(file_path) as img:
+                # Convertir imagen a RGB si es necesario
                 if img.mode in ("RGBA", "LA", "P"):
                     background = Image.new("RGB", img.size, (255, 255, 255))
                     if img.mode == "P":
@@ -898,10 +899,25 @@ class LoginAvatarsRooks:
                 elif img.mode != "RGB":
                     img = img.convert("RGB")
             
-                # Redimensionar para mostrar
+                # Tamaño fijo del contenedor
+                container_size = (250, 250)
+                
+                # Redimensionar imagen manteniendo proporciones
                 img_display = img.copy()
-                img_display.thumbnail((400, 400), Image.Resampling.LANCZOS)
-                self.profile_photo_display = ImageTk.PhotoImage(img_display)
+                img_display.thumbnail(container_size, Image.Resampling.LANCZOS)
+                
+                # Crear imagen de fondo del tamaño exacto del contenedor
+                final_img = Image.new('RGB', container_size, color=self.colors[0])
+                
+                # Calcular posición para centrar la imagen
+                x = (container_size[0] - img_display.width) // 2
+                y = (container_size[1] - img_display.height) // 2
+                
+                # Pegar la imagen redimensionada en el centro
+                final_img.paste(img_display, (x, y))
+                
+                # Convertir a PhotoImage para Tkinter
+                self.profile_photo_display = ImageTk.PhotoImage(final_img)
                 
                 # Guardar temporalmente hasta que se complete el registro
                 timestamp = int(time.time())
@@ -910,21 +926,24 @@ class LoginAvatarsRooks:
                 temp_path = os.path.join(tempfile.gettempdir(), temp_filename)
                 
                 # Guardar imagen redimensionada para el registro
-                img_to_save = img.resize((300, 300), Image.Resampling.LANCZOS)
+                img_to_save = img.resize((250, 250), Image.Resampling.LANCZOS)
                 img_to_save.save(temp_path, "JPEG", quality=90)
                 
                 # Guardar la ruta temporal de la imagen
                 self.profile_photo_temp_path = temp_path
                 
+                # Actualizar el botón/label con la imagen
                 self.photo_btn.config(
                     image=self.profile_photo_display,
-                    text=""
+                    text=""  # Quitar el texto cuando hay imagen
                 )
-                self.photo_btn.image = self.profile_photo_display
+                self.photo_btn.image = self.profile_photo_display  # Mantener referencia
+                
                 messagebox.showinfo("Éxito", t("succes_photo"))
+                
         except Exception as e:
             messagebox.showerror("Error", t("error_photo").format(error=e))
-    
+            
     def save_facial_data_final(self, encrypted_username):
         """
         Mueve los datos faciales temporales al nombre final encriptado
@@ -1541,8 +1560,8 @@ class LoginAvatarsRooks:
             form_frame,
             text=t("question_security"),
             font=("Arial", 10),
-            fg=self.colors[6],  # Era: self.c6
-            bg=self.colors[0]   # Era: self.c1
+            fg=self.colors[6], 
+            bg=self.colors[0]   
         ).pack(pady=(10,5), anchor="w", padx=20)
 
         self.security_question_combobox = ttk.Combobox(
@@ -1559,17 +1578,17 @@ class LoginAvatarsRooks:
             form_frame,
             text=t("answer_security"),
             font=("Arial", 10),
-            fg=self.colors[6],    # Era: self.c6
-            bg=self.colors[0]   # Era: self.c1
+            fg=self.colors[6],   
+            bg=self.colors[0]
         ).pack(pady=(10, 5), anchor="w", padx=20)
     
     # Entry para respuesta
         self.security_answer_entry = tk.Entry(
             form_frame,
             font=("Arial", 10),
-            bg=self.colors[2],    # Era: self.c2
-            fg=self.colors[6],    # Era: self.c6
-            insertbackground=self.colors[6],  # Era: self.c6
+            bg=self.colors[2],    
+            fg=self.colors[6], 
+            insertbackground=self.colors[6],
             relief=tk.FLAT,
             width=30
         )
@@ -1584,20 +1603,29 @@ class LoginAvatarsRooks:
             bg=self.colors[0],
             fg=self.colors[5]
         ).pack(anchor="w", pady=(0, 10))
-        
-        self.photo_btn = tk.Button(
+
+        # Frame contenedor con tamaño fijo
+        self.photo_frame = tk.Frame(
             inner_frame,
+            width=250,
+            height=250,
+            bg=self.colors[5],
+            relief=tk.FLAT
+        )
+        self.photo_frame.pack(anchor="w", pady=(0, 15))
+        self.photo_frame.pack_propagate(False)  # Evita que el frame cambie de tamaño
+        
+        self.photo_btn = tk.Label(
+            self.photo_frame,
             text=t("add_photo"),
             font=("Arial", 10),
             bg=self.colors[5],
             fg=self.colors[2],
-            width=30,
-            height=12,
             relief=tk.FLAT,
             cursor="hand2",
-            command=self.selec_profile_photo
         )
-        self.photo_btn.pack(anchor="w", pady=(0, 15))
+        self.photo_btn.place(relwidth=1, relheight=1)  # Ocupa todo el espacio del frame
+        self.photo_btn.bind("<Button-1>", lambda e: self.selec_profile_photo()) 
 
         # Fecha de nacimiento
         tk.Label(

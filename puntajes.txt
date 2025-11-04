@@ -223,5 +223,100 @@
             "tempo": 120,
             "popularidad": 20
         }
+    ],
+    "Hd3L97PoprWli06Mlci9K4nojIIofocsPf+npH7gIrjj7KU=": [
+        {
+            "nivel": 1,
+            "puntaje": 54.87,
+            "fecha": "2025-11-03 13:53:26",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 47.8,
+            "fecha": "2025-11-03 13:53:54",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 70.22,
+            "fecha": "2025-11-03 13:54:56",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-03 13:55:20",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-03 14:46:11",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 2,
+            "puntaje": 28.0,
+            "fecha": "2025-11-03 14:47:04",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-03 15:01:16",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-03 15:01:38",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-03 15:02:44",
+            "tempo": 120,
+            "popularidad": 20
+        }
+    ],
+    "d1YyOTkAYDwjLW3WaEgY/y/ZjPTwHp3//TD3io9LSxlxI3aA": [
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-03 14:18:54",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-03 14:41:05",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-03 15:03:44",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-03 15:04:56",
+            "tempo": 120,
+            "popularidad": 20
+        }
     ]
 }
