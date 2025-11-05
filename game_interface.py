@@ -1414,7 +1414,7 @@ class GameInterface:
     def crear_botones_derrota(self, ventana, nivel):
         """Crea botones para cuando el jugador pierde"""
         # Frame para alinear botones en fila
-        frame_botones = tk.Frame(ventana, bg=COLOR_PANEL)
+        frame_botones = tk.Frame(ventana, bg=self.c2)
         frame_botones.pack(pady=20)
 
         # Reintentar → Reinicia el MISMO nivel
