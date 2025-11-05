@@ -958,6 +958,21 @@ class ModificarDatosUsuario:
 
     def volver(self):
         """Vuelve a la ventana anterior"""
+        # Limpiar todos los bindings del root
+        try:
+            self.root.unbind_all("<MouseWheel>")
+            self.root.unbind_all("<Button-4>")
+            self.root.unbind_all("<Button-5>")
+        except:
+            pass
+        
+        # Limpiar bindings recursivos
+        try:
+            self.unbind_mousewheel_recursive(self.canvas)
+            self.unbind_mousewheel_recursive(self.modify_frame)
+        except:
+            pass
+        
         self.modify_frame.destroy()
         self.callback_volver()
 
