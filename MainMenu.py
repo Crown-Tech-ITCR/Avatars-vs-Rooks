@@ -225,64 +225,51 @@ class MainMenu:
         self.root.withdraw()
         root_nivel1 = tk.Toplevel(self.root)
         root_nivel1.title("Avatars vs Rooks - Nivel 1 (Fácil)")
-        if self.cambio:
-            GameInterface(root_nivel1, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
-                tempo=self.tempo, 
-                popularidad=self.popularidad,
-                username_enc=self.username_enc,
-                c1=self.c1, c2=self.c2, c3=self.c3, c4=self.c4, c5=self.c5, c6=self.c6, c7=self.c7
-                )
-        else:
-            GameInterface(root_nivel1, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel1, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
-                tempo=self.tempo, 
-                popularidad=self.popularidad,
-                username_enc=self.username_enc
-                )
+        
+        # ✅ SIEMPRE pasar los colores, sin verificar self.cambio
+        GameInterface(
+            root_nivel1, 
+            callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: 
+                self.regresar_menu(root_nivel1, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
+            tempo=self.tempo, 
+            popularidad=self.popularidad,
+            username_enc=self.username_enc,
+            c1=self.c1, c2=self.c2, c3=self.c3, c4=self.c4, c5=self.c5, c6=self.c6, c7=self.c7
+        )
 
     def start_level2(self):
         set_nivel_actual(2)
         self.root.withdraw()
         root_nivel2 = tk.Toplevel(self.root)
         root_nivel2.title("Avatars vs Rooks - Nivel 2 (Medio)")
-        if self.cambio:
-            GameInterface(root_nivel2, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
-                tempo=self.tempo, 
-                popularidad=self.popularidad,
-                username_enc=self.username_enc,
-                c1=self.c1, c2=self.c2, c3=self.c3, c4=self.c4, c5=self.c5, c6=self.c6, c7=self.c7
-                )
-        else:
-            GameInterface(root_nivel2, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel2, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
-                tempo=self.tempo, 
-                popularidad=self.popularidad,
-                username_enc=self.username_enc
-                )
-
+        
+        # ✅ SIEMPRE pasar los colores
+        GameInterface(
+            root_nivel2, 
+            callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: 
+                self.regresar_menu(root_nivel2, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
+            tempo=self.tempo, 
+            popularidad=self.popularidad,
+            username_enc=self.username_enc,
+            c1=self.c1, c2=self.c2, c3=self.c3, c4=self.c4, c5=self.c5, c6=self.c6, c7=self.c7
+        )
 
     def start_level3(self):
         set_nivel_actual(3)
         self.root.withdraw()
         root_nivel3 = tk.Toplevel(self.root)
         root_nivel3.title("Avatars vs Rooks - Nivel 3 (Difícil)")
-        if self.cambio:
-            GameInterface(root_nivel3, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
-                tempo=self.tempo, 
-                popularidad=self.popularidad,
-                username_enc=self.username_enc,
-                c1=self.c1, c2=self.c2, c3=self.c3, c4=self.c4, c5=self.c5, c6=self.c6, c7=self.c7
-                )
-        else:
-            GameInterface(root_nivel3, 
-                callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: self.regresar_menu(root_nivel3, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
-                tempo=self.tempo, 
-                popularidad=self.popularidad,
-                username_enc=self.username_enc
-                )
+        
+        # ✅ SIEMPRE pasar los colores
+        GameInterface(
+            root_nivel3, 
+            callback_volver_menu=lambda iniciar_nuevo_nivel=False, username_actualizado=None, username_enc_actualizado=None: 
+                self.regresar_menu(root_nivel3, iniciar_nuevo_nivel, username_actualizado, username_enc_actualizado),
+            tempo=self.tempo, 
+            popularidad=self.popularidad,
+            username_enc=self.username_enc,
+            c1=self.c1, c2=self.c2, c3=self.c3, c4=self.c4, c5=self.c5, c6=self.c6, c7=self.c7
+        )
 
 
 
