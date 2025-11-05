@@ -79,14 +79,25 @@ class GameInterface:
         self.username = None
         self.master_key = encrip_aes.master_key
         
-        # AGREGAR: Colores personalizados del usuario
-        self.c1 = c1 if c1 else COLOR_FONDO
-        self.c2 = c2 if c2 else COLOR_PANEL
-        self.c3 = c3 if c3 else COLOR_VERDE_CLARO
-        self.c4 = c4 if c4 else COLOR_BOTON
-        self.c5 = c5 if c5 else COLOR_BOTON_HOVER
-        self.c6 = c6 if c6 else COLOR_TEXTO
-        self.c7 = c7 if c7 else COLOR_TEXTO
+        # Verifica que TODOS los colores son None (no se seleccionó color personalizado)
+        if all(color is None for color in [c1, c2, c3, c4, c5, c6, c7]):
+            # Usar colores verdes originales del juego
+            self.c1 = COLOR_FONDO        
+            self.c2 = COLOR_PANEL        
+            self.c3 = COLOR_VERDE_CLARO    
+            self.c4 = COLOR_BOTON        
+            self.c5 = COLOR_BOTON_HOVER    
+            self.c6 = COLOR_TEXTO          
+            self.c7 = COLOR_TEXTO          
+        else:
+            # Usar colores personalizados del usuario
+            self.c1 = c1 if c1 is not None else COLOR_FONDO
+            self.c2 = c2 if c2 is not None else COLOR_PANEL
+            self.c3 = c3 if c3 is not None else COLOR_VERDE_CLARO
+            self.c4 = c4 if c4 is not None else COLOR_BOTON
+            self.c5 = c5 if c5 is not None else COLOR_BOTON_HOVER
+            self.c6 = c6 if c6 is not None else COLOR_TEXTO
+            self.c7 = c7 if c7 is not None else COLOR_TEXTO
 
         # Configurar tamaño de ventana
         self.root.geometry("1000x600")
@@ -554,7 +565,7 @@ class GameInterface:
     def crear_boton_rook(self, parent, config):
         """Crea un botón estilizado para seleccionar un rook."""
         # Frame contenedor del botón
-        frame_boton = tk.Frame(parent, bg=COLOR_PANEL, height=110)
+        frame_boton = tk.Frame(parent, bg=self.c2, height=110)
         frame_boton.pack(fill=tk.X, pady=10, padx=10)
         frame_boton.pack_propagate(False)
         
@@ -562,7 +573,7 @@ class GameInterface:
         frame_boton.bind("<Button-1>", lambda e, cfg=config, fb=frame_boton: self.seleccionar_rook_desde_frame(cfg["clase"], fb))
         
         # Frame izquierdo 
-        frame_emoji = tk.Frame(frame_boton, bg=COLOR_PANEL, width=80)
+        frame_emoji = tk.Frame(frame_boton, bg=self.c2, width=80)
         frame_emoji.pack(side=tk.LEFT, fill=tk.Y, padx=10)
         frame_emoji.pack_propagate(False)
         
@@ -576,7 +587,7 @@ class GameInterface:
             label_emoji = tk.Label(
                 frame_emoji,
                 image=imagen_tk,
-                bg=COLOR_PANEL
+                bg=self.c2
             )
             label_emoji.image = imagen_tk 
             label_emoji.pack(expand=True)
@@ -586,14 +597,14 @@ class GameInterface:
                 frame_emoji,
                 text=config["emoji"],
                 font=("Arial", 40),
-                bg=COLOR_PANEL
+                bg=self.c2
             )
             label_emoji.pack(expand=True)
         
         label_emoji.bind("<Button-1>", lambda e, cfg=config, fb=frame_boton: self.seleccionar_rook_desde_frame(cfg["clase"], fb))
         
         # Frame derecho para información
-        frame_info = tk.Frame(frame_boton, bg=COLOR_PANEL)
+        frame_info = tk.Frame(frame_boton, bg=self.c2)
         frame_info.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
         frame_info.bind("<Button-1>", lambda e, cfg=config, fb=frame_boton: self.seleccionar_rook_desde_frame(cfg["clase"], fb))
         
@@ -602,8 +613,8 @@ class GameInterface:
             frame_info,
             text=config["nombre"],
             font=("Arial", 12, "bold"),
-            bg=COLOR_PANEL,
-            fg=COLOR_TEXTO,
+            bg=self.c2,
+            fg=self.c6,
             anchor="w"
         )
         label_nombre.pack(fill=tk.X, pady=(8, 2))
@@ -614,8 +625,8 @@ class GameInterface:
             frame_info,
             text=f"Costo: {config['costo']}",
             font=("Arial", 10),
-            bg=COLOR_PANEL,
-            fg=COLOR_TEXTO,
+            bg=self.c2,
+            fg=self.c6,
             anchor="w"
         )
         label_costo.pack(fill=tk.X, pady=2)
@@ -626,8 +637,8 @@ class GameInterface:
             frame_info,
             text=f"Daño: {config['daño']}",
             font=("Arial", 10),
-            bg=COLOR_PANEL,
-            fg=COLOR_TEXTO,
+            bg=self.c2,
+            fg=self.c6,
             anchor="w"
         )
         label_daño.pack(fill=tk.X, pady=2)
@@ -639,21 +650,21 @@ class GameInterface:
         # Efecto hover
         def on_enter(e):
             if frame_boton != self.boton_seleccionado:
-                frame_boton.config(bg=COLOR_BOTON_HOVER)
-                frame_emoji.config(bg=COLOR_BOTON_HOVER)
-                frame_info.config(bg=COLOR_BOTON_HOVER)
+                frame_boton.config(bg=self.c5)
+                frame_emoji.config(bg=self.c5)
+                frame_info.config(bg=self.c5)
                 for widget in frame_info.winfo_children():
-                    widget.config(bg=COLOR_BOTON_HOVER)
-                label_emoji.config(bg=COLOR_BOTON_HOVER)
-        
+                    widget.config(bg=self.c5)
+                label_emoji.config(bg=self.c5)
+
         def on_leave(e):
             if frame_boton != self.boton_seleccionado:
-                frame_boton.config(bg=COLOR_PANEL)
-                frame_emoji.config(bg=COLOR_PANEL)
-                frame_info.config(bg=COLOR_PANEL)
+                frame_boton.config(bg=self.c2)
+                frame_emoji.config(bg=self.c2)
+                frame_info.config(bg=self.c2)
                 for widget in frame_info.winfo_children():
-                    widget.config(bg=COLOR_PANEL)
-                label_emoji.config(bg=COLOR_PANEL)
+                    widget.config(bg=self.c2)
+                label_emoji.config(bg=self.c2)
         
         frame_boton.bind("<Enter>", on_enter)
         frame_boton.bind("<Leave>", on_leave)
@@ -673,25 +684,25 @@ class GameInterface:
         
         # Quitar selección anterior
         if self.boton_seleccionado:
-            self.boton_seleccionado.config(bg=COLOR_PANEL)
+            self.boton_seleccionado.config(bg=self.c2)
             for widget in self.boton_seleccionado.winfo_children():
-                widget.config(bg=COLOR_PANEL)
+                widget.config(bg=self.c2)
                 if isinstance(widget, tk.Frame):
                     for subwidget in widget.winfo_children():
-                        subwidget.config(bg=COLOR_PANEL)
+                        subwidget.config(bg=self.c2)
         
         # Marcar nuevo botón seleccionado
         self.boton_seleccionado = frame_boton
-        frame_boton.config(bg=COLOR_BOTON)
+        frame_boton.config(bg=self.c4)
         for widget in frame_boton.winfo_children():
-            widget.config(bg=COLOR_BOTON)
+            widget.config(bg=self.c4)
             if isinstance(widget, tk.Frame):
                 for subwidget in widget.winfo_children():
-                    subwidget.config(bg=COLOR_BOTON)
+                    subwidget.config(bg=self.c4)
 
     def crear_panel_monedas(self, parent):
         """Crea el panel de monedas."""
-        frame_monedas = tk.Frame(parent, bg=COLOR_BOTON, height=60, width=180) 
+        frame_monedas = tk.Frame(parent, bg=self.c4, height=60, width=180) 
         frame_monedas.pack(side=tk.BOTTOM, anchor="e", pady=5, padx=10) 
         frame_monedas.pack_propagate(False)
         
@@ -700,7 +711,7 @@ class GameInterface:
             frame_monedas,
             text="🪙",
             font=("Arial", 28),
-            bg=COLOR_BOTON
+            bg=self.c4
         )
         label_icono.pack(side=tk.LEFT, padx=(10, 5), pady=(0, 8))
         
@@ -709,14 +720,14 @@ class GameInterface:
             frame_monedas,
             text=str(self.monedas),
             font=("Arial", 20, "bold"),
-            bg=COLOR_BOTON,
-            fg=COLOR_TEXTO
+            bg=self.c4,
+            fg=self.c6
         )
         self.label_monedas.pack(side=tk.LEFT, padx=(5, 10), pady=8)
 
     def crear_panel_tiempo(self, parent):
         """Crea el panel de tiempo."""
-        frame_tiempo = tk.Frame(parent, bg=COLOR_PANEL, height=60, width=180)  
+        frame_tiempo = tk.Frame(parent, bg=self.c2, height=60, width=180)  
         frame_tiempo.pack(side=tk.BOTTOM, anchor="e", pady=11, padx=10)  
         frame_tiempo.pack_propagate(False)
         
@@ -725,8 +736,8 @@ class GameInterface:
             frame_tiempo,
             text="Tiempo",
             font=("Arial", 11, "bold"),
-            bg=COLOR_PANEL,
-            fg=COLOR_TEXTO
+            bg=self.c2,
+            fg=self.c6
         )
         label_texto.pack(side=tk.LEFT, padx=(10, 5), pady=8)  
 
@@ -735,8 +746,8 @@ class GameInterface:
             frame_tiempo,
             text="0:00",
             font=("Arial", 20, "bold"),
-            bg=COLOR_PANEL,
-            fg=COLOR_TEXTO
+            bg=self.c2,
+            fg=self.c6
         )
         self.label_tiempo.pack(side=tk.LEFT, padx=(5, 10), pady=8)
 
@@ -1264,7 +1275,7 @@ class GameInterface:
         if gano:
             titulo = "Nivel completado"
             mensaje = f"🎉 ¡Nivel {datos_puntaje['nivel']} completado! 🎉"
-            color_mensaje = COLOR_TEXTO
+            color_mensaje = self.c6
             altura = 420
         else:
             titulo = "¡Has perdido! 💀"
@@ -1276,7 +1287,7 @@ class GameInterface:
         ventana = tk.Toplevel(self.root)
         ventana.title(titulo)
         ventana.geometry(f"500x{altura}")
-        ventana.config(bg=COLOR_PANEL)
+        ventana.config(bg=self.c2)
         ventana.resizable(False, False)
         
         # Centrar ventana
@@ -1287,7 +1298,7 @@ class GameInterface:
             ventana,
             text=mensaje,
             font=("Arial", 18, "bold"),
-            bg=COLOR_PANEL, 
+            bg=self.c2, 
             fg=color_mensaje,
             pady=10
         ).pack()
@@ -1302,7 +1313,7 @@ class GameInterface:
             ventana,
             text=f"🏆 Puntuación Final: {datos_puntaje['puntaje']:.2f}",
             font=("Arial", 14, "bold"),
-            bg=COLOR_PANEL, 
+            bg=self.c2, 
             fg="gold",
             pady=5
         ).pack()
@@ -1312,8 +1323,8 @@ class GameInterface:
             ventana,
             text=f"⚔️ Avatars eliminados: {datos_puntaje['avatars_eliminados']}",
             font=("Arial", 12),
-            bg=COLOR_PANEL, 
-            fg=COLOR_TEXTO,
+            bg=self.c2, 
+            fg=self.c6,
             pady=2
         ).pack()
         
@@ -1321,8 +1332,8 @@ class GameInterface:
             ventana,
             text=f"💔 Daño total: {datos_puntaje['puntos_vida_acumulados']}",
             font=("Arial", 12),
-            bg=COLOR_PANEL, 
-            fg=COLOR_TEXTO,
+            bg=self.c2, 
+            fg=self.c6,
             pady=2
         ).pack()
         
@@ -1330,8 +1341,8 @@ class GameInterface:
             ventana,
             text=f"🎵 Tempo: {datos_puntaje['tempo']} | Popularidad: {datos_puntaje['popularidad']}",
             font=("Arial", 10),
-            bg=COLOR_PANEL, 
-            fg=COLOR_TEXTO,
+            bg=self.c2, 
+            fg=self.c6,
             pady=2
         ).pack()
         
@@ -1365,9 +1376,11 @@ class GameInterface:
             ventana,
             text="🔁 Repetir nivel",
             font=("Arial", 12, "bold"),
-            bg=COLOR_BOTON,
-            fg=COLOR_TEXTO,
+            bg=self.c4,
+            fg=self.c6,
             width=20,
+            relief="flat",  
+            cursor="hand2",
             command=lambda: self.repetir_nivel(ventana, nivel)
         ).pack(pady=8)
 
@@ -1377,9 +1390,11 @@ class GameInterface:
                 ventana,
                 text="⏭ Siguiente nivel",
                 font=("Arial", 12, "bold"),
-                bg=COLOR_BOTON,
-                fg=COLOR_TEXTO,
+                bg=self.c4,
+                fg=self.c6,
                 width=20,
+            relief="flat",  
+            cursor="hand2",
                 command=lambda: self.next_level(ventana, nivel)
             ).pack(pady=8)
 
@@ -1388,9 +1403,11 @@ class GameInterface:
             ventana,
             text="🏠 Menú principal",
             font=("Arial", 12, "bold"),
-            bg=COLOR_BOTON,
-            fg=COLOR_TEXTO,
+            bg=self.c4,
+            fg=self.c6,
             width=20,
+            relief="flat",  
+            cursor="hand2",
             command=lambda: self.volver_menu_win(ventana)
         ).pack(pady=8)
     
@@ -1405,9 +1422,11 @@ class GameInterface:
             frame_botones,
             text="🔁 Reintentar",
             font=("Arial", 12, "bold"),
-            bg=COLOR_BOTON,
-            fg=COLOR_TEXTO,
+            bg=self.c4,
+            fg=self.c6,
             width=12,
+            relief="flat",  
+            cursor="hand2",  
             command=lambda: self.repetir_nivel(ventana, nivel)
         ).pack(side=tk.LEFT, padx=8)
 
@@ -1416,9 +1435,11 @@ class GameInterface:
             frame_botones,
             text="🏠 Menú",
             font=("Arial", 12, "bold"),
-            bg=COLOR_BOTON,
-            fg=COLOR_TEXTO,
+            bg=self.c4,
+            fg=self.c6,
             width=12,
+            relief="flat",  
+            cursor="hand2", 
             command=lambda: self.volver_menu_win(ventana)
         ).pack(side=tk.LEFT, padx=8)
 

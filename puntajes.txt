@@ -318,5 +318,49 @@
             "tempo": 120,
             "popularidad": 20
         }
+    ],
+    "tD1EPlO2BiDl/pd7ttCZUdsx4aVi6auU6haYRJ9JwmV6": [
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-04 17:53:41",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-04 18:13:37",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-04 18:14:12",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 52.61,
+            "fecha": "2025-11-04 18:24:46",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 2,
+            "puntaje": 28.0,
+            "fecha": "2025-11-04 18:25:13",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 3,
+            "puntaje": 28.0,
+            "fecha": "2025-11-04 18:25:33",
+            "tempo": 120,
+            "popularidad": 20
+        }
     ]
 }
