@@ -115,50 +115,35 @@ class ModificarDatosUsuario:
         self.root.resizable(False, False)
 
         # Canvas principal
-        canvas = tk.Canvas(self.modify_frame, bg=self.colors[0], highlightthickness=0)
-        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.canvas = tk.Canvas(self.modify_frame, bg=self.colors[0], highlightthickness=0)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         # Scrollbar
-        scrollbar = tk.Scrollbar(self.modify_frame, orient=tk.VERTICAL, command=canvas.yview)
+        scrollbar = tk.Scrollbar(self.modify_frame, orient=tk.VERTICAL, command=self.canvas.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Configurar canvas
-        canvas.configure(yscrollcommand=scrollbar.set)
+        self.canvas.configure(yscrollcommand=scrollbar.set)
             
         # Contenedor principal
         main_container = tk.Frame(self.modify_frame, bg=self.colors[0])
-        canvas_frame = canvas.create_window((0, 0), window=main_container, anchor="nw")
+        canvas_frame = self.canvas.create_window((0, 0), window=main_container, anchor="nw")
 
          # Función para actualizar el scroll region
         def configure_scroll(event=None):
-            canvas.configure(scrollregion=canvas.bbox("all"))
+            """Esta funcion habilita el scroll en la ventana top level de modificacion de datos"""
+            self.canvas.configure(scrollregion=self.canvas.bbox("all"))
             # Centrar el contenido horizontalmente
-            canvas_width = canvas.winfo_width()
+            canvas_width = self.canvas.winfo_width()
             frame_width = main_container.winfo_reqwidth()
             if frame_width < canvas_width:
                 x_position = (canvas_width - frame_width) // 2
             else:
                 x_position = 0
-            canvas.coords(canvas_frame, x_position, 0)
+            self.canvas.coords(canvas_frame, x_position, 0)
         
         main_container.bind("<Configure>", configure_scroll)
-        canvas.bind("<Configure>", configure_scroll)
-
-        # Scroll con rueda del mouse
-        def on_mousewheel(event):
-            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-        
-        def on_mousewheel_linux(event):
-            if event.num == 4:
-                canvas.yview_scroll(-1, "units")
-            elif event.num == 5:
-                canvas.yview_scroll(1, "units")
-        
-        # Bind para Windows y MacOS
-        canvas.bind_all("<MouseWheel>", on_mousewheel)
-        # Bind para Linux
-        canvas.bind_all("<Button-4>", on_mousewheel_linux)
-        canvas.bind_all("<Button-5>", on_mousewheel_linux)
+        self.canvas.bind("<Configure>", configure_scroll)
 
         # Contenedor con padding
         content_frame = tk.Frame(main_container, bg=self.colors[0])
@@ -452,6 +437,14 @@ class ModificarDatosUsuario:
         
         # Mostrar frame
         self.modify_frame.pack(fill=tk.BOTH, expand=True)
+
+        #SCROLLBAR
+        # Aplicar el binding al canvas y todo su contenido
+        self.bind_mousewheel_recursive(self.canvas)
+        self.bind_mousewheel_recursive(main_container)
+
+        # Configurar protocolo de cierre
+        self.root.protocol("WM_DELETE_WINDOW", self.cerrar_ventana)
 
     def validar_datos(self):
         """Valida todos los datos antes de guardar"""
@@ -965,8 +958,75 @@ class ModificarDatosUsuario:
 
     def volver(self):
         """Vuelve a la ventana anterior"""
+        # Limpiar todos los bindings del root
+        try:
+            self.root.unbind_all("<MouseWheel>")
+            self.root.unbind_all("<Button-4>")
+            self.root.unbind_all("<Button-5>")
+        except:
+            pass
+        
+        # Limpiar bindings recursivos
+        try:
+            self.unbind_mousewheel_recursive(self.canvas)
+            self.unbind_mousewheel_recursive(self.modify_frame)
+        except:
+            pass
+        
         self.modify_frame.destroy()
         self.callback_volver()
+
+    def on_mousewheel(self, event):
+        """Esto permite hacer scroll con la rueda del mouse"""
+        try:
+            if self.canvas.winfo_exists():
+                self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        except tk.TclError:
+            pass
+
+    def on_mousewheel_linux(self, event):
+        """Esto permite hacer scroll con la rueda del mouse para usuario linux"""
+        try:
+            if self.canvas.winfo_exists():
+                if event.num == 4:
+                    self.canvas.yview_scroll(-1, "units")
+                elif event.num == 5:
+                    self.canvas.yview_scroll(1, "units")
+        except tk.TclError:
+            pass
+
+    def bind_mousewheel_recursive(self, widget):
+        """Bind recursivo del mousewheel a un widget y todos sus hijos (para evitar inconvenientes al cerrar la ventana)"""
+        widget.bind("<MouseWheel>", self.on_mousewheel)
+        widget.bind("<Button-4>", self.on_mousewheel_linux)
+        widget.bind("<Button-5>", self.on_mousewheel_linux)
+        
+        # Aplicar a todos los hijos recursivamente
+        for child in widget.winfo_children():
+            self.bind_mousewheel_recursive(child)
+
+    def unbind_mousewheel_recursive(self, widget):
+        """Unbind recursivo del mousewheel"""
+        try:
+            widget.unbind("<MouseWheel>")
+            widget.unbind("<Button-4>")
+            widget.unbind("<Button-5>")
+            
+            for child in widget.winfo_children():
+                self.unbind_mousewheel_recursive(child)
+        except:
+            pass
+
+    def cerrar_ventana(self):
+        """Limpia recursos y cierra la ventana"""
+        try:
+            self.unbind_mousewheel_recursive(self.canvas)
+        except:
+            pass
+        
+        if self.callback_volver:
+            self.callback_volver()
+        self.root.destroy()
 
     def get_updated_data(self):
         """Retorna los datos actualizados del usuario"""
@@ -987,3 +1047,4 @@ def mostrar_modificar_datos(root, username, username_enc, callback_volver, c1, c
     
     # Retornar la instancia para poder acceder a los datos actualizados
     return modificador
+    
