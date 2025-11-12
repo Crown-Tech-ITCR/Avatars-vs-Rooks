@@ -37,20 +37,16 @@ def generar_cantidades_poisson():
         total = cant_100 * 100 + cant_50 * 50 + cant_25 * 25
         
         if total == 100:
-            print(f"✅ Poisson exitoso: {cant_100}x100 + {cant_50}x50 + {cant_25}x25 = 100")
             return {100: cant_100, 50: cant_50, 25: cant_25}
         
         # Intentar ajustar si está cerca
         if total < 100 and (100 - total) <= 100:
             diferencia = 100 - total
             if diferencia == 100:
-                print(f"✅ Ajustado: agregando 1x100")
                 return {100: cant_100 + 1, 50: cant_50, 25: cant_25}
             elif diferencia == 50:
-                print(f"✅ Ajustado: agregando 1x50")
                 return {100: cant_100, 50: cant_50 + 1, 25: cant_25}
             elif diferencia % 25 == 0:
-                print(f"✅ Ajustado: agregando {diferencia // 25}x25")
                 return {100: cant_100, 50: cant_50, 25: cant_25 + diferencia // 25}
     
     # usar combinaciones predefinidas con probabilidades según Poisson
@@ -85,7 +81,6 @@ def crear_monedas_en_tablero(matriz_juego, filas, columnas):
     Returns:
         list: Lista de objetos Moneda creados
     """
-    print("🔄 Generando cantidades con Poisson...")
     
     # Generar cantidades con Poisson
     cantidades = generar_cantidades_poisson()
@@ -97,7 +92,6 @@ def crear_monedas_en_tablero(matriz_juego, filas, columnas):
             tiempo_limite = generar_tiempo_limite_exponencial()
             monedas_a_colocar.append((valor, tiempo_limite))
     
-    print(f"📊 Total monedas a colocar: {len(monedas_a_colocar)}")
     
     # Buscar casillas vacías
     casillas_vacias = []
@@ -107,7 +101,6 @@ def crear_monedas_en_tablero(matriz_juego, filas, columnas):
             if len(matriz_juego[f][c]) == 0:
                 casillas_vacias.append((f, c))
     
-    print(f"📍 Casillas vacías disponibles: {len(casillas_vacias)}")
     
     # Si no hay suficientes casillas vacías, usar las que haya
     if len(casillas_vacias) < len(monedas_a_colocar):
@@ -123,9 +116,7 @@ def crear_monedas_en_tablero(matriz_juego, filas, columnas):
             moneda = Moneda(valor, fila, col, tiempo_limite)
             matriz_juego[fila][col].append(moneda)
             monedas_creadas.append(moneda)
-            print(f"💰 Moneda de {valor} colocada en ({fila}, {col}) - expira en {tiempo_limite:.1f}s")
-    
-    print(f"✅ {len(monedas_creadas)} monedas creadas exitosamente")
+
     return monedas_creadas
 
 
@@ -145,4 +136,3 @@ def verificar_monedas_expiradas(matriz_juego, filas, columnas):
                 if isinstance(entidad, Moneda) and entidad.esta_expirada():
                     if entidad in matriz_juego[f][c]:
                         matriz_juego[f][c].remove(entidad)
-                        print(f"⏰ Moneda de {entidad.valor} expiró en ({f}, {c})")

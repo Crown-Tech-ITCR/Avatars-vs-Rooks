@@ -91,7 +91,7 @@ class Entidad:
 
 # CLASES DE ROOKS
 class Rook(Entidad):
-    """Rook base: no se desplaza, puede disparar si su cooldown está a cero."""
+    """Rook base: no se desplaza, puede disparar si su cooldown está a cero o si se hizo click por medio del joystick."""
     def __init__(self, vida: int = 10, dano: int = 10, shot_cooldown_max: int = 0, costo: int = 0):
         super().__init__("rook", vida=vida, dano=dano, movil=False)
         self.shot_cooldown = 0
@@ -99,22 +99,39 @@ class Rook(Entidad):
         self.costo = costo
         self.color = "green"
 
+        # Cooldown separado para disparo manual
+        self.manual_shot_cooldown = 0
+        self.manual_shot_cooldown_max = 2  # Cooldown mínimo (2 ticks)
+
+    #Manejar disparos automaticos en pantalla 
+
     def can_shoot(self) -> bool:
-        """Verifica si el rook puede disparar."""
+        """Verifica si el rook puede disparar automaticamente"""
         return self.shot_cooldown == 0
 
     def shoot(self):
-        """Dispara una rafaga y reinicia el cooldown."""
+        """Dispara una rafaga y reinicia el cooldown"""
         self.shot_cooldown = self.shot_cooldown_max
+        return Rafaga(self.dano)
+    
+    #Manejar disparos manuales por medio del joystick
+
+    def can_shoot_manual(self) -> bool:
+        """Verifica si el rook puede disparar manualmente"""
+        return self.manual_shot_cooldown == 0
+    
+    def shoot_manual(self):
+        """Dispara al detectar un click del joystick y reinicia su cooldown"""
+        self.manual_shot_cooldown = self.manual_shot_cooldown_max
         return Rafaga(self.dano)
 
     def tick(self):
-        """Actualiza el cooldown del rook."""
+        """Actualiza cooldowns"""
         if self.shot_cooldown > 0:
             self.shot_cooldown -= 1
-
-
-
+        if self.manual_shot_cooldown > 0:
+            self.manual_shot_cooldown -= 1
+        
 # TIPOS ESPECÍFICOS DE ROOKS
 
 class RookRoca(Rook):
@@ -128,6 +145,12 @@ class RookRoca(Rook):
         """Dispara una rafaga de roca y reinicia el cooldown."""
         self.shot_cooldown = self.shot_cooldown_max
         return Rafaga(self.dano, tipo_rafaga="roca")
+    
+    def shoot_manual(self):
+        """Dispara forzadamente una ráfaga de roca."""
+        self.manual_shot_cooldown = self.manual_shot_cooldown_max
+        return Rafaga(self.dano, tipo_rafaga="roca")
+        
 
 
 class RookFuego(Rook):
@@ -140,6 +163,11 @@ class RookFuego(Rook):
     def shoot(self): 
         """Dispara una rafaga de roca y reinicia el cooldown."""
         self.shot_cooldown = self.shot_cooldown_max
+        return Rafaga(self.dano, tipo_rafaga="fuego")
+    
+    def shoot_manual(self):
+        """Dispara forzadamente una ráfaga de roca."""
+        self.manual_shot_cooldown = self.manual_shot_cooldown_max
         return Rafaga(self.dano, tipo_rafaga="fuego")
 
 
@@ -154,6 +182,11 @@ class RookAgua(Rook):
         """Dispara una rafaga de roca y reinicia el cooldown."""
         self.shot_cooldown = self.shot_cooldown_max
         return Rafaga(self.dano, tipo_rafaga="agua")
+    
+    def shoot_manual(self):
+        """Dispara forzadamente una ráfaga de roca."""
+        self.manual_shot_cooldown = self.manual_shot_cooldown_max
+        return Rafaga(self.dano, tipo_rafaga="agua")
 
 
 class RookArena(Rook):
@@ -166,6 +199,11 @@ class RookArena(Rook):
     def shoot(self): 
         """Dispara una rafaga de roca y reinicia el cooldown."""
         self.shot_cooldown = self.shot_cooldown_max
+        return Rafaga(self.dano, tipo_rafaga="arena")
+    
+    def shoot_manual(self):
+        """Dispara forzadamente una ráfaga de roca."""
+        self.manual_shot_cooldown = self.manual_shot_cooldown_max
         return Rafaga(self.dano, tipo_rafaga="arena")
 
 
