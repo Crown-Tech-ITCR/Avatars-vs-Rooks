@@ -5,6 +5,9 @@ from Entidades import RookRoca, RookFuego, RookAgua, RookArena, crear_avatar, Ro
 from sistema_puntos import SistemaPuntos
 from gestion_puntajes import agregar_puntaje
 from ModificaciónDatos import mostrar_modificar_datos
+from input_handler import InputHandler
+from serial_handler import SerialHandler
+from buzzer_handler import BuzzerHandler
 import encrip_aes
 
 # Configuración de colores
@@ -127,7 +130,7 @@ class GameInterface:
         self.tiempos_generacion = {}
         
         # Sistema de monedas
-        self.monedas = 400 # CAMBIAR LAS MONEDAS INICIALES
+        self.monedas = 1000 # CAMBIAR LAS MONEDAS INICIALES
         self.rook_seleccionado = RookArena
         self.boton_seleccionado = None
 
@@ -150,6 +153,9 @@ class GameInterface:
         # Cargar imagen moneda
         self.imagen_moneda = {}
         self.cargar_imagen_moneda()
+
+        #Sistema de entrada (joystick o mouse)
+        self.inicializar_sistema_entrada()
         
         # Crear interfaz
         self.crear_interfaz()
@@ -159,6 +165,35 @@ class GameInterface:
         
         # Iniciar bucles del juego
         self.iniciar_juego()
+
+    def inicializar_sistema_entrada(self):
+        """Inicializa el sistema de entrada (joystick o mouse)"""
+        
+        self.input_handler = InputHandler(FILAS, COLUMNAS)
+        self.serial_handler = SerialHandler()
+        
+        # Intentar conectar joystick
+        if self.serial_handler.conectar():
+            #Marca si se detecta el buzzer
+            self.buzzer_handler = BuzzerHandler(self.serial_handler)
+
+            # Marcar que hay joystick
+            self.input_handler.marcar_joystick_detectado()
+            
+            # Configurar callbacks
+            self.input_handler.set_callback_mover_cursor(self.actualizar_cursor_visual)
+            self.input_handler.set_callback_click_joystick(self.accion_joystick)
+            
+            # Iniciar lectura continua
+            self.serial_handler.iniciar_lectura_continua(
+                self.input_handler.procesar_comando_joystick
+            )
+        else:
+            # No hay joystick, pero el mouse funciona normal
+            print("Solo mouse disponible")
+
+            # Marca si se dete cta el buzzer
+            self.buzzer_handler = BuzzerHandler(self.serial_handler)
     
     def cargar_username_desencriptado(self):
         """Carga el username desencriptado desde el username_enc"""
@@ -287,7 +322,6 @@ class GameInterface:
 
         if monedas_creadas:
             total_valor = sum(m.valor for m in monedas_creadas)
-            print(f"💰 {len(monedas_creadas)} monedas generadas (total: {total_valor})")
 
     def center_window(self):
         "Centra la ventana en la pantalla"
@@ -765,6 +799,118 @@ class GameInterface:
                     outline=""
                 )
 
+    #MANEJO DEL JUEGO CON JOYSTICK
+
+    def actualizar_cursor_visual(self, fila, columna):
+        """Dibuja el cursor en la matriz cuando se mueve con joystick"""
+        pass
+
+    def accion_joystick(self, fila, columna):
+        """Ejecuta la acción cuando se presiona el botón del joystick"""
+        
+        if self.juego_terminado:
+            return
+        
+        if self.interfaz_pausada:
+            return
+        
+        matriz = get_matriz_juego()
+        entidades_en_casilla = matriz[fila][columna]
+        
+        # Verificar si hay rook para disparar
+        rooks_en_casilla = [e for e in entidades_en_casilla if isinstance(e, Rook)]
+        
+        if not rooks_en_casilla:
+            print(f"BLOQUEADO: No hay rook en esta casilla")
+            return
+        
+        rook = rooks_en_casilla[0]
+        
+        # Verificar el cooldown MANUAL
+        if not rook.can_shoot_manual():
+            return
+            
+        # Verificar si hay avatares en la columna
+        hay_avatares = False
+        avatares_encontrados = []
+        for fila_check in range(fila + 1, FILAS):
+            avatares_en_fila = [a for a in matriz[fila_check][columna] if isinstance(a, Avatar)]
+            if avatares_en_fila:
+                hay_avatares = True
+                avatares_encontrados.append(f"Fila {fila_check}: {len(avatares_en_fila)} avatares")
+        
+        if not avatares_encontrados:
+            print(f"BLOQUEADO: No hay avatares en la columna {columna}")
+            return
+        
+        # Dispara manual
+        rafaga = rook.shoot_manual()
+        
+        if rafaga:
+            destino_f = fila + 1
+            
+            if destino_f < FILAS:
+                avatars_adyacentes = [avatar for avatar in matriz[destino_f][columna] if isinstance(avatar, Avatar)]
+                
+                if avatars_adyacentes:
+                    for avatar in avatars_adyacentes:
+                        avatar.take_damage(rafaga.dano)
+                        self.game_logic.puntos_vida_acumulados += rafaga.dano
+                        if avatar.vida <= 0:
+                            self.game_logic.eliminar_avatar_con_sonido(avatar, destino_f, columna)
+                else:
+                    #Verificar que no haya mas de una rafaga en una casilla
+                    rafagas_existentes = [r for r in matriz[destino_f][columna] if isinstance(r, Rafaga)]
+                    if not rafagas_existentes:
+                        rafaga.set_pos(destino_f, columna)
+                        rafaga.reset_move_cooldown()
+                        matriz[destino_f][columna].append(rafaga)
+                        print("RAFAGA CREADA")
+
+                    else:
+                        print(f"ERROR: aun hay rafaga en la casilla siguiente")
+                
+        else:
+            print(f"ERROR: shoot_manual() retornó None")
+        
+
+    def dibujar_cursor_joystick(self):
+        """Dibuja el cursor de selección cuando hay joystick"""
+        fila, columna = self.input_handler.get_posicion_cursor()
+        
+        x1 = columna * TAM_CASILLA
+        y1 = fila * TAM_CASILLA
+        x2 = x1 + TAM_CASILLA
+        y2 = y1 + TAM_CASILLA
+        
+        # Borde amarillo brillante
+        self.canvas.create_rectangle(
+            x1, y1, x2, y2,
+            outline="yellow",
+            width=3,
+            tags="entidad"
+        )
+        
+        # grosor del cuadro
+        grosor = 4
+        
+        # Esquina superior izquierda
+        self.canvas.create_line(x1, y1, x1, y1, fill="yellow", width=grosor, tags="entidad")
+        self.canvas.create_line(x1, y1, x1, y1, fill="yellow", width=grosor, tags="entidad")
+        
+        # Esquina superior derecha
+        self.canvas.create_line(x2, y1, x2, y1, fill="yellow", width=grosor, tags="entidad")
+        self.canvas.create_line(x2, y1, x2, y1, fill="yellow", width=grosor, tags="entidad")
+        
+        # Esquina inferior izquierda
+        self.canvas.create_line(x1, y2, x1, y2, fill="yellow", width=grosor, tags="entidad")
+        self.canvas.create_line(x1, y2, x1, y2, fill="yellow", width=grosor, tags="entidad")
+        
+        # Esquina inferior derecha
+        self.canvas.create_line(x2, y2, x2, y2, fill="yellow", width=grosor, tags="entidad")
+        self.canvas.create_line(x2, y2, x2, y2, fill="yellow", width=grosor, tags="entidad")
+
+
     def seleccionar_rook(self, clase_rook):
         """Selecciona el tipo de rook a colocar."""
         self.rook_seleccionado = clase_rook
@@ -796,11 +942,12 @@ class GameInterface:
             self.monedas += valor_recogido
             self.label_monedas.config(text=str(self.monedas))
 
+            #sonido de recoleccion de moneda
+            self.buzzer_handler.tocar_moneda()
+
             #Eliminar la moneda de la matriz
             if moneda in matriz[f][c]:
                 matriz[f][c].remove(moneda)
-
-            print(f"💰 Moneda de {valor_recogido} recogida! Total: {self.monedas}")
             return
         
         # Verificar si hay rooks o avatars en la casilla
@@ -976,6 +1123,9 @@ class GameInterface:
         self.canvas.delete("pausa_overlay")
         
         matriz = get_matriz_juego()
+
+        if self.input_handler.hay_joystick():
+            self.dibujar_cursor_joystick()
         
         for f in range(FILAS):
             for c in range(COLUMNAS):
@@ -1233,6 +1383,9 @@ class GameInterface:
         ventana.destroy()
         self.root.destroy()
 
+        #terminar thread de joystick 
+        self.serial_handler.desconectar()
+
         # Iniciar el mismo nivel directamente sin pasar por el menú
         self.callback_volver_menu(iniciar_nuevo_nivel=True)
 
@@ -1248,6 +1401,9 @@ class GameInterface:
         set_nivel_actual(nivel + 1)  # Aumentar nivel de manera segura
         ventana.destroy()
         self.root.destroy()
+
+        #terminar thread de joystick 
+        self.serial_handler.desconectar()
 
         # Lanzar el siguiente nivel inmediatamente
         self.callback_volver_menu(iniciar_nuevo_nivel=True)
@@ -1351,6 +1507,12 @@ class GameInterface:
             self.crear_botones_victoria(ventana, datos_puntaje['nivel'])
         else:
             self.crear_botones_derrota(ventana, datos_puntaje['nivel'])
+
+        #reproduccion de la melodia
+        if gano:
+            self.buzzer_handler.tocar_victoria()
+        else:
+            self.buzzer_handler.tocar_derrota()
     
     def centrar_popup(self, ventana, ancho, alto):
         """Centra una ventana popup respecto a la ventana principal"""
@@ -1447,6 +1609,10 @@ class GameInterface:
     def volver_menu_win(self, ventana):
         # Cerrar sólo el popup y notificar al MainMenu
         ventana.destroy()
+
+        #terminar thread de joystick 
+        self.serial_handler.desconectar()
+
         # Pasar los datos actualizados al callback
         self.callback_volver_menu(
             iniciar_nuevo_nivel=False,
