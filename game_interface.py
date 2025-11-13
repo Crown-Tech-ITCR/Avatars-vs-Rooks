@@ -9,6 +9,7 @@ from input_handler import InputHandler
 from serial_handler import SerialHandler
 from buzzer_handler import BuzzerHandler
 import encrip_aes
+from Publicaciones_X import publicar_top_salon_fama
 
 # Configuración de colores
 COLOR_FONDO = "black" 
@@ -1463,6 +1464,26 @@ class GameInterface:
         if entra_salon:
             print(f"🎉¡Puntaje entra al Salón de la Fama en la posición #{posicion}!")
             self.crear_banner_salon_fama(ventana, posicion)
+            # Publicar en X/Twitter automáticamente cuando se notifica al usuario
+            try:
+                # Preparar diccionario con nombres descifrados
+                nombres_descifrados = {}
+                for username_enc, _, _, _, _ in top_actual:
+                    try:
+                        nombres_descifrados[username_enc] = encrip_aes.decrypt_data(username_enc, self.master_key)
+                    except Exception:
+                        nombres_descifrados[username_enc] = "Usuario desconocido"
+
+                # Ejecutar la publicación en un hilo separado para no bloquear la UI
+                import threading
+                hilo = threading.Thread(
+                    target=publicar_top_salon_fama,
+                    args=(datos_puntaje['nivel'], top_actual, nombres_descifrados),
+                    daemon=True
+                )
+                hilo.start()
+            except Exception as e:
+                print(f"Error iniciando publicación automática del Salón de la Fama: {e}")
         
         # Mostrar puntuación
         tk.Label(

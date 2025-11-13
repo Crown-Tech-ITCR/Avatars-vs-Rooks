@@ -448,7 +448,7 @@ TAM_CASILLA = 58
 NIVEL_ACTUAL = 1
 
 # Configuración base
-DURACION_BASE = 60             # duración base en segundos del nivel 1
+DURACION_BASE = 15             # duración base en segundos del nivel 1
 VELOCIDAD_BASE = 250           # velocidad base en ms (para el bucle principal)
 AUMENTO_DURACION = 0.25         # +25% duración por nivel
 AUMENTO_VELOCIDAD = 0.15        # +15% de rapidez (menos tiempo entre actualizaciones)
