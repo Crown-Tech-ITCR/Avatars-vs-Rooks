@@ -198,6 +198,7 @@ class SalonFamaNivel:
         nombres = {1: "Fácil", 2: "Medio", 3: "Difícil"}
         return nombres.get(self.nivel, "Desconocido")
     
+    
     def crear_interfaz(self):
         """Crea la interfaz del ranking con fondo animado en un Canvas"""
         # Limpiar ventana
@@ -293,6 +294,8 @@ class SalonFamaNivel:
                     pass
             self.podium_items = []
             self.mostrar_ranking_podio(top3)
+            # la publicación en X se realiza únicamente cuando el jugador es notificado
+            # de que su puntaje entró al Salón de la Fama (en game_interface.py).
 
         # Iniciar animación
         self.root.after(100, self.iniciar_animacion_fondo)
@@ -367,9 +370,7 @@ class SalonFamaNivel:
                 self.podium_items.append(photo_id)
                 self.profile_images.append(profile_photo)  # Mantener referencia
                 
-                # Crear borde circular alrededor de la foto (opcional)
-                # circle_id = self.canvas.create_oval(x-32, foto_y-32, x+32, foto_y+32, outline="white", width=3)
-                # self.podium_items.append(circle_id)
+
             else:
                 content_y_offset = 0
 
