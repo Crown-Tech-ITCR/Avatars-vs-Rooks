@@ -184,17 +184,18 @@ class GameInterface:
             # Configurar callbacks
             self.input_handler.set_callback_mover_cursor(self.actualizar_cursor_visual)
             self.input_handler.set_callback_click_joystick(self.accion_joystick)
+            self.input_handler.set_callback_boton_rook(self.accion_boton_rook) 
             
             # Iniciar lectura continua
             self.serial_handler.iniciar_lectura_continua(
                 self.input_handler.procesar_comando_joystick
             )
         else:
+            # Marca si se detecta el buzzer
+            self.buzzer_handler = BuzzerHandler(self.serial_handler)
+
             # No hay joystick, pero el mouse funciona normal
             print("Solo mouse disponible")
-
-            # Marca si se dete cta el buzzer
-            self.buzzer_handler = BuzzerHandler(self.serial_handler)
     
     def cargar_username_desencriptado(self):
         """Carga el username desencriptado desde el username_enc"""
@@ -799,6 +800,58 @@ class GameInterface:
                     fill=color,
                     outline=""
                 )
+
+    #MANEJO DE LOS BOTONES DE LAS ROOKS
+    def accion_boton_rook(self, tipo_rook):
+        """Coloca un tipo de rook en la posición actual del cursor cuando se presiona un botón físico"""
+        print(f"🎮 Botón presionado: {tipo_rook}")
+        
+        if self.juego_terminado or self.interfaz_pausada:
+            return
+        
+        # Obtener posición actual del cursor
+        f, c = self.input_handler.get_posicion_cursor()
+        
+        # Verificar límites
+        if f < 0 or f >= FILAS or c < 0 or c >= COLUMNAS:
+            return
+        
+        # Mapeo de nombres de botones a clases de rooks
+        mapeo_rooks = {
+            "FUEGO": RookFuego,
+            "ROCA": RookRoca,
+            "AGUA": RookAgua,
+            "ARENA": RookArena
+        }
+        
+        if tipo_rook not in mapeo_rooks:
+            print(f" Tipo de rook desconocido: {tipo_rook}")
+            return
+        
+        matriz = get_matriz_juego()
+        entidades_en_casilla = matriz[f][c]
+        
+        # Verificar si hay rooks o avatars en la casilla
+        hay_rook = any(isinstance(e, Rook) for e in entidades_en_casilla)
+        hay_avatar = any(isinstance(e, Avatar) for e in entidades_en_casilla)
+        
+        if hay_rook or hay_avatar:
+            print(f" Ya hay una rook o avatar en ({f},{c})")
+            return
+        
+        # Crear y colocar el rook del tipo seleccionado
+        clase_rook = mapeo_rooks[tipo_rook]
+        rook = clase_rook()
+        
+        # Verificar monedas
+        if self.monedas >= rook.costo:
+            self.monedas -= rook.costo
+            self.label_monedas.config(text=str(self.monedas))
+            rook.set_pos(f, c)
+            matriz[f][c].append(rook)
+            print(f" Rook {tipo_rook} colocada en ({f},{c}) - Costo: {rook.costo}")
+        else:
+            print(f" No tienes suficientes monedas (necesitas {rook.costo}, tienes {self.monedas})")
 
     #MANEJO DEL JUEGO CON JOYSTICK
 
@@ -1669,14 +1722,14 @@ class GameInterface:
         return False, 0, top_3
     
     def crear_banner_salon_fama(self, parent, posicion):
-        frame_banner = tk.Frame(parent, bg=COLOR_PANEL)
+        frame_banner = tk.Frame(parent, bg=self.c2)
         frame_banner.pack(fill=tk.X, padx=20, pady=15)
 
         tk.Label(
             frame_banner,
             text="🎉 ¡SALÓN DE LA FAMA! 🎉",
             font=("Arial", 16, "bold"),
-            bg=COLOR_PANEL,
+            bg=self.c2,
             fg="#f39c12",
             pady=8
         ).pack()
@@ -1690,13 +1743,13 @@ class GameInterface:
             frame_banner,
             text=f"{emoji_pos} Entraste en la posición #{posicion} {emoji_pos}",
             font=("Arial", 14, "bold"),
-            bg=COLOR_PANEL,
+            bg=self.c2,
             fg="#3498db",
             pady=5
         ).pack()
     
         # Línea decorativa
-        canvas_linea = tk.Canvas(frame_banner, width=400, height=2, bg=COLOR_PANEL, highlightthickness=0)
+        canvas_linea = tk.Canvas(frame_banner, width=400, height=2, bg=self.c2, highlightthickness=0)
         canvas_linea.pack(pady=5)
         canvas_linea.create_line(0, 1, 400, 1, fill="#f39c12", width=2)
         
@@ -1705,7 +1758,7 @@ class GameInterface:
             frame_banner,
             text="Tu puntaje está entre los mejores del nivel",
             font=("Arial", 10),
-            bg=COLOR_PANEL,
+            bg=self.c2,
             fg="#ecf0f1",
             pady=5
         ).pack()

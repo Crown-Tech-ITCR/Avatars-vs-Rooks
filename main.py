@@ -10,5 +10,4 @@ if __name__ == "__main__":
         global app
         app = root
     login_app.on_login_success = on_login_success # Asignamos la función de callback al login
-    
     root.mainloop()
