@@ -9,8 +9,10 @@ class InputHandler:
         
         self.joystick_detectado = False
         
+        #callbacks de cada componente
         self.callback_mover_cursor = None
         self.callback_click_joystick = None
+        self.callback_boton_rook = None
         
         self.ultimo_click_joystick = False
 
@@ -24,10 +26,16 @@ class InputHandler:
         return self.joystick_detectado
     
     def set_callback_mover_cursor(self, callback):
+        """Configura callback para leer el movimiento del cursor del joystick"""
         self.callback_mover_cursor = callback
     
     def set_callback_click_joystick(self, callback):
+        """Configura callback para el click de joystick"""
         self.callback_click_joystick = callback
+
+    def set_callback_boton_rook(self, callback):
+        """Configura callback para botones de selección de rooks"""
+        self.callback_boton_rook = callback
     
     def mover_cursor(self, direccion):
         if direccion == "Arriba" and self.cursor_fila > 0:
@@ -48,8 +56,18 @@ class InputHandler:
             if len(partes) != 2:
                 return
             
-            direccion = partes[0]
-            click = int(partes[1])
+            parte1 = partes[0]
+            parte2 = partes[1]
+            
+            # Detectar comandos de botones (BTN,ARENA / BTN,ROCA / etc)
+            if parte1 == "BTN":
+                if self.callback_boton_rook:
+                    self.callback_boton_rook(parte2)
+                return
+            
+            # Comandos normales de joystick
+            direccion = parte1
+            click = int(parte2)
             
             if direccion != "Centro":
                 if self.ultima_direccion == "Centro":
