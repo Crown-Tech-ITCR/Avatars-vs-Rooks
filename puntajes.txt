@@ -165,5 +165,210 @@
             "tempo": 120,
             "popularidad": 20
         }
+    ],
+    "IbfmT9aFDNfuu33TG0ZLK/KBi8xnOLK/McoUOD70gHOCigs=": [
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-16 10:43:24",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-16 10:47:05",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-16 10:58:36",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-16 11:03:05",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 38.8,
+            "fecha": "2025-11-16 11:05:33",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 35.2,
+            "fecha": "2025-11-16 11:07:56",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 35.2,
+            "fecha": "2025-11-16 11:08:18",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 37.6,
+            "fecha": "2025-11-16 11:11:06",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 30.6,
+            "fecha": "2025-11-16 11:11:27",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-16 11:11:49",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 30.6,
+            "fecha": "2025-11-16 11:13:13",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 30.6,
+            "fecha": "2025-11-16 11:13:36",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 42.4,
+            "fecha": "2025-11-16 11:14:01",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 35.2,
+            "fecha": "2025-11-16 11:14:24",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 34.2,
+            "fecha": "2025-11-16 11:14:50",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 2,
+            "puntaje": 41.2,
+            "fecha": "2025-11-16 11:18:25",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 2,
+            "puntaje": 34.8,
+            "fecha": "2025-11-16 11:18:51",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 2,
+            "puntaje": 38.4,
+            "fecha": "2025-11-16 11:19:14",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 34.0,
+            "fecha": "2025-11-16 17:11:56",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 32.4,
+            "fecha": "2025-11-16 17:20:21",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 34.0,
+            "fecha": "2025-11-16 17:22:16",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 37.4,
+            "fecha": "2025-11-16 17:24:15",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 34.2,
+            "fecha": "2025-11-16 17:26:50",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 34.4,
+            "fecha": "2025-11-16 17:27:13",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 42.4,
+            "fecha": "2025-11-16 17:36:28",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 63.76,
+            "fecha": "2025-11-16 17:37:12",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 66.01,
+            "fecha": "2025-11-16 17:39:37",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 65.33,
+            "fecha": "2025-11-16 17:41:43",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 55.04,
+            "fecha": "2025-11-16 17:47:00",
+            "tempo": 120,
+            "popularidad": 20
+        }
     ]
 }

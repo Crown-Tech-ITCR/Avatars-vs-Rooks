@@ -101,7 +101,7 @@ class Rook(Entidad):
 
         # Cooldown separado para disparo manual
         self.manual_shot_cooldown = 0
-        self.manual_shot_cooldown_max = 2  # Cooldown mínimo (2 ticks)
+        self.manual_shot_cooldown_max = 0  # Sin cooldown - disparo inmediato
 
     #Manejar disparos automaticos en pantalla 
 
@@ -119,6 +119,11 @@ class Rook(Entidad):
     def can_shoot_manual(self) -> bool:
         """Verifica si el rook puede disparar manualmente"""
         return self.manual_shot_cooldown == 0
+    
+    def manual_cooldown_remaining(self) -> float:
+        """Retorna el tiempo restante en segundos para el próximo disparo manual"""
+        from game_logic import VELOCIDAD_NIVEL
+        return (self.manual_shot_cooldown * VELOCIDAD_NIVEL) / 1000.0
     
     def shoot_manual(self):
         """Dispara al detectar un click del joystick y reinicia su cooldown"""
