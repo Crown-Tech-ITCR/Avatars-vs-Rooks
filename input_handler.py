@@ -1,6 +1,11 @@
+import random
+
 class InputHandler:
     
     def __init__(self, filas, columnas):
+        self.instance_id = random.randint(1000, 9999)  # ID único para rastrear instancias
+        print(f"🆔 InputHandler creado con ID: {self.instance_id}")
+        
         self.filas = filas
         self.columnas = columnas
         
@@ -13,6 +18,7 @@ class InputHandler:
         self.callback_mover_cursor = None
         self.callback_click_joystick = None
         self.callback_boton_rook = None
+        self.callback_boton_pausa = None  # Callback para botón de pausa
         
         self.ultimo_click_joystick = False
 
@@ -37,6 +43,12 @@ class InputHandler:
         """Configura callback para botones de selección de rooks"""
         self.callback_boton_rook = callback
     
+    def set_callback_boton_pausa(self, callback):
+        """Configura callback para el botón de pausa"""
+        print(f"🔧 [ID:{self.instance_id}] Configurando callback_boton_pausa: {callback}")
+        self.callback_boton_pausa = callback
+        print(f"   ✓ [ID:{self.instance_id}] callback_boton_pausa ahora es: {self.callback_boton_pausa}")
+    
     def mover_cursor(self, direccion):
         if direccion == "Arriba" and self.cursor_fila > 0:
             self.cursor_fila -= 1
@@ -59,8 +71,19 @@ class InputHandler:
             parte1 = partes[0]
             parte2 = partes[1]
             
-            # Detectar comandos de botones (BTN,ARENA / BTN,ROCA / etc)
+            # Detectar comandos de botones (BTN,ARENA / BTN,ROCA / BTN,PAUSA / etc)
             if parte1 == "BTN":
+                # Botón de pausa tiene prioridad
+                if parte2 == "PAUSA":
+                    print(f"⏸️  [ID:{self.instance_id}] Botón de pausa detectado")
+                    print(f"   📋 [ID:{self.instance_id}] callback_boton_pausa = {self.callback_boton_pausa}")
+                    if self.callback_boton_pausa:
+                        print(f"   → [ID:{self.instance_id}] Llamando a callback de pausa")
+                        self.callback_boton_pausa()
+                    else:
+                        print(f"   ⚠️ [ID:{self.instance_id}] No hay callback configurado para pausa")
+                    return
+                # Botones de rooks
                 if self.callback_boton_rook:
                     self.callback_boton_rook(parte2)
                 return

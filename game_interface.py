@@ -7,6 +7,7 @@ from gestion_puntajes import agregar_puntaje
 from ModificaciónDatos import mostrar_modificar_datos
 from input_handler import InputHandler
 from serial_handler import SerialHandler
+from wifi_handler import WiFiHandler
 from buzzer_handler import BuzzerHandler
 import encrip_aes
 from Publicaciones_X import publicar_top_salon_fama
@@ -168,14 +169,47 @@ class GameInterface:
         self.iniciar_juego()
 
     def inicializar_sistema_entrada(self):
-        """Inicializa el sistema de entrada (joystick o mouse)"""
+        """
+        Inicializa el sistema de entrada con prioridad:
+        1. Mando WiFi (Raspberry Pi Pico W)
+        2. Mando USB (Raspberry Pi Pico por serial)
+        3. Teclado/Mouse (por defecto)
+        """
         
         self.input_handler = InputHandler(FILAS, COLUMNAS)
+        self.wifi_handler = None
         self.serial_handler = SerialHandler()
         
-        # Intentar conectar joystick
+        # ===== PRIORIDAD 1: Intentar conectar MANDO WiFi =====
+        try:
+            print("🔍 Buscando mando WiFi...")
+            # IMPORTANTE: Cambia esta IP por la que muestre tu Pico W
+            PICO_IP = "192.168.0.101"  # ← MODIFICAR CON TU IP
+            self.wifi_handler = WiFiHandler(pico_ip=PICO_IP, pico_port=8080, timeout=2.0)
+            
+            # Conectar el input_handler al wifi_handler (ANTES de verificar is_connected)
+            self.wifi_handler.set_input_handler(self.input_handler)
+            
+            # Configurar callbacks (SIEMPRE, aunque is_connected sea False inicialmente)
+            print("📝 Configurando callbacks WiFi...")
+            self.input_handler.set_callback_mover_cursor(self.actualizar_cursor_visual)
+            self.input_handler.set_callback_click_joystick(self.accion_joystick)
+            self.input_handler.set_callback_boton_rook(self.accion_boton_rook)
+            self.input_handler.set_callback_boton_pausa(self.toggle_pausa)  # Botón de pausa
+            print(f"   ✓ Callback de pausa configurado: {self.input_handler.callback_boton_pausa is not None}")
+            
+            # Buzzer puede funcionar si está conectado
+            self.buzzer_handler = BuzzerHandler(self.serial_handler)
+            
+            print("✓ Sistema de entrada: MANDO WiFi")
+            return
+        except Exception as e:
+            print(f"⚠ Error intentando conectar mando WiFi: {e}")
+            self.wifi_handler = None
+        
+        # ===== PRIORIDAD 2: Intentar conectar MANDO USB (Serial) =====
         if self.serial_handler.conectar():
-            #Marca si se detecta el buzzer
+            # Marca si se detecta el buzzer
             self.buzzer_handler = BuzzerHandler(self.serial_handler)
 
             # Marcar que hay joystick
@@ -184,18 +218,23 @@ class GameInterface:
             # Configurar callbacks
             self.input_handler.set_callback_mover_cursor(self.actualizar_cursor_visual)
             self.input_handler.set_callback_click_joystick(self.accion_joystick)
-            self.input_handler.set_callback_boton_rook(self.accion_boton_rook) 
+            self.input_handler.set_callback_boton_rook(self.accion_boton_rook)
+            self.input_handler.set_callback_boton_pausa(self.toggle_pausa)  # Botón de pausa
+            self.input_handler.set_callback_boton_pausa(self.toggle_pausa)  # Botón de pausa 
             
             # Iniciar lectura continua
             self.serial_handler.iniciar_lectura_continua(
                 self.input_handler.procesar_comando_joystick
             )
+            
+            print("✓ Sistema de entrada: MANDO USB")
         else:
+            # ===== PRIORIDAD 3: TECLADO/MOUSE (por defecto) =====
             # Marca si se detecta el buzzer
             self.buzzer_handler = BuzzerHandler(self.serial_handler)
 
-            # No hay joystick, pero el mouse funciona normal
-            print("Solo mouse disponible")
+            # No hay mando, usar mouse/teclado
+            print("✓ Sistema de entrada: TECLADO/MOUSE")
     
     def cargar_username_desencriptado(self):
         """Carga el username desencriptado desde el username_enc"""
@@ -862,28 +901,40 @@ class GameInterface:
     def accion_joystick(self, fila, columna):
         """Ejecuta la acción cuando se presiona el botón del joystick"""
         
+        print(f"🎯 Click del joystick en casilla ({fila}, {columna})")
+        
         if self.juego_terminado:
+            print("   ⚠️  Juego terminado - click ignorado")
             return
         
         if self.interfaz_pausada:
+            print("   ⚠️  Juego pausado - click ignorado")
             return
         
         matriz = get_matriz_juego()
         entidades_en_casilla = matriz[fila][columna]
         
+        print(f"   📦 Entidades en casilla: {len(entidades_en_casilla)}")
+        for e in entidades_en_casilla:
+            print(f"      - {type(e).__name__}")
+        
         # Verificar si hay rook para disparar
         rooks_en_casilla = [e for e in entidades_en_casilla if isinstance(e, Rook)]
         
         if not rooks_en_casilla:
-            print(f"BLOQUEADO: No hay rook en esta casilla")
+            print(f"   ❌ BLOQUEADO: No hay rook en esta casilla")
             return
         
         rook = rooks_en_casilla[0]
+        print(f"   ✓ Rook encontrado: {rook.tipo}")
         
         # Verificar el cooldown MANUAL
         if not rook.can_shoot_manual():
+            print(f"   ⏱️  BLOQUEADO: Rook en cooldown (espera {rook.manual_cooldown_remaining():.1f}s)")
             return
             
+        print(f"   ✓ Rook puede disparar")
+        
         # Verificar si hay avatares en la columna
         hay_avatares = False
         avatares_encontrados = []
@@ -894,8 +945,11 @@ class GameInterface:
                 avatares_encontrados.append(f"Fila {fila_check}: {len(avatares_en_fila)} avatares")
         
         if not avatares_encontrados:
-            print(f"BLOQUEADO: No hay avatares en la columna {columna}")
+            print(f"   ❌ BLOQUEADO: No hay avatares en la columna {columna}")
             return
+        
+        print(f"   ✓ Avatares encontrados: {avatares_encontrados}")
+        print(f"   🔫 DISPARANDO...")
         
         # Dispara manual
         rafaga = rook.shoot_manual()
@@ -1439,6 +1493,10 @@ class GameInterface:
 
         #terminar thread de joystick 
         self.serial_handler.desconectar()
+        
+        # Desconectar mando WiFi si está activo
+        if self.wifi_handler:
+            self.wifi_handler.disconnect()
 
         # Iniciar el mismo nivel directamente sin pasar por el menú
         self.callback_volver_menu(iniciar_nuevo_nivel=True)
@@ -1458,6 +1516,10 @@ class GameInterface:
 
         #terminar thread de joystick 
         self.serial_handler.desconectar()
+        
+        # Desconectar mando WiFi si está activo
+        if self.wifi_handler:
+            self.wifi_handler.disconnect()
 
         # Lanzar el siguiente nivel inmediatamente
         self.callback_volver_menu(iniciar_nuevo_nivel=True)
@@ -1686,6 +1748,10 @@ class GameInterface:
 
         #terminar thread de joystick 
         self.serial_handler.desconectar()
+        
+        # Desconectar mando WiFi si está activo
+        if self.wifi_handler:
+            self.wifi_handler.disconnect()
 
         # Pasar los datos actualizados al callback
         self.callback_volver_menu(
