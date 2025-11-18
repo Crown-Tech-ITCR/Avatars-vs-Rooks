@@ -187,20 +187,22 @@ class GameInterface:
             PICO_IP = "192.168.0.101"  # ← MODIFICAR CON TU IP
             self.wifi_handler = WiFiHandler(pico_ip=PICO_IP, pico_port=8080, timeout=2.0)
             
-            if self.wifi_handler.is_connected():
-                # Mando WiFi conectado!
-                self.wifi_handler.set_input_handler(self.input_handler)
-                
-                # Configurar callbacks
-                self.input_handler.set_callback_mover_cursor(self.actualizar_cursor_visual)
-                self.input_handler.set_callback_click_joystick(self.accion_joystick)
-                self.input_handler.set_callback_boton_rook(self.accion_boton_rook)
-                
-                # Buzzer puede funcionar si está conectado
-                self.buzzer_handler = BuzzerHandler(self.serial_handler)
-                
-                print("✓ Sistema de entrada: MANDO WiFi")
-                return
+            # Conectar el input_handler al wifi_handler (ANTES de verificar is_connected)
+            self.wifi_handler.set_input_handler(self.input_handler)
+            
+            # Configurar callbacks (SIEMPRE, aunque is_connected sea False inicialmente)
+            print("📝 Configurando callbacks WiFi...")
+            self.input_handler.set_callback_mover_cursor(self.actualizar_cursor_visual)
+            self.input_handler.set_callback_click_joystick(self.accion_joystick)
+            self.input_handler.set_callback_boton_rook(self.accion_boton_rook)
+            self.input_handler.set_callback_boton_pausa(self.toggle_pausa)  # Botón de pausa
+            print(f"   ✓ Callback de pausa configurado: {self.input_handler.callback_boton_pausa is not None}")
+            
+            # Buzzer puede funcionar si está conectado
+            self.buzzer_handler = BuzzerHandler(self.serial_handler)
+            
+            print("✓ Sistema de entrada: MANDO WiFi")
+            return
         except Exception as e:
             print(f"⚠ Error intentando conectar mando WiFi: {e}")
             self.wifi_handler = None
@@ -216,7 +218,9 @@ class GameInterface:
             # Configurar callbacks
             self.input_handler.set_callback_mover_cursor(self.actualizar_cursor_visual)
             self.input_handler.set_callback_click_joystick(self.accion_joystick)
-            self.input_handler.set_callback_boton_rook(self.accion_boton_rook) 
+            self.input_handler.set_callback_boton_rook(self.accion_boton_rook)
+            self.input_handler.set_callback_boton_pausa(self.toggle_pausa)  # Botón de pausa
+            self.input_handler.set_callback_boton_pausa(self.toggle_pausa)  # Botón de pausa 
             
             # Iniciar lectura continua
             self.serial_handler.iniciar_lectura_continua(

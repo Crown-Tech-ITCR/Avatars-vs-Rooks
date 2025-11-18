@@ -26,7 +26,8 @@ class WiFiHandler:
                                      auto_connect=True, timeout=timeout)
         self.input_handler = None
         
-        # Registrar callbacks para eventos de la Pico W
+        # Registrar callbacks para eventos de la Pico W inmediatamente
+        # Los handlers verificarán si input_handler está configurado
         if self.pico.is_connected():
             self.pico.on_event("joystick", self._handle_joystick)
             self.pico.on_event("button", self._handle_button)
@@ -51,7 +52,7 @@ class WiFiHandler:
         Convierte formato de Pico W a formato InputHandler
         """
         if not self.input_handler:
-            print("⚠️  WiFiHandler: InputHandler no configurado")
+            # Si aún no se configuró, simplemente ignorar (eventos tempranos)
             return
         
         comando = data.get("comando", "")
@@ -68,7 +69,7 @@ class WiFiHandler:
         Convierte formato de Pico W a formato InputHandler
         """
         if not self.input_handler:
-            print("⚠️  WiFiHandler: InputHandler no configurado")
+            # Si aún no se configuró, simplemente ignorar (eventos tempranos)
             return
         
         comando = data.get("comando", "")

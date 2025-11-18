@@ -44,11 +44,14 @@ led = Pin("LED", Pin.OUT)
 stick = joystick(27, 26, 22)        # Y, X, Click
 buzzer_hw = BuzzerClass(15)         # Buzzer en GP15
 botones_hw = botones(16, 17, 18, 19)  # Botones en GP16-19
+boton_pausa = Pin(14, Pin.IN, Pin.PULL_UP)  # Botón de pausa en GP14
+ultimo_estado_pausa = 1  # Estado previo del botón (1 = no presionado)
 
 print("✓ Hardware inicializado")
 print("  - Joystick: GP26(X), GP27(Y), GP22(Click)")
 print("  - Buzzer: GP15")
 print("  - Botones: GP16-19")
+print("  - Botón Pausa: GP14")
 
 # ============= FUNCIONES WiFi =============
 def connect_wifi():
@@ -206,8 +209,17 @@ def leer_joystick_y_botones():
     Lee el joystick y botones usando las clases existentes
     Retorna el comando en formato compatible con InputHandler
     """
+    global ultimo_estado_pausa
+    
     try:
-        # Leer botones de rooks primero (tienen prioridad)
+        # Leer botón de pausa (máxima prioridad)
+        estado_pausa = boton_pausa.value()
+        if estado_pausa == 0 and ultimo_estado_pausa == 1:  # Flanco de bajada (presionado)
+            ultimo_estado_pausa = estado_pausa
+            return "BTN,PAUSA"
+        ultimo_estado_pausa = estado_pausa
+        
+        # Leer botones de rooks
         boton = botones_hw.leer_estado()
         if boton:
             return f"BTN,{boton}"

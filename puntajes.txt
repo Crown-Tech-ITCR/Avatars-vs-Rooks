@@ -369,6 +369,27 @@
             "fecha": "2025-11-16 17:47:00",
             "tempo": 120,
             "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 28.0,
+            "fecha": "2025-11-16 17:50:35",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 56.36,
+            "fecha": "2025-11-16 17:57:47",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 1,
+            "puntaje": 65.45,
+            "fecha": "2025-11-16 18:06:24",
+            "tempo": 120,
+            "popularidad": 20
         }
     ]
 }
