@@ -11,6 +11,8 @@ from wifi_handler import WiFiHandler
 from buzzer_handler import BuzzerHandler
 import encrip_aes
 from Publicaciones_X import publicar_top_salon_fama
+from Publicaciones_Insta import publicar_top_salon_instagram
+import os
 
 # Configuración de colores
 COLOR_FONDO = "black" 
@@ -1591,11 +1593,21 @@ class GameInterface:
 
                 # Ejecutar la publicación en un hilo separado para no bloquear la UI
                 import threading
-                hilo = threading.Thread(
-                    target=publicar_top_salon_fama,
-                    args=(datos_puntaje['nivel'], top_actual, nombres_descifrados),
-                    daemon=True
-                )
+
+                def _publish_both():
+                    try:
+                        publicar_top_salon_fama(datos_puntaje['nivel'], top_actual, nombres_descifrados)
+                    except Exception as e:
+                        print(f"Error publicando en X: {e}")
+                    try:
+                        # Publicar en Instagram (real). Asegúrate de haber rellenado
+                        # `IG_USER_ID`, `ACCESS_TOKEN` y alguno de: IMAGE_PUBLIC_URL o
+                        # FB_PAGE_ID+FB_PAGE_ACCESS_TOKEN o IMGUR_CLIENT_ID.
+                        publicar_top_salon_instagram(datos_puntaje['nivel'], top_actual, nombres_descifrados)
+                    except Exception as e:
+                        print(f"Error publicando en Instagram: {e}")
+
+                hilo = threading.Thread(target=_publish_both, daemon=True)
                 hilo.start()
             except Exception as e:
                 print(f"Error iniciando publicación automática del Salón de la Fama: {e}")
