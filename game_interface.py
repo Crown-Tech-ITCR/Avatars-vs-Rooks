@@ -1775,27 +1775,29 @@ class GameInterface:
     def verificar_entrada_salon_fama(self, datos_puntaje):
         "Verificar si el puntaje entro al salon de la fama"
         
-        from gestion_puntajes import obtener_top_nivel
+        from gestion_puntajes import obtener_top_nivel, obtener_posicion_usuario
 
         nivel=datos_puntaje['nivel']
         puntaje=datos_puntaje['puntaje']
+        fue_guardado = datos_puntaje.get('fue_guardado', True)
+
+        # Si el puntaje NO fue guardado (no es un nuevo récord), NO entra al salón de la fama
+        if not fue_guardado:
+            return False, 0, []
 
         top_3= obtener_top_nivel(nivel, limit=3)
 
         #Si hay menos de 3 jugadores entra directo
         if len(top_3) < 3:
-            posicion = len(top_3)+1
+            # Obtener la posición real del usuario después de agregar el puntaje
+            posicion = obtener_posicion_usuario(self.username_enc, nivel)
             return True, posicion, top_3
+        
         tercer_puntaje = top_3[2][1] #verificar que el puntaje supere al tercero
 
         if puntaje > tercer_puntaje:
-            posicion = 1
-            for idx, (_, ptj, _, _, _) in enumerate(top_3):
-                if puntaje > ptj:
-                    posicion = idx + 1
-                    break
-            posicion = idx + 2
-
+            # Obtener la posición real del usuario después de agregar el puntaje
+            posicion = obtener_posicion_usuario(self.username_enc, nivel)
             return True, posicion, top_3
         return False, 0, top_3
     
@@ -1856,8 +1858,8 @@ class GameInterface:
                     puntos_vida_acumulados
                 )
             
-                # GUARDAR PUNTAJE
-                agregar_puntaje(
+                # GUARDAR PUNTAJE y capturar si se guardó
+                fue_guardado = agregar_puntaje(
                     self.username_enc,
                     NIVEL_ACTUAL,
                     puntaje,
@@ -1873,7 +1875,8 @@ class GameInterface:
                     'popularidad': self.popularidad,
                     'avatars_eliminados': avatars_eliminados,
                     'puntos_vida_acumulados': puntos_vida_acumulados,
-                    'nivel': NIVEL_ACTUAL
+                    'nivel': NIVEL_ACTUAL,
+                    'fue_guardado': fue_guardado
                 }
             
             except Exception as e:
@@ -1883,5 +1886,6 @@ class GameInterface:
                     'error': str(e),
                     'puntaje': 0,
                     'tempo': self.tempo,
-                    'popularidad': self.popularidad
+                    'popularidad': self.popularidad,
+                    'fue_guardado': False
                 }
