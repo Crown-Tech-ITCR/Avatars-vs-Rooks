@@ -1,5 +1,5 @@
 import tkinter as tk
-from gestion_puntajes import obtener_top_nivel
+from gestion_puntajes import obtener_top_nivel, obtener_posicion_usuario
 import encrip_aes
 from PIL import Image, ImageTk
 import os
@@ -356,6 +356,9 @@ class SalonFamaNivel:
             x = pos["x"]
             y = pos["y"]
             
+            # Obtener la posición real del usuario en el ranking completo
+            posicion_real = obtener_posicion_usuario(username_enc, self.nivel)
+            
             # Intentar cargar foto de perfil
             profile_photo = self.obtener_foto_perfil(username_enc)
             
@@ -378,8 +381,8 @@ class SalonFamaNivel:
             ids = self._draw_outlined_text(x, y + content_y_offset, emojis[idx], font_medalla, fill="gold", outline="black", anchor="n")
             self.podium_items.extend(ids)
 
-            # Número de posición (abajo de la medalla)
-            ids = self._draw_outlined_text(x, y + content_y_offset + 35, f"#{idx+1}", font_pos, fill="white", outline="black", anchor="n")
+            # Número de posición (abajo de la medalla) - usar posición real
+            ids = self._draw_outlined_text(x, y + content_y_offset + 35, f"#{posicion_real}", font_pos, fill="white", outline="black", anchor="n")
             self.podium_items.extend(ids)
 
             # Nombre (centro) - con más espaciado
