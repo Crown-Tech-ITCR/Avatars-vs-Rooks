@@ -5,8 +5,8 @@ from Entidades import RookRoca, RookFuego, RookAgua, RookArena, crear_avatar, Ro
 from sistema_puntos import SistemaPuntos
 from gestion_puntajes import agregar_puntaje
 from ModificaciónDatos import mostrar_modificar_datos
+from Moneda import Moneda
 from input_handler import InputHandler
-from serial_handler import SerialHandler
 from wifi_handler import WiFiHandler
 from buzzer_handler import BuzzerHandler
 import encrip_aes
@@ -180,13 +180,12 @@ class GameInterface:
         
         self.input_handler = InputHandler(FILAS, COLUMNAS)
         self.wifi_handler = None
-        self.serial_handler = SerialHandler()
         
         # ===== PRIORIDAD 1: Intentar conectar MANDO WiFi =====
         try:
             print("🔍 Buscando mando WiFi...")
             # IMPORTANTE: Cambia esta IP por la que muestre tu Pico W
-            PICO_IP = "192.168.0.101"  # ← MODIFICAR CON TU IP
+            PICO_IP = "192.168.0.9" 
             self.wifi_handler = WiFiHandler(pico_ip=PICO_IP, pico_port=8080, timeout=2.0)
             
             # Conectar el input_handler al wifi_handler (ANTES de verificar is_connected)
@@ -197,22 +196,22 @@ class GameInterface:
             self.input_handler.set_callback_mover_cursor(self.actualizar_cursor_visual)
             self.input_handler.set_callback_click_joystick(self.accion_joystick)
             self.input_handler.set_callback_boton_rook(self.accion_boton_rook)
-            self.input_handler.set_callback_boton_pausa(self.toggle_pausa)  # Botón de pausa
-            print(f"   ✓ Callback de pausa configurado: {self.input_handler.callback_boton_pausa is not None}")
+            self.input_handler.set_callback_boton_pausa(self.toggle_pausa)
+            self.input_handler.set_callback_boton_monedas(self.accion_monedas)
             
             # Buzzer puede funcionar si está conectado
-            self.buzzer_handler = BuzzerHandler(self.serial_handler)
+            self.buzzer_handler = BuzzerHandler(wifi_handler=self.wifi_handler)
             
-            print("✓ Sistema de entrada: MANDO WiFi")
+            print("Sistema de entrada: MANDO WiFi")
             return
         except Exception as e:
-            print(f"⚠ Error intentando conectar mando WiFi: {e}")
+            print(f"Error intentando conectar mando WiFi: {e}")
             self.wifi_handler = None
         
         # ===== PRIORIDAD 2: Intentar conectar MANDO USB (Serial) =====
         if self.serial_handler.conectar():
             # Marca si se detecta el buzzer
-            self.buzzer_handler = BuzzerHandler(self.serial_handler)
+            self.buzzer_handler = BuzzerHandler(wifi_handler=self.wifi_handler)
 
             # Marcar que hay joystick
             self.input_handler.marcar_joystick_detectado()
@@ -221,8 +220,9 @@ class GameInterface:
             self.input_handler.set_callback_mover_cursor(self.actualizar_cursor_visual)
             self.input_handler.set_callback_click_joystick(self.accion_joystick)
             self.input_handler.set_callback_boton_rook(self.accion_boton_rook)
-            self.input_handler.set_callback_boton_pausa(self.toggle_pausa)  # Botón de pausa
-            self.input_handler.set_callback_boton_pausa(self.toggle_pausa)  # Botón de pausa 
+            self.input_handler.set_callback_boton_pausa(self.toggle_pausa) 
+            self.input_handler.set_callback_boton_monedas(self.accion_monedas)
+
             
             # Iniciar lectura continua
             self.serial_handler.iniciar_lectura_continua(
@@ -233,7 +233,7 @@ class GameInterface:
         else:
             # ===== PRIORIDAD 3: TECLADO/MOUSE (por defecto) =====
             # Marca si se detecta el buzzer
-            self.buzzer_handler = BuzzerHandler(self.serial_handler)
+            self.buzzer_handler = BuzzerHandler(wifi_handler=self.wifi_handler)
 
             # No hay mando, usar mouse/teclado
             print("✓ Sistema de entrada: TECLADO/MOUSE")
@@ -520,6 +520,42 @@ class GameInterface:
             # Reanudar bucles si estaban pausados
             if not self.juego_terminado:
                 self.reanudar_bucles()
+
+    def accion_monedas(self):
+        """Recoge automáticamente todas las monedas del tablero."""
+        
+        if self.juego_terminado or self.interfaz_pausada:
+            return
+        
+        matriz = get_matriz_juego()
+        monedas_recogidas = 0
+        valor_total = 0
+        
+        # Recorrer toda la matriz buscando monedas
+        for f in range(FILAS):
+            for c in range(COLUMNAS):
+                # Buscar todas las monedas en esta casilla
+                monedas = [e for e in matriz[f][c] if isinstance(e, Moneda)]
+                
+                for moneda in monedas:
+                    # Recoger la moneda
+                    valor = moneda.recoger()
+                    self.monedas += valor
+                    valor_total += valor
+                    monedas_recogidas += 1
+                    
+                    # Eliminar de la matriz
+                    if moneda in matriz[f][c]:
+                        matriz[f][c].remove(moneda)
+        
+        # Actualizar la UI de monedas
+        self.label_monedas.config(text=str(self.monedas))
+        
+        
+        # Mostrar feedback visual
+        if monedas_recogidas > 0:
+            print("buzzer")
+            self.buzzer_handler.tocar_moneda()
     
     def reanudar_bucles(self):
         """Reanuda los bucles del juego después de una pausa."""
@@ -1492,9 +1528,6 @@ class GameInterface:
         set_nivel_actual(nivel)  #Mantener el mismo nivel
         ventana.destroy()
         self.root.destroy()
-
-        #terminar thread de joystick 
-        self.serial_handler.desconectar()
         
         # Desconectar mando WiFi si está activo
         if self.wifi_handler:
@@ -1515,9 +1548,6 @@ class GameInterface:
         set_nivel_actual(nivel + 1)  # Aumentar nivel de manera segura
         ventana.destroy()
         self.root.destroy()
-
-        #terminar thread de joystick 
-        self.serial_handler.desconectar()
         
         # Desconectar mando WiFi si está activo
         if self.wifi_handler:
@@ -1757,9 +1787,6 @@ class GameInterface:
     def volver_menu_win(self, ventana):
         # Cerrar sólo el popup y notificar al MainMenu
         ventana.destroy()
-
-        #terminar thread de joystick 
-        self.serial_handler.desconectar()
         
         # Desconectar mando WiFi si está activo
         if self.wifi_handler:
