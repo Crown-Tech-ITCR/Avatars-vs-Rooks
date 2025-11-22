@@ -18,7 +18,8 @@ class InputHandler:
         self.callback_mover_cursor = None
         self.callback_click_joystick = None
         self.callback_boton_rook = None
-        self.callback_boton_pausa = None  # Callback para botón de pausa
+        self.callback_boton_pausa = None
+        self.callback_boton_monedas = None
         
         self.ultimo_click_joystick = False
 
@@ -45,10 +46,12 @@ class InputHandler:
     
     def set_callback_boton_pausa(self, callback):
         """Configura callback para el botón de pausa"""
-        print(f"🔧 [ID:{self.instance_id}] Configurando callback_boton_pausa: {callback}")
-        self.callback_boton_pausa = callback
-        print(f"   ✓ [ID:{self.instance_id}] callback_boton_pausa ahora es: {self.callback_boton_pausa}")
-    
+        self.callback_boton_pausa = callback   
+
+    def set_callback_boton_monedas(self,callback):
+         """Configura callback para el botón de monedas"""
+         self.callback_boton_monedas = callback
+        
     def mover_cursor(self, direccion):
         if direccion == "Arriba" and self.cursor_fila > 0:
             self.cursor_fila -= 1
@@ -75,14 +78,22 @@ class InputHandler:
             if parte1 == "BTN":
                 # Botón de pausa tiene prioridad
                 if parte2 == "PAUSA":
-                    print(f"⏸️  [ID:{self.instance_id}] Botón de pausa detectado")
-                    print(f"   📋 [ID:{self.instance_id}] callback_boton_pausa = {self.callback_boton_pausa}")
+                    print(f"[ID:{self.instance_id}] Botón de pausa detectado")
                     if self.callback_boton_pausa:
-                        print(f"   → [ID:{self.instance_id}] Llamando a callback de pausa")
                         self.callback_boton_pausa()
                     else:
-                        print(f"   ⚠️ [ID:{self.instance_id}] No hay callback configurado para pausa")
+                        print(f"[ID:{self.instance_id}] No hay callback configurado para pausa")
                     return
+                
+                # Botón de monedas
+                if parte2 == "MONEDA":
+                    print(f"[ID:{self.instance_id}] Botón de monedas detectado")
+                    if self.callback_boton_monedas:
+                        self.callback_boton_monedas()
+                    else:
+                        print(f"[ID:{self.instance_id}] No hay callback configurado para monedas")
+                    return
+                
                 # Botones de rooks
                 if self.callback_boton_rook:
                     self.callback_boton_rook(parte2)
@@ -96,9 +107,9 @@ class InputHandler:
                 if self.ultima_direccion == "Centro":
                     self.mover_cursor(direccion)
                     self.ultima_direccion = direccion
-                else:
-                    #volvio al centro, actualizamos ultima direccion para permitir movimiento
-                    self.ultima_direccion = "Centro"
+            else:
+                #volvio al centro, actualizamos ultima direccion para permitir movimiento
+                self.ultima_direccion = "Centro"
 
             if click == 1 :
                 if not self.ultimo_click_joystick:

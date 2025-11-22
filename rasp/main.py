@@ -3,21 +3,14 @@ Código para Raspberry Pi Pico W (MicroPython)
 Servidor WiFi para control del juego Avatars vs Rooks
 Fusiona funcionalidad WiFi con el sistema de Joystick, Buzzer y Botones existente
 
-INSTRUCCIONES DE INSTALACIÓN:
-1. Instala Thonny IDE (https://thonny.org/)
-2. Conecta tu Pico W vía USB
-3. En Thonny, selecciona MicroPython (Raspberry Pi Pico)
-4. Sube este archivo como main.py en la Pico W
-5. Sube también: Joystick.py, Buzzer.py, Botones.py
-6. Modifica WIFI_SSID y WIFI_PASSWORD con tus credenciales
-7. Reinicia la Pico W
-
 HARDWARE:
 - Joystick en pines GP26, GP27, GP22
 - Buzzer en pin GP15
-- Botones en pines GP16, GP17, GP18, GP19
-"""
+- Botones Rooks en pines GP16, GP17, GP18, GP19
+- Boton pausa en pin GP14
+- Boton monedas en GP13
 
+"""
 import network
 import socket
 import json
@@ -28,32 +21,31 @@ from machine import Pin
 
 # Importar clases del hardware
 from Joystick import joystick
-from Buzzer import buzzer as BuzzerClass
+from Buzzer import buzzer
 from Botones import botones
 
 # ============= CONFIGURACIÓN WiFi =============
-WIFI_SSID = "Apart01"          # Cambia esto por tu red WiFi
-WIFI_PASSWORD = "casaEstu1"   # Cambia esto por tu contraseña
-SERVER_PORT = 8080                    # Puerto del servidor
+# Aquí se cambia la red de acuerdo a la del momento
+WIFI_SSID = "Tigo"         
+WIFI_PASSWORD = "123456789"  
+SERVER_PORT = 8080                   
 
 # ============= CONFIGURACIÓN DE HARDWARE =============
-# LED integrado de la Pico W (indicador de estado)
+
+# LED integrado de la Pico W (util para pruebas)
 led = Pin("LED", Pin.OUT)
 
 # Inicializar hardware
-stick = joystick(27, 26, 22)        # Y, X, Click
-buzzer_hw = BuzzerClass(15)         # Buzzer en GP15
-botones_hw = botones(16, 17, 18, 19)  # Botones en GP16-19
-boton_pausa = Pin(14, Pin.IN, Pin.PULL_UP)  # Botón de pausa en GP14
-ultimo_estado_pausa = 1  # Estado previo del botón (1 = no presionado)
-
-print("✓ Hardware inicializado")
-print("  - Joystick: GP26(X), GP27(Y), GP22(Click)")
-print("  - Buzzer: GP15")
-print("  - Botones: GP16-19")
-print("  - Botón Pausa: GP14")
+stick = joystick(27, 26, 22)       
+buzzer_hw = buzzer(15)
+botones_hw = botones(16, 17, 18, 19)
+boton_pausa = Pin(14, Pin.IN, Pin.PULL_UP)
+boton_monedas = Pin(13, Pin.IN, Pin.PULL_UP)
+ultimo_estado_pausa = 1
+ultimo_estado_moneda = 1
 
 # ============= FUNCIONES WiFi =============
+
 def connect_wifi():
     """Conecta la Pico W a WiFi"""
     wlan = network.WLAN(network.STA_IF)
@@ -74,13 +66,13 @@ def connect_wifi():
     
     if wlan.isconnected():
         ip = wlan.ifconfig()[0]
-        print(f'✓ Conectado a WiFi')
-        print(f'✓ IP de la Pico W: {ip}')
-        print(f'✓ Puerto: {SERVER_PORT}')
+        print(f'Conectado a WiFi')
+        print(f'IP de la Pico W: {ip}')
+        print(f'Puerto: {SERVER_PORT}')
         print(f'\n>>> Usa esta IP en tu juego: {ip} <<<\n')
         return wlan, ip
     else:
-        print('✗ No se pudo conectar a WiFi')
+        print('No se pudo conectar a WiFi')
         return None, None
 
 # ============= MANEJO DE COMANDOS =============
@@ -97,22 +89,22 @@ def handle_command(command_dict, client_socket):
     
     print(f"← Comando recibido: {command}")
     
-    # ===== COMANDOS DEL BUZZER (Compatibles con picow.py) =====
+    # ===== COMANDOS DEL BUZZER =====
     
     if command == "WIN":
         # Victoria - melodía de victoria
         buzzer_hw.melodia_victoria()
-        print("  → Melodía de victoria")
+        print("Melodía de victoria")
         
     elif command == "LOSE":
         # Derrota - melodía de derrota
         buzzer_hw.melodia_derrota()
-        print("  → Melodía de derrota")
+        print("Melodía de derrota")
         
     elif command == "COIN":
         # Moneda obtenida
         buzzer_hw.melodia_moneda()
-        print("  → Melodía de moneda")
+        print("Melodía de moneda")
     
     # ===== COMANDOS DEL LED =====
     
@@ -145,12 +137,11 @@ def handle_command(command_dict, client_socket):
         lives = data.get("lives", 0)
         print(f"  → Nivel: {level}, Puntos: {score}, Vidas: {lives}")
         
-        # Aquí puedes actualizar un display LCD, LEDs, etc.
         
     elif command == "game_over":
         # El juego terminó
         won = data.get("won", False)
-        print(f"  → Juego terminado. ¿Ganó? {won}")
+        print(f" Juego terminado. ¿Ganó? {won}")
         
         # Reproducir melodía correspondiente
         if won:
@@ -161,23 +152,18 @@ def handle_command(command_dict, client_socket):
     elif command == "level_complete":
         # Nivel completado
         level = data.get("level", 0)
-        print(f"  → Nivel {level} completado!")
+        print(f"Nivel {level} completado!")
         
         # Efecto de celebración
         buzzer_hw.melodia_victoria()
-        for _ in range(3):
-            led.on()
-            time.sleep(0.1)
-            led.off()
-            time.sleep(0.1)
     
     elif command == "ping":
         # Responder a ping
         send_event(client_socket, "pong", {"timestamp": time.time()})
-        print("  → Pong enviado")
+        print("Pong enviado")
     
     else:
-        print(f"  ⚠ Comando desconocido: {command}")
+        print(f"Comando desconocido: {command}")
 
 # ============= ENVÍO DE EVENTOS =============
 def send_event(client_socket, event_type, data=None):
@@ -200,7 +186,7 @@ def send_event(client_socket, event_type, data=None):
         client_socket.send(json_str.encode('utf-8'))
         return True
     except Exception as e:
-        print(f"✗ Error al enviar evento: {e}")
+        print(f"Error al enviar evento: {e}")
         return False
 
 # ============= LECTURA DE JOYSTICK Y BOTONES =============
@@ -210,14 +196,24 @@ def leer_joystick_y_botones():
     Retorna el comando en formato compatible con InputHandler
     """
     global ultimo_estado_pausa
+    global ultimo_estado_moneda
     
     try:
-        # Leer botón de pausa (máxima prioridad)
+        # Leer botón de pausa
         estado_pausa = boton_pausa.value()
-        if estado_pausa == 0 and ultimo_estado_pausa == 1:  # Flanco de bajada (presionado)
-            ultimo_estado_pausa = estado_pausa
+        pausa_presionada = (estado_pausa == 0 and ultimo_estado_pausa == 1)
+        ultimo_estado_pausa = estado_pausa  # ← SIEMPRE actualizar
+        
+        if pausa_presionada:
             return "BTN,PAUSA"
-        ultimo_estado_pausa = estado_pausa
+        
+        # Leer boton de recolectar monedas
+        estado_moneda = boton_monedas.value()
+        moneda_presionada = (estado_moneda == 0 and ultimo_estado_moneda == 1)
+        ultimo_estado_moneda = estado_moneda  # ← SIEMPRE actualizar
+        
+        if moneda_presionada:
+            return "BTN,MONEDA"
         
         # Leer botones de rooks
         boton = botones_hw.leer_estado()
@@ -242,14 +238,12 @@ def leer_joystick_y_botones():
         if click:
             return f"Centro,1"
         
-        # Importante: enviar Centro,0 cuando no hay click para resetear el estado
-        # Pero solo hacerlo ocasionalmente para no saturar
+        # Enviar Centro, 0 cuando no hay click para resetear el estado
         return f"Centro,0"
     
     except Exception as e:
-        print(f"✗ Error leyendo hardware: {e}")
+        print(f"Error leyendo hardware: {e}")
         return None
-
 # ============= SERVIDOR PRINCIPAL =============
 def start_server(ip):
     """Inicia el servidor TCP"""
@@ -266,7 +260,7 @@ def start_server(ip):
         try:
             # Aceptar conexión
             client_socket, client_addr = server_socket.accept()
-            print(f'\n✓ Cliente conectado desde {client_addr}')
+            print(f'\n Cliente conectado desde {client_addr}')
             
             # LED de confirmación
             led.on()
@@ -296,13 +290,13 @@ def start_server(ip):
                                     command_dict = json.loads(line)
                                     handle_command(command_dict, client_socket)
                                 except json.JSONDecodeError as e:
-                                    print(f"✗ JSON inválido: {e}")
+                                    print(f"JSON inválido: {e}")
                     
                     except OSError as e:
                         # EAGAIN o EWOULDBLOCK = No hay datos disponibles (normal en modo no bloqueante)
                         # Errno 11 = EAGAIN, Errno 35 = EWOULDBLOCK (Mac), Errno 10035 = WSAEWOULDBLOCK (Windows)
                         if e.args[0] not in [11, 35, 10035]:
-                            print(f'✗ Error de socket: {e}')
+                            print(f'Error de socket: {e}')
                             raise
                     
                     # Leer joystick y botones usando el hardware existente
@@ -311,10 +305,10 @@ def start_server(ip):
                         # Determinar si es botón o joystick
                         if comando.startswith("BTN,"):
                             send_event(client_socket, "button", {"comando": comando})
-                            print(f"  🔘 {comando}")
+                            print(f"{comando}")
                         else:
                             send_event(client_socket, "joystick", {"comando": comando})
-                            print(f"  🕹️  {comando}")
+                            print(f"{comando}")
                     
                     # Pequeño delay para no saturar (50ms = 20 lecturas por segundo)
                     time.sleep(0.05)
@@ -344,7 +338,7 @@ def main():
     print('Raspberry Pi Pico W - Servidor de Juego')
     print('='*50)
     
-    # Parpadeo inicial
+    # Parpadeo inicial de la ras al iniciar el juego
     for _ in range(3):
         led.on()
         time.sleep(0.2)

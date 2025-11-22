@@ -56,12 +56,10 @@ class WiFiHandler:
             return
         
         comando = data.get("comando", "")
-        print(f"🕹️  WiFiHandler recibió joystick: {comando}")
         
         # El comando ya viene en formato compatible: "Direccion,Click"
-        # Ejemplo: "Arriba,0" o "Centro,1"
+
         self.input_handler.procesar_comando_joystick(comando)
-        print(f"   → Comando enviado a InputHandler")
     
     def _handle_button(self, data):
         """
