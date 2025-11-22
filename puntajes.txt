@@ -82,6 +82,20 @@
             "fecha": "2025-11-19 20:31:42",
             "tempo": 122.5,
             "popularidad": 96
+        },
+        {
+            "nivel": 3,
+            "puntaje": 28.0,
+            "fecha": "2025-11-21 16:50:26",
+            "tempo": 120,
+            "popularidad": 20
+        },
+        {
+            "nivel": 3,
+            "puntaje": 40.6,
+            "fecha": "2025-11-21 16:50:51",
+            "tempo": 120,
+            "popularidad": 20
         }
     ],
     "4DG90KtcHdpyFcRvnpYL5Ztb85U3/ZghxVQrhQBDw2q2": [

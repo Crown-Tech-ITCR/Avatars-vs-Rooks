@@ -162,8 +162,7 @@ class PicoCommunication:
         Args:
             message: Diccionario con el mensaje
         """
-        print(f"← Recibido: {message}")
-        
+                
         event_type = message.get("event", "unknown")
         
         # Llamar al callback registrado para este tipo de evento
