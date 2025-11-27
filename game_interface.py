@@ -185,7 +185,7 @@ class GameInterface:
         try:
             print("🔍 Buscando mando WiFi...")
             # IMPORTANTE: Cambia esta IP por la que muestre tu Pico W
-            PICO_IP = "192.168.0.9" 
+            PICO_IP = "172.29.191.94"
             self.wifi_handler = WiFiHandler(pico_ip=PICO_IP, pico_port=8080, timeout=2.0)
             
             # Conectar el input_handler al wifi_handler (ANTES de verificar is_connected)
@@ -1580,7 +1580,7 @@ class GameInterface:
             titulo = "Nivel completado"
             mensaje = f"🎉 ¡Nivel {datos_puntaje['nivel']} completado! 🎉"
             color_mensaje = self.c6
-            altura = 420
+            altura = 500
         else:
             titulo = "¡Has perdido! 💀"
             mensaje = f"💀 Perdiste en el Nivel {datos_puntaje['nivel']} 💀"
