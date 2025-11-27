@@ -236,6 +236,128 @@ def show_help(parent, colors):
             justify="left"
         ).pack(anchor="w", pady=(0, 10))
 
+    # Separador visual
+    Label(
+        frame_texto,
+        text="─" * 80,
+        fg=colors[3],
+        bg=colors[0],
+        font=("Arial", 8)
+    ).pack(anchor="w", pady=15)
+
+    # Frame para sección adicional destacada
+    frame_seccion_adicional = Frame(
+        frame_texto,
+        bg=colors[0],
+        bd=2,
+        relief="ridge",
+        padx=15,
+        pady=15
+    )
+    frame_seccion_adicional.pack(anchor="w", fill="x", pady=10)
+
+    # Título de la sección adicional
+    Label(
+        frame_seccion_adicional,
+        text="ℹ️ Funciones del control",
+        font=("Arial Black", 12),
+        fg=colors[3],
+        bg=colors[0],
+        anchor="w",
+        justify="left"
+    ).pack(anchor="w", pady=(0, 10))
+    
+    # Crear un frame interno para el contenido con scroll
+    frame_contenido = Frame(frame_seccion_adicional, bg=colors[0])
+    frame_contenido.pack(anchor="w", fill="both", expand=True)
+    
+    # Lista de secciones dentro del marco
+    secciones_control = [
+        {
+            "titulo": "🎮 Uso general del control:",
+            "puntos": [
+                "El control no funciona en el menú ni fuera de los niveles.",
+                "Solo dentro del juego podrás mover el cursor y colocar torres."
+            ]
+        },
+        {
+            "titulo": "🕹️ Movimiento:",
+            "puntos": [
+                "Usa el joystick para moverte entre las casillas donde puedes construir torres."
+            ]
+        },
+        {
+            "titulo": "🏰 Colocación de Torres:",
+            "subtitulo": "Los botones de colores colocan una torre diferente en la casilla seleccionada:",
+            "puntos": [
+                "🔵 Botón Azul → Torre de Fuego",
+                "🟢 Botón Verde → Torre de Roca",
+                "🟡 Botón Amarillo → Torre de Arena",
+                "🟠 Botón Anaranjado → Torre de Agua"
+            ]
+        },
+        {
+            "titulo": "💰 Funciones Centrales:",
+            "puntos": [
+                "⬅️ Botón central amarillo izquierdo → Recoger monedas en la casilla",
+                "➡️ Botón central blanco derecho → Pausar / Reanudar la partida"
+            ]
+        }
+    ]
+    
+    # Mostrar cada sección
+    for sec in secciones_control:
+        Label(
+            frame_contenido,
+            text=sec["titulo"],
+            font=("Arial", 10, "bold"),
+            fg=colors[3],
+            bg=colors[0],
+            anchor="w",
+            justify="left"
+        ).pack(anchor="w", pady=(5, 2))
+        
+        if "subtitulo" in sec:
+            Label(
+                frame_contenido,
+                text=sec["subtitulo"],
+                font=("Arial", 10),
+                fg=colors[6],
+                bg=colors[0],
+                wraplength=600,
+                anchor="w",
+                justify="left"
+            ).pack(anchor="w", pady=(0, 3))
+        
+        for punto in sec["puntos"]:
+            Label(
+                frame_contenido,
+                text="• " + punto,
+                font=("Arial", 10),
+                fg=colors[6],
+                bg=colors[0],
+                wraplength=580,
+                anchor="w",
+                justify="left"
+            ).pack(anchor="w", pady=1)
+        
+        Label(
+            frame_contenido,
+            text="",
+            bg=colors[0]
+        ).pack(pady=3)
+    
+    # Conclusión
+    Label(
+        frame_contenido,
+        text="Estas funciones son todo lo que necesitas para jugar de manera sencilla y rápida.",
+        font=("Arial", 10),
+        fg=colors[6],
+        bg=colors[0],
+        wraplength=600,
+        justify="left"
+    ).pack(anchor="w", pady=(5, 0))
+
 
     # Botón para cerrar la ventana
     Button(
